@@ -1,0 +1,46 @@
+package com.backtoend.file_management_system;
+
+import com.backtoend.file_management_system.controller.MainController;
+import com.backtoend.file_management_system.database.Database;
+import com.backtoend.file_management_system.database.DatabaseInitializer;
+import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.service.DirectoryHandler;
+import com.backtoend.file_management_system.logging.LoggingConfig;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+
+public class MainApplication extends Application {
+    @Override
+    public void start(Stage stage) throws IOException {
+        LoggingConfig.configure();
+        // Preparation
+        Database db = new Database("filesystem.db");
+        DirectoryHandler dir = new DirectoryHandler();
+        Context context = new Context(dir, db);
+        DatabaseInitializer dbInit = new DatabaseInitializer(context);
+        dbInit.initiateDB();
+
+        // Showing initial stage
+        FXMLLoader fxml = new FXMLLoader(MainApplication.class.getResource("main-view.fxml"));
+        fxml.setControllerFactory(type -> {
+            if (type == MainController.class) {
+                return new MainController(context);
+            }
+            throw new IllegalArgumentException(
+                    "Unknown controller: " + type.getName()
+            );
+        });
+        Scene scene = new Scene(fxml.load(), 320, 240);
+        stage.setTitle("File Management System");
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+}

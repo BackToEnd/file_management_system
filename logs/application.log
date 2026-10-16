@@ -1,0 +1,52 @@
+[14:12:42.287] [INFO] [file_management_system] Logger initialized
+[14:12:42.290] [INFO] [file_management_system] Log directory: logs
+[14:12:42.292] [FINE] [Database] Instance created
+[14:12:42.292] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
+[14:12:42.292] [FINE] [Database] DB connection requested
+[14:12:42.450] [INFO] [Database] Successfully connected to DB
+[14:12:42.451] [FINE] [DirectoryHandler] Instance created
+[14:12:42.452] [FINE] [DatabaseInitializer] Instance created
+[14:12:42.452] [INFO] [DatabaseInitializer] Attempting to initialize DB
+[14:12:42.452] [FINE] [Database] DB connection requested
+[14:12:42.453] [FINE] [DatabaseInitializer] Connection established
+[14:12:42.456] [INFO] [DatabaseInitializer] All tables either created or skipped
+[14:12:42.457] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
+[14:12:42.457] [INFO] [Database] Checking table {node} for column {parent}
+[14:12:42.457] [FINE] [Database] DB connection requested
+[14:12:42.460] [FINE] [Database] Connection established, statement created, result obtained
+[14:12:42.462] [INFO] [Database] Column found
+[14:12:47.202] [INFO] [MainController] Initiating ScanImport
+[14:12:47.202] [INFO] [ScanImport] Initiating directory scan and import process
+[14:12:47.203] [FINE] [DirectoryHandler] Instance created
+[14:12:47.203] [INFO] [DirectoryHandler] Initiating directory chooser
+[14:12:47.204] [FINE] [DirectoryHandler] Identified last directory: [ C:\Users\PeterCon]
+[14:13:00.604] [INFO] [DirectoryHandler] User selection obtained: [ C:\Users\PeterCon\Documents\Documents\OCs]
+[14:13:00.604] [INFO] [ScanImport] Valid path obtained; initiating directory scan
+[14:13:00.604] [INFO] [DirectoryHandler] Parsing directory: C:\Users\PeterCon\Documents\Documents\OCs
+[14:13:00.604] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs' exists
+[14:13:00.605] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs' is a directory
+[14:13:00.605] [INFO] [DirectoryHandler] C:\Users\PeterCon\Documents\Documents\OCs exists and is directory
+[14:13:00.606] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\Glitch.md' is a directory
+[14:13:00.609] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\Glitch.md, Glitch.md, false
+[14:13:00.610] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\Henry.md' is a directory
+[14:13:00.610] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\Henry.md, Henry.md, false
+[14:13:00.610] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\Jack.md' is a directory
+[14:13:00.610] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\Jack.md, Jack.md, false
+[14:13:00.610] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\the rogue.md' is a directory
+[14:13:00.610] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\the rogue.md, the rogue.md, false
+[14:13:00.610] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\_OCs List.md' is a directory
+[14:13:00.610] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\_OCs List.md, _OCs List.md, false
+[14:13:00.610] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\OCs\_Template.md' is a directory
+[14:13:00.611] [FINE] [ItemHandler] Adding item to list: C:\Users\PeterCon\Documents\Documents\OCs\_Template.md, _Template.md, false
+[14:13:00.611] [INFO] [ScanImport] Scan successful; attempting to show overview
+[14:13:00.611] [INFO] [ModalController] Attempting to load FXML file
+[14:13:00.614] [FINE] [ImportController] Instance created
+[14:13:00.640] [FINE] [ModalController] Scene preparation complete
+[14:13:04.068] [INFO] [ImportController] Selection accepted, proceeding to DB entries
+[14:13:04.075] [INFO] [ScanImport] Import accepted; beginning DB insert
+[14:13:04.076] [INFO] [DatabaseInsert] Attempting to insert items into DB
+[14:13:04.076] [FINE] [Database] DB connection requested
+[14:13:04.079] [FINE] [DatabaseInsert] Successfully connected to DB and prepared statement
+[14:13:04.147] [INFO] [MainController] Operation result: true
+[14:13:04.147] [FINE] [MainController] Message: Operation successful
+[14:13:11.218] [INFO] [MainController] Application shutting down
