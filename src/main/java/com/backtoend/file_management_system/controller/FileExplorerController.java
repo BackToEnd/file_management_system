@@ -1,11 +1,14 @@
 package com.backtoend.file_management_system.controller;
 
 import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.util.FeedbackMsg;
+import com.backtoend.file_management_system.util.OperationResult;
+import com.backtoend.file_management_system.enums.OperationStatus;
 import javafx.stage.DirectoryChooser;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.File;
+import java.util.ArrayList;
+
 import com.backtoend.file_management_system.service.DirectoryHandler;
 import javafx.stage.Window;
 
@@ -15,16 +18,18 @@ public class FileExplorerController {
     // Constructor
     public FileExplorerController(DirectoryHandler dirHandler) {
         this.dirHandler = dirHandler;
-        logger.debug("Instance created");
     }
 
     /**
-     * Opens a DirectoryChooser and returns the selected directory
-     * @param window Where the DirectoryChooser should be displayed
-     * @return The selected directory
+     * Opens a directory chooser and allows the user to choose a path
+     * @param window The window on which the directory chooser should be displayed
+     * @return Operation status and selected path
      */
-    public String openDirectoryChooser(Window window) {
+    public OperationResult<String> openDirectoryChooser(Window window) {
+        ArrayList<FeedbackMsg> list = new ArrayList<>();
         logger.info("Initiating directory chooser");
+
+        // Setting up new DirectoryChooser
         Stage stage = (Stage) window;
         DirectoryChooser dirChooser = new DirectoryChooser();
         dirChooser.setTitle("Select a Directory");
@@ -36,13 +41,28 @@ public class FileExplorerController {
 
         // Show DirectoryChooser
         File selection = dirChooser.showDialog(stage);
-        if (selection != null) {
-            logger.info("User selection obtained: [ " + selection + "]");
 
-            return selection.getAbsolutePath();
+        // Check whether the user selected a path or canceled
+        if (selection != null) {
+            dirHandler.setLastDir(selection.getPath());
+            list.add(new FeedbackMsg(
+                    this.getClass().getName(),
+                    "explorer.directory.result.obtained",
+                    new Object[] { selection.getAbsolutePath() }
+            ));
+            return new OperationResult<String>(
+                    OperationStatus.SUCCESS, selection.getAbsolutePath(), list
+            );
         } else {
-            logger.info("Selection canceled");
-            return null;
+            list.add(
+                    new FeedbackMsg(
+                            this.getClass().getName(),
+                            "explorer.directory.result.canceled",
+                            new Object[] {})
+            );
+            return new OperationResult<String>(
+                    OperationStatus.CANCELLED, null, list
+            );
         }
     }
 }

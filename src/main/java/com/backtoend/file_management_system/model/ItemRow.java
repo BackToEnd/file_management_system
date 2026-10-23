@@ -1,92 +1,36 @@
 package com.backtoend.file_management_system.model;
 
-import com.backtoend.file_management_system.util.ItemStatus;
+import com.backtoend.file_management_system.enums.ItemStatus;
 
-import java.io.File;
+import java.text.MessageFormat;
+import java.time.Instant;
 
-public class ItemRow {
-    private final int id;
-    private final String name;
-    private final String path;
-    private final String displayName;
-    private final String fileType;
-    private final String lastModified;
-    private final double size;
-    private final ItemStatus status;
-    private final int parent;
-
-    // Constructor
-    public ItemRow(int id, String name, String path, String fileType) {
-        this.id = id;
-        this.name = name;
-        this.path = path;
-        this.fileType = fileType;
-        this.displayName = name;
-        this.lastModified = "Unknown";
-        this.size = 0.0;
-        this.status = ItemStatus.ACTIVE;
-        this.parent = -1;
-    }
-    public ItemRow(int id, String name, String path, String fileType, String displayName) {
-        this.id = id;
-        this.name = name;
-        this.path = path;
-        this.fileType = fileType;
-        this.displayName = displayName;
-        this.lastModified = "Unknown";
-        this.size = 0.0;
-        this.status = ItemStatus.ACTIVE;
-        this.parent = -1;
-    }
-    public ItemRow(int id, String name, String path, String fileType, String displayName, String lastModified, double size, ItemStatus status) {
-        this.id = id;
-        this.name = name;
-        this.path = path;
-        this.fileType = fileType;
-        this.displayName = displayName;
-        this.lastModified = lastModified;
-        this.size = size;
-        this.status = status;
-        this.parent = -1;
-    }
-    public ItemRow(int id, String name, String path, String fileType, String displayName, String lastModified, double size, ItemStatus status, int parent) {
-        this.id = id;
-        this.name = name;
-        this.path = path;
-        this.fileType = fileType;
-        this.displayName = displayName;
-        this.lastModified = lastModified;
-        this.size = size;
-        this.status = status;
-        this.parent = parent;
-    }
-
-    // Getters, Setters
-    public int getId() {
-        return this.id;
-    }
-    public String getName() {
-        return this.name;
-    }
-    public String getPath() {
-        return this.path;
-    }
-    public String getDisplayName() {
-        return this.displayName;
-    }
-    public String getFileType() {
-        return this.fileType;
-    }
-    public String getLastModified() {
-        return this.lastModified;
-    }
-    public double getSize() {
-        return this.size;
-    }
-    public ItemStatus getStatus() {
-        return this.status;
-    }
-    public int getParent() {
-        return this.parent;
+/**
+ * Record class used for keeping track of DB output and scanned files
+ * @param id An item's DB ID; -1 if none exists
+ * @param name Absolute file name
+ * @param path Absolute file path
+ * @param displayName Custom display name; is either set via metadata settings or identical to the name
+ * @param fileType What kind of file this is
+ * @param lastModified When this file was last modified
+ * @param size The file's size on disk
+ * @param status File status; used to handle missing or deleted files without actual DB deletions
+ * @param parent Nullable parent ID
+ * @param hasChildren Whether this is a regular node, or a scan location node
+ */
+public record ItemRow(
+        int id, String name, String path, String displayName, String fileType,
+        long lastModified, double size, ItemStatus status, Integer parent, boolean hasChildren
+) {
+    public String toString(){
+        return MessageFormat.format(
+                "Printing ItemRow '{0}' (ID: {1}): Path '{2}' | Display name '{3}' | File type '{4}' | "
+                + "Date modified: {5} | Size: {6} | Status: '{7}' | Parent ID '{8}' | Children '{9}'",
+                new Object[] {
+                    this.name, this.id, this.path, this.displayName, this.fileType,
+                        Instant.ofEpochMilli(this.lastModified), this.size, this.status.toString(),
+                        this.parent, this.hasChildren
+                }
+        );
     }
 }

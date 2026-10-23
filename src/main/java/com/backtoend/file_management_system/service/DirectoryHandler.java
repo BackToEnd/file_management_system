@@ -1,11 +1,19 @@
 package com.backtoend.file_management_system.service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 import com.backtoend.file_management_system.logging.AppLogger;
-import com.backtoend.file_management_system.model.ItemHandler;
+import com.backtoend.file_management_system.model.ItemRow;
+import com.backtoend.file_management_system.enums.ItemStatus;
 
+/**
+ * Class responsible for anything related to directory parsing
+ */
 public class DirectoryHandler {
     private final String home;
     private String lastDir;
@@ -31,19 +39,6 @@ public class DirectoryHandler {
 
 
     // === Utility Methods === \\
-
-    /**
-     * Checks whether the given path exists<br>
-     * Does not check whether the path is a valid file path
-     * @param path The path to be checked
-     * @return whether the path exists
-     */
-    public static boolean checkPath(String path) {
-        logger.debug("Checking if path '" + path + "' exists");
-        File f = new File(path);
-        return f.exists();
-    }
-
     /**
      * Checks whether the given path is a directory<br>
      * Does not check whether the path exists or is a valid file path
@@ -57,30 +52,48 @@ public class DirectoryHandler {
     }
 
     /**
-     * Parses the content of the specified directory<br>
-     * Returns null if the given path either does not exist or is not a directory
-     * @param path The path to be parsed
-     * @return ItemHandler with all parsed items, or null
+     * Parses the given directory's child items into a list of ItemRows
+     * @param path Directory path to be scanned
+     * @return A list of all scanned child items
+     * @throws IOException If the file operation cannot be executed
      */
-    public static ItemHandler parseDir(String path) {
+    public static ArrayList<ItemRow> parseDir(String path) throws IOException {
         logger.info("Parsing directory: " + path);
-        if (checkPath(path) && isDir(path)) {
-            File f = new File(path);
-            logger.info(path + " exists and is directory");
-            String[] children = f.list();
-            ItemHandler items = new ItemHandler(path);
-            for (String item : children) {
-                String completePath = Path.of(path, item).toString();
-                items.addItem(
-                        completePath,
-                        item,
-                        DirectoryHandler.isDir(completePath)
-                );
+        ArrayList<ItemRow> items = new ArrayList<>();
+        Path absolutePath = Path.of(path);
+        try (DirectoryStream<Path> children = Files.newDirectoryStream(absolutePath)) {
+            for (Path item : children) {
+                File f = item.toFile();
+                String filePath = f.getAbsolutePath();
+                String fileType = (isDir(filePath)) ? "Folder" : "File";
+                long lastModified = f.lastModified();
+                long size = f.length();
+                items.add(new ItemRow(
+                        -1, f.getAbsoluteFile().getName(), filePath,
+                        f.getAbsoluteFile().getName(), fileType, lastModified,
+                        size, ItemStatus.ACTIVE, null, false
+                ));
             }
-            return items;
-        } else {
-            logger.info(path + " is either nonexistent or not a directory");
-            return null;
         }
+        return items;
+    }
+
+    /**
+     * Scans the information about the specified parent path
+     * @param path Path of the parent directory
+     * @return ItemRow for the parent directory
+     * @throws IOException If the file operation cannot be executed
+     */
+    public static ItemRow parseParent(String path) throws IOException {
+        logger.info("Getting ItemRow for path: " + path);
+        File f = new File(path);
+        String name = f.getAbsoluteFile().getName();
+        String fileType = (isDir(path)) ? "Folder" : "File";
+        long lastModified = f.lastModified();
+        long size = f.length();
+        return new ItemRow(
+                -1, name, path, name, fileType, lastModified, size, ItemStatus.ACTIVE,
+                null, true
+        );
     }
 }

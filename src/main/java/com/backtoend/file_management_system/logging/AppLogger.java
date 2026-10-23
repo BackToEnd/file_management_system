@@ -1,9 +1,13 @@
 package com.backtoend.file_management_system.logging;
 
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.backtoend.file_management_system.util.OperationResult;
 
+import java.util.ArrayList;
+import java.util.logging.Level;
+
+/**
+ * Custom app logger class with custom logging handlers and levels
+ */
 public class AppLogger {
 
     private final java.util.logging.Logger logger;
@@ -16,6 +20,7 @@ public class AppLogger {
         return new AppLogger(owner);
     }
 
+    // === All logging methods === \\
     public void info(String msg) {
         logger.info(msg);
     }
@@ -39,5 +44,26 @@ public class AppLogger {
     }
     public void debug(String msg, Throwable error) {
         logger.log(Level.FINE, msg, error);
+    }
+    public void result(String source, OperationResult<?> res) {
+        ArrayList<String> msgs = res.logAllMsg();
+        logger.info("Received operation result from {" + source + "}");
+        if (res.isSuccessful()) {
+            logger.info("[" + source + "] Operation completed successfully");
+            msgs.forEach(m -> {
+                logger.fine("[" + source + "] - " + m);
+            });
+        } else if (res.isCancelled()) {
+            logger.info("[" + source + "] Operation was canceled:");
+            msgs.forEach(m -> {
+                logger.info("[" + source + "] - " + m);
+            });
+        } else {
+            logger.warning("Operation failed:");
+            msgs.forEach(m -> {
+                logger.warning("[" + source + "] - " + m);
+            });
+        }
+
     }
 }

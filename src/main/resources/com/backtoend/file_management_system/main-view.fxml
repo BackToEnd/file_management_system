@@ -8,18 +8,15 @@
 <?import javafx.scene.control.TreeTableView?>
 
 <?import javafx.scene.control.TreeTableColumn?>
+<?import javafx.scene.layout.HBox?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.backtoend.file_management_system.controller.MainController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
-    <TreeTableView fx:id="treeView" editable="false" showRoot="false" prefWidth="800" prefHeight="500">
-        <columns>
-            <TreeTableColumn fx:id="nameCol" text="Name" prefWidth="350"/>
-            <TreeTableColumn fx:id="typeCol" text="Type" prefWidth="120"/>
-            <TreeTableColumn fx:id="pathCol" text="Path" prefWidth="330"/>
-        </columns>
-    </TreeTableView>
-    <Button text="Browse..." onAction="#onChooseDirectory"/>
-    <Button text="Terminate..." onAction="#onExit"/>
+    <fx:include source="tree-view.fxml" fx:id="overview" VBox.vgrow="ALWAYS"/>
+    <HBox spacing="10" alignment="BOTTOM_RIGHT">
+        <Button text="Browse..." onAction="#onChooseDirectory"/>
+        <Button text="Terminate..." onAction="#onExit"/>
+    </HBox>
 </VBox>

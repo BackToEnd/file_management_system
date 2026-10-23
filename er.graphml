@@ -15,7 +15,6 @@
   <graph edgedefault="directed" id="G">
     <data key="d0" xml:space="preserve"/>
     <node id="n0">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="175.19327276641548" width="155.19530375403656" x="762.4023481229817" y="422.40336361679226"/>
@@ -27,7 +26,7 @@ name TEXT
 path TEXT
 display_name TEXT NULL
 file_type TEXT NULL
-last_modified TEXT NULL
+last_modified INT NULL
 size REAL NULL
 status TEXT NULL
 parent INT (FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:ModelParameter><y:ErdAttributesNodeLabelModelParameter/></y:ModelParameter></y:NodeLabel>
@@ -38,7 +37,6 @@ parent INT (FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:M
       </data>
     </node>
     <node id="n1">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="127.76608998923575" width="150.61905620290622" x="554.6904718985469" y="356.1169550053821"/>
@@ -58,13 +56,12 @@ status TEXT NULL<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:
       </data>
     </node>
     <node id="n2">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="74.1909390742735" width="114.79437027717972" x="572.6028148614101" y="682.9045304628632"/>
           <y:Fill color="#E8EEF7" color2="#B7C9E3" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" backgroundColor="#B7C9E3" configuration="com.yworks.entityRelationship.label.name" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.025390625" x="32.384489826089975" xml:space="preserve" y="4.0">category</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" backgroundColor="#B7C9E3" configuration="com.yworks.entityRelationship.label.name" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="50.025390625" x="32.38448982608986" xml:space="preserve" y="4.0">category</y:NodeLabel>
           <y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="top" visible="true" width="102.033203125" x="2.0" xml:space="preserve" y="30.701171875">id INT (PK)
 name TEXT NULL<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:ModelParameter><y:ErdAttributesNodeLabelModelParameter/></y:ModelParameter></y:NodeLabel>
           <y:StyleProperties>
@@ -74,7 +71,6 @@ name TEXT NULL<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:Mo
       </data>
     </node>
     <node id="n3">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="101.07027734761698" width="143.4506981398008" x="768.2746509300996" y="611.0477347685683"/>
@@ -92,7 +88,6 @@ category INT (FK) NULL<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </node>
     <node id="n4">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="82.97375069967711" width="114.79437027717972" x="572.6028148614101" y="588.5131246501614"/>
@@ -109,13 +104,12 @@ value TEXT NULL<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:M
       </data>
     </node>
     <node id="n5">
-      <data key="d5"/>
       <data key="d6">
         <y:GenericNode configuration="com.yworks.entityRelationship.big_entity">
           <y:Geometry height="74.1909390742735" width="136.92499606431647" x="561.5375019678418" y="502.9045304628633"/>
           <y:Fill color="#E8EEF7" color2="#B7C9E3" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" backgroundColor="#B7C9E3" configuration="com.yworks.entityRelationship.label.name" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="87.40234375" x="24.761326157158237" xml:space="preserve" y="4.0">node_metadata</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" backgroundColor="#B7C9E3" configuration="com.yworks.entityRelationship.label.name" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="t" textColor="#000000" verticalTextPosition="bottom" visible="true" width="87.40234375" x="24.761326157158237" xml:space="preserve" y="3.999999999999943">node_metadata</y:NodeLabel>
           <y:NodeLabel alignment="left" autoSizePolicy="content" configuration="com.yworks.entityRelationship.label.attributes" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="top" visible="true" width="129.3671875" x="2.0" xml:space="preserve" y="30.701171874999943">node_id INT (PK / FK)
 metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelModel><y:ModelParameter><y:ErdAttributesNodeLabelModelParameter/></y:ModelParameter></y:NodeLabel>
           <y:StyleProperties>
@@ -124,8 +118,53 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
         </y:GenericNode>
       </data>
     </node>
+    <node id="n6">
+      <data key="d4" xml:space="preserve"/>
+      <data key="d5"/>
+      <data key="d6">
+        <y:UMLClassNode>
+          <y:Geometry height="183.0" width="124.0" x="992.60281486141" y="448.5"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="38.68994140625" x="42.655029296875" xml:space="preserve" y="3.0">Class<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
+            <y:AttributeLabel xml:space="preserve">id:int
+name:String
+path:String
+displayName:String
+fileType:String
+lastModified:long
+size:double
+status:ItemStatus
+parent:Integer
+hasChildren:boolean</y:AttributeLabel>
+            <y:MethodLabel xml:space="preserve"/>
+          </y:UML>
+        </y:UMLClassNode>
+      </data>
+    </node>
+    <node id="n7">
+      <data key="d4" xml:space="preserve"/>
+      <data key="d5"/>
+      <data key="d6">
+        <y:UMLClassNode>
+          <y:Geometry height="122.0" width="124.0" x="388.0" y="359.0"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="76.9599609375" x="23.52001953125" xml:space="preserve" y="3.0">ParentNode<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:UML clipContent="true" constraint="" hasDetailsColor="false" omitDetails="false" stereotype="" use3DEffect="true">
+            <y:AttributeLabel xml:space="preserve">node:ItemRow
+scanDepth:int
+updateMode:String
+scanSource:String
+generation:int
+status:ItemStatus</y:AttributeLabel>
+            <y:MethodLabel xml:space="preserve"/>
+          </y:UML>
+        </y:UMLClassNode>
+      </data>
+    </node>
     <edge id="e0" source="n4" target="n5">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-42.14158567578261" sy="0.0" tx="-57.03458108073153" ty="17.559744344456647">
@@ -139,7 +178,6 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </edge>
     <edge id="e1" source="n0" target="n5">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-55.893705093648805" sy="-47.64384916253971" tx="49.20230834015092" ty="2.9451457997853936">
@@ -153,7 +191,6 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </edge>
     <edge id="e2" source="n2" target="n3">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="-60.12530388965092" ty="36.693009358088034">
@@ -167,7 +204,6 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </edge>
     <edge id="e3" source="n0" target="n1">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-66.06780401650747" sy="-47.64384916253971" tx="36.8361095715826" ty="-22.992136680300746">
@@ -181,7 +217,6 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </edge>
     <edge id="e4" source="n3" target="n4">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-60.12530388965092" sy="-8.730475984220561" tx="41.14122199327504" ty="-1.2622657308930911">
@@ -195,7 +230,6 @@ metadata INT (PK / FK)<y:LabelModel><y:ErdAttributesNodeLabelModel/></y:LabelMod
       </data>
     </edge>
     <edge id="e5" source="n0" target="n0">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="74.75341364908536" tx="43.019208955866816" ty="-46.80069924650127">

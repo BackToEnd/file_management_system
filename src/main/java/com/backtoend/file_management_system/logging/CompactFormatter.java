@@ -6,11 +6,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+/**
+ * Custom formatter class for AppLogger
+ */
 public class CompactFormatter extends Formatter {
     private static final DateTimeFormatter TIME_FORMAT =
             DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
                     .withZone(ZoneId.systemDefault());
 
+    // Set custom message formatter
     @Override
     public String format(LogRecord record) {
         String time = TIME_FORMAT.format(Instant.ofEpochMilli(record.getMillis()));

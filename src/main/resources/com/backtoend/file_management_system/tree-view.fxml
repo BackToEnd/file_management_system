@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.backtoend.file_management_system.controller.OverviewController"
+      prefHeight="400.0" prefWidth="600.0">
+    <TreeTableView fx:id="treeView" VBox.vgrow="ALWAYS">
+        <placeholder>
+            <Label fx:id="placeholder"/>
+        </placeholder>
+        <columns>
+            <TreeTableColumn fx:id="nameCol" prefWidth="350"/>
+            <TreeTableColumn fx:id="typeCol" prefWidth="120"/>
+            <TreeTableColumn fx:id="pathCol" prefWidth="330"/>
+        </columns>
+    </TreeTableView>
+</VBox>

@@ -1,4 +1,4 @@
-package com.backtoend.file_management_system.util;
+package com.backtoend.file_management_system.enums;
 
 public enum ItemStatus {
     ACTIVE,
