@@ -15,6 +15,7 @@ public class ItemTreeNode extends TreeItem<ItemRow> {
         super(item);
     }
     public ItemTreeNode(ItemRow item, ParentNode parent) {
+        super(item);
         this.scanLocation = parent;
     }
 

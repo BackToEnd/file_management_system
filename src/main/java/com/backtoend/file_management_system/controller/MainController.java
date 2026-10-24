@@ -30,6 +30,12 @@ public class MainController {
     }
 
     @FXML
+    private void initialize() {
+        OperationResult<Void> showOverview = this.overviewController.buildTree();
+        logger.result(this.getClass().getName(), showOverview);
+    }
+
+    @FXML
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating ScanImport");
         Window window = (Window) ((Button) event.getSource()).getScene().getWindow();

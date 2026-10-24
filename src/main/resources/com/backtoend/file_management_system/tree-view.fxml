@@ -3,12 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import javafx.geometry.Insets?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.backtoend.file_management_system.controller.OverviewController"
       prefHeight="400.0" prefWidth="600.0">
-    <TreeTableView fx:id="treeView" VBox.vgrow="ALWAYS">
+    <TreeTableView fx:id="treeView" VBox.vgrow="ALWAYS" showRoot="false" prefWidth="800" prefHeight="500">
         <placeholder>
             <Label fx:id="placeholder"/>
         </placeholder>

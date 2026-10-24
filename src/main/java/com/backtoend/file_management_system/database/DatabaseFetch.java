@@ -70,7 +70,7 @@ public class DatabaseFetch {
         ArrayList<ItemRow> list = new ArrayList<>();
         logger.debug("Fetching children for node with ID: " + parentId);
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(0, parentId);
+            stmt.setInt(1, parentId);
             ResultSet result = stmt.executeQuery();
             logger.debug("Result set obtained");
             while (result.next()) {
@@ -104,17 +104,20 @@ public class DatabaseFetch {
             ResultSet result = stmt.executeQuery(query);
             logger.debug("Result set obtained");
             while (result.next()) {
+                int id = result.getInt("id");
+                String name = result.getString("name");
+                String path = result.getString("path");
+                String displayName = result.getString("display_name");
+                String fileType = result.getString("file_type");
+                long lastModified = result.getLong("last_modified");
+                double size = result.getDouble("size");
+                ItemStatus status = ItemStatus.valueOf(result.getString("status"));
+                Integer parent = result.getInt("parent");
+                if (result.wasNull()) {
+                    parent = null;
+                }
                 list.add(new ItemRow(
-                        result.getInt("id"),
-                        result.getString("name"),
-                        result.getString("path"),
-                        result.getString("display_name"),
-                        result.getString("file_type"),
-                        result.getLong("last_modified"),
-                        result.getDouble("size"),
-                        ItemStatus.valueOf(result.getString("status")),
-                        result.getObject("parent", Integer.class),
-                        true
+                        id, name, path, displayName, fileType, lastModified, size, status, parent, true
                 ));
             }
             return list;

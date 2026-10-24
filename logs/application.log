@@ -1,94 +1,52 @@
-[10:22:42.721] [INFO] [file_management_system] Logger initialized
-[10:22:42.724] [INFO] [file_management_system] Log directory: logs
-[10:22:42.726] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
-[10:22:42.726] [FINE] [Database] DB connection requested
-[10:22:42.898] [INFO] [Database] Successfully connected to DB
-[10:22:42.899] [FINE] [DirectoryHandler] Instance created
-[10:22:42.900] [INFO] [DatabaseInitializer] Attempting to initialize DB
-[10:22:42.900] [FINE] [Database] DB connection requested
-[10:22:42.901] [FINE] [DatabaseInitializer] Connection established
-[10:22:42.905] [INFO] [DatabaseInitializer] All tables either created or skipped
-[10:22:42.906] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
-[10:22:42.907] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
-[10:22:42.908] [FINE] [Database] DB connection requested
-[10:22:42.911] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
-[10:22:42.913] [INFO] [DatabaseCheck] Column found
-[10:22:42.924] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
-[10:22:42.924] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
-[10:22:42.925] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
-[10:22:46.278] [INFO] [MainController] Initiating ScanImport
-[10:22:46.279] [INFO] [ScanImport] Initiating directory scan and import process
-[10:22:46.280] [INFO] [DirectoryHandler] Initiating directory chooser
-[10:22:46.281] [FINE] [DirectoryHandler] Identified last directory: [ C:\Users\PeterCon]
-[10:22:52.925] [INFO] [ScanImport] Received operation result from {com.backtoend.file_management_system.service.ScanImport}
-[10:22:52.925] [INFO] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] Operation completed successfully
-[10:22:52.926] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.controller.FileExplorerController) User selected a directory: C:\Users\PeterCon\Documents\Documents\YouTube
-[10:22:52.926] [FINE] [Database] DB connection requested
-[10:22:52.926] [FINE] [DatabaseCheck] Checking if 'C:\Users\PeterCon\Documents\Documents\YouTube' exists in DB
-[10:22:52.932] [FINE] [DatabaseCheck] Path is not a node
-[10:22:52.933] [INFO] [DirectoryHandler] Parsing directory: C:\Users\PeterCon\Documents\Documents\YouTube
-[10:22:52.933] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\A Few Words on Autism & ADHD.md' is a directory
-[10:22:52.935] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\A Few Words on Modern Technology and AI.md' is a directory
-[10:22:52.936] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\AI + Programming.md' is a directory
-[10:22:52.936] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Autism Is Not An Excuse.md' is a directory
-[10:22:52.936] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Being a Content Creator With ADHD And Autism.md' is a directory
-[10:22:52.936] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Commissions.md' is a directory
-[10:22:52.937] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Gendered Language and Why It Sucks.md' is a directory
-[10:22:52.937] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Introduction.md' is a directory
-[10:22:52.938] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Modded Minecraft - How To.md' is a directory
-[10:22:52.938] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\My Diagnoses.md' is a directory
-[10:22:52.938] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\My Stance on the AI War.md' is a directory
-[10:22:52.938] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Phasmophobia - How To.md' is a directory
-[10:22:52.939] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Silent Disability.md' is a directory
-[10:22:52.939] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Things I Struggle With That Most People Don't Know About.md' is a directory
-[10:22:52.940] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Things I Would Love to Do But Haven't Done Yet.md' is a directory
-[10:22:52.940] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Traceback.md' is a directory
-[10:22:52.941] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube\Wochenendrebellen.md' is a directory
-[10:22:52.943] [INFO] [ModalController] Attempting to load FXML file
-[10:22:52.969] [FINE] [ModalController] Scene preparation complete
-[10:22:54.274] [INFO] [ImportController] Selection accepted, proceeding to DB entries
-[10:22:54.282] [INFO] [ScanImport] Received operation result from {com.backtoend.file_management_system.service.ScanImport}
-[10:22:54.282] [INFO] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] Operation completed successfully
-[10:22:54.282] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.service.ScanImport) Import was accepted - Beginning bulk databank insert
-[10:22:54.282] [INFO] [DirectoryHandler] Getting ItemRow for path: C:\Users\PeterCon\Documents\Documents\YouTube
-[10:22:54.282] [FINE] [DirectoryHandler] Checking if path 'C:\Users\PeterCon\Documents\Documents\YouTube' is a directory
-[10:22:54.284] [FINE] [Database] DB connection requested
-[10:22:54.285] [INFO] [DatabaseInsert] Beginning insert transaction
-[10:22:54.285] [FINE] [DatabaseInsert] Parent node has no ID; inserting new parent
-[10:22:54.289] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2026-07-30T05:36:22.442Z | Size: 8.192 | Status: {7} | Parent ID {8} | Children {9}
-[10:22:54.305] [FINE] [DatabaseInsert] Parent ID obtained: 9
-[10:22:54.305] [FINE] [DatabaseInsert] Inserting scan location for parent node
-[10:22:54.306] [FINEST] [DatabaseInsert] Printing ParentNode for Item {0} (ID: -1): Scan depth {2} | Update mode {3} | Scan source {4} | Generation [0] | Status {6} || Alternative ID: 9
-[10:22:54.306] [FINEST] [DatabaseInsert] Printing ParentNode for Item {0} (ID: -1): Scan depth {2} | Update mode {3} | Scan source {4} | Generation [0] | Status {6}
-[10:22:54.307] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-07-22T10:30:21.374Z | Size: 8.425 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.308] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2026-02-03T10:56:51.698Z | Size: 8.999 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.309] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2026-05-21T06:01:27.566Z | Size: 2.653 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.309] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-06-29T11:43:18.282Z | Size: 6.186 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.309] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-11-06T14:57:24.568Z | Size: 6.951 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.310] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-11-14T06:45:54.643Z | Size: 3.538 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.310] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-06-22T08:33:08.639Z | Size: 3.946 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.310] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2026-01-29T14:07:04.577Z | Size: 5.004 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.311] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-05-27T08:23:37.681Z | Size: 11.684 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.311] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-08-10T10:27:55.239Z | Size: 8.014 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.311] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2026-07-30T06:25:32.528Z | Size: 2.148 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.312] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-10-29T08:31:30.892Z | Size: 22.041 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.312] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-08-17T07:19:37.783Z | Size: 4.099 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.312] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-08-17T07:11:42.429Z | Size: 2.868 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.312] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-06-16T08:25:37.701Z | Size: 7.410 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.313] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-10-23T09:07:14.217Z | Size: 16.158 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.313] [FINEST] [DatabaseInsert] Printing ItemRow {0} (ID: -1): Path {2} | Display name {3} | File type {4} | Date modified: 2025-06-16T07:44:33.925Z | Size: 2.324 | Status: {7} | Parent ID {8} | Children {9} || Alternative ID: 9
-[10:22:54.328] [INFO] [ScanImport] Received operation result from {com.backtoend.file_management_system.service.ScanImport}
-[10:22:54.329] [INFO] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] Operation completed successfully
-[10:22:54.329] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.database.DatabaseInsert) Successfully added new parent node: YouTube
-[10:22:54.329] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.database.DatabaseInsert) Successfully inserted new scan location for parent node.
-[10:22:54.329] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.database.DatabaseInsert) Parent item processed adequately and successfully
-[10:22:54.329] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.database.DatabaseInsert) Successfully inserted all child items.
-[10:22:54.329] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.database.DatabaseInsert) Finalized database insert transaction.
-[10:22:54.329] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
-[10:22:54.329] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
-[10:22:54.329] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.FileExplorerController) User selected a directory: C:\Users\PeterCon\Documents\Documents\YouTube
-[10:22:54.329] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.FileExplorerController) User selected a directory: C:\Users\PeterCon\Documents\Documents\YouTube
-[10:22:54.330] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.service.ScanImport) Import was accepted - Beginning bulk databank insert
-[10:22:54.330] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.service.ScanImport) Import was accepted - Beginning bulk databank insert
-[10:22:54.330] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.service.ScanImport) Successfully read directory content into database
-[10:23:01.324] [INFO] [MainController] Application shutting down
+[16:51:48.907] [INFO] [file_management_system] Logger initialized
+[16:51:48.909] [INFO] [file_management_system] Log directory: logs
+[16:51:48.910] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
+[16:51:48.910] [FINE] [Database] DB connection requested
+[16:51:49.092] [INFO] [Database] Successfully connected to DB
+[16:51:49.094] [FINE] [DirectoryHandler] Instance created
+[16:51:49.115] [INFO] [DatabaseInitializer] Attempting to initialize DB
+[16:51:49.115] [FINE] [Database] DB connection requested
+[16:51:49.116] [FINE] [DatabaseInitializer] Connection established
+[16:51:49.124] [INFO] [DatabaseInitializer] All tables either created or skipped
+[16:51:49.125] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
+[16:51:49.135] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
+[16:51:49.135] [FINE] [Database] DB connection requested
+[16:51:49.137] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
+[16:51:49.138] [INFO] [DatabaseCheck] Column found
+[16:51:49.176] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
+[16:51:49.176] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
+[16:51:49.177] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
+[16:51:49.575] [INFO] [OverviewController] Attempting to generate tree table view
+[16:51:49.575] [FINE] [OverviewController] Attempting to fetch parent nodes from DB
+[16:51:49.577] [FINE] [Database] DB connection requested
+[16:51:49.577] [FINE] [DatabaseFetch] Fetching all parent items
+[16:51:49.578] [FINE] [DatabaseFetch] Result set obtained
+[16:51:49.581] [INFO] [OverviewController] Attempting to build base tree
+[16:51:49.581] [FINE] [Database] DB connection requested
+[16:51:49.582] [FINE] [DatabaseFetch] Fetching scan location of parent node: 9
+[16:51:49.584] [FINE] [DatabaseFetch] Result set obtained
+[16:51:49.585] [FINE] [OverviewController] Received scan location
+[16:51:49.586] [FINE] [OverviewController] Configuring node 'YouTube' (ID 9)
+[16:51:49.587] [FINE] [Database] DB connection requested
+[16:51:49.587] [FINE] [DatabaseFetch] Fetching scan location of parent node: 27
+[16:51:49.587] [FINE] [DatabaseFetch] Result set obtained
+[16:51:49.588] [FINE] [OverviewController] Received scan location
+[16:51:49.588] [FINE] [OverviewController] Configuring node 'Documents' (ID 27)
+[16:51:49.588] [FINE] [Database] DB connection requested
+[16:51:49.588] [FINE] [DatabaseFetch] Fetching scan location of parent node: 36
+[16:51:49.588] [FINE] [DatabaseFetch] Result set obtained
+[16:51:49.589] [FINE] [OverviewController] Received scan location
+[16:51:49.589] [FINE] [OverviewController] Configuring node 'shorts' (ID 36)
+[16:51:49.589] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
+[16:51:49.589] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
+[16:51:49.589] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully fetched all entries of the default overview
+[16:51:49.589] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully built the final tree display
+[16:51:51.388] [INFO] [OverviewController] Attempting to load and display children of node: 27
+[16:51:51.388] [FINE] [Database] DB connection requested
+[16:51:51.390] [FINE] [DatabaseFetch] Fetching children for node with ID: 27
+[16:51:51.390] [FINE] [DatabaseFetch] Result set obtained
+[16:51:54.609] [INFO] [OverviewController] Attempting to load and display children of node: 27
+[16:51:54.609] [FINE] [Database] DB connection requested
+[16:51:54.610] [FINE] [DatabaseFetch] Fetching children for node with ID: 27
+[16:51:54.610] [FINE] [DatabaseFetch] Result set obtained
+[16:52:29.003] [INFO] [MainController] Application shutting down
