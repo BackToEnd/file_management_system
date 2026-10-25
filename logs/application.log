@@ -1,52 +1,58 @@
-[16:51:48.907] [INFO] [file_management_system] Logger initialized
-[16:51:48.909] [INFO] [file_management_system] Log directory: logs
-[16:51:48.910] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
-[16:51:48.910] [FINE] [Database] DB connection requested
-[16:51:49.092] [INFO] [Database] Successfully connected to DB
-[16:51:49.094] [FINE] [DirectoryHandler] Instance created
-[16:51:49.115] [INFO] [DatabaseInitializer] Attempting to initialize DB
-[16:51:49.115] [FINE] [Database] DB connection requested
-[16:51:49.116] [FINE] [DatabaseInitializer] Connection established
-[16:51:49.124] [INFO] [DatabaseInitializer] All tables either created or skipped
-[16:51:49.125] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
-[16:51:49.135] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
-[16:51:49.135] [FINE] [Database] DB connection requested
-[16:51:49.137] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
-[16:51:49.138] [INFO] [DatabaseCheck] Column found
-[16:51:49.176] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
-[16:51:49.176] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
-[16:51:49.177] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
-[16:51:49.575] [INFO] [OverviewController] Attempting to generate tree table view
-[16:51:49.575] [FINE] [OverviewController] Attempting to fetch parent nodes from DB
-[16:51:49.577] [FINE] [Database] DB connection requested
-[16:51:49.577] [FINE] [DatabaseFetch] Fetching all parent items
-[16:51:49.578] [FINE] [DatabaseFetch] Result set obtained
-[16:51:49.581] [INFO] [OverviewController] Attempting to build base tree
-[16:51:49.581] [FINE] [Database] DB connection requested
-[16:51:49.582] [FINE] [DatabaseFetch] Fetching scan location of parent node: 9
-[16:51:49.584] [FINE] [DatabaseFetch] Result set obtained
-[16:51:49.585] [FINE] [OverviewController] Received scan location
-[16:51:49.586] [FINE] [OverviewController] Configuring node 'YouTube' (ID 9)
-[16:51:49.587] [FINE] [Database] DB connection requested
-[16:51:49.587] [FINE] [DatabaseFetch] Fetching scan location of parent node: 27
-[16:51:49.587] [FINE] [DatabaseFetch] Result set obtained
-[16:51:49.588] [FINE] [OverviewController] Received scan location
-[16:51:49.588] [FINE] [OverviewController] Configuring node 'Documents' (ID 27)
-[16:51:49.588] [FINE] [Database] DB connection requested
-[16:51:49.588] [FINE] [DatabaseFetch] Fetching scan location of parent node: 36
-[16:51:49.588] [FINE] [DatabaseFetch] Result set obtained
-[16:51:49.589] [FINE] [OverviewController] Received scan location
-[16:51:49.589] [FINE] [OverviewController] Configuring node 'shorts' (ID 36)
-[16:51:49.589] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
-[16:51:49.589] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
-[16:51:49.589] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully fetched all entries of the default overview
-[16:51:49.589] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully built the final tree display
-[16:51:51.388] [INFO] [OverviewController] Attempting to load and display children of node: 27
-[16:51:51.388] [FINE] [Database] DB connection requested
-[16:51:51.390] [FINE] [DatabaseFetch] Fetching children for node with ID: 27
-[16:51:51.390] [FINE] [DatabaseFetch] Result set obtained
-[16:51:54.609] [INFO] [OverviewController] Attempting to load and display children of node: 27
-[16:51:54.609] [FINE] [Database] DB connection requested
-[16:51:54.610] [FINE] [DatabaseFetch] Fetching children for node with ID: 27
-[16:51:54.610] [FINE] [DatabaseFetch] Result set obtained
-[16:52:29.003] [INFO] [MainController] Application shutting down
+[20:05:15.690] [INFO] [file_management_system] Logger initialized
+[20:05:15.692] [INFO] [file_management_system] Log directory: logs
+[20:05:15.696] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
+[20:05:15.696] [FINE] [Database] DB connection requested
+[20:05:15.831] [INFO] [Database] Successfully connected to DB
+[20:05:15.876] [FINE] [DirectoryHandler] Instance created
+[20:05:15.896] [INFO] [DatabaseInitializer] Attempting to initialize DB
+[20:05:15.896] [FINE] [Database] DB connection requested
+[20:05:15.897] [FINE] [DatabaseInitializer] Connection established
+[20:05:15.906] [INFO] [DatabaseInitializer] All tables either created or skipped
+[20:05:15.907] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
+[20:05:15.916] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
+[20:05:15.916] [FINE] [Database] DB connection requested
+[20:05:15.918] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
+[20:05:15.920] [INFO] [DatabaseCheck] Column found
+[20:05:15.956] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
+[20:05:15.956] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
+[20:05:15.957] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
+[20:05:16.521] [INFO] [OverviewController] Attempting to generate tree table view
+[20:05:16.521] [FINE] [OverviewController] Attempting to fetch parent nodes from DB
+[20:05:16.524] [FINE] [Database] DB connection requested
+[20:05:16.524] [FINE] [DatabaseFetch] Fetching all parent items
+[20:05:16.525] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.530] [INFO] [OverviewController] Attempting to build base tree
+[20:05:16.530] [FINE] [Database] DB connection requested
+[20:05:16.531] [FINE] [DatabaseFetch] Fetching scan location of parent node: 9
+[20:05:16.534] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.535] [FINE] [OverviewController] Received scan location
+[20:05:16.537] [FINE] [OverviewController] Configuring node 'YouTube' (ID 9)
+[20:05:16.537] [FINE] [Database] DB connection requested
+[20:05:16.538] [FINE] [DatabaseFetch] Fetching scan location of parent node: 27
+[20:05:16.538] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.538] [FINE] [OverviewController] Received scan location
+[20:05:16.539] [FINE] [OverviewController] Configuring node 'Documents' (ID 27)
+[20:05:16.539] [FINE] [Database] DB connection requested
+[20:05:16.539] [FINE] [DatabaseFetch] Fetching scan location of parent node: 36
+[20:05:16.539] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.539] [FINE] [OverviewController] Received scan location
+[20:05:16.540] [FINE] [OverviewController] Configuring node 'shorts' (ID 36)
+[20:05:16.540] [FINE] [Database] DB connection requested
+[20:05:16.540] [FINE] [DatabaseFetch] Fetching scan location of parent node: 38
+[20:05:16.540] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.540] [FINE] [OverviewController] Received scan location
+[20:05:16.541] [FINE] [OverviewController] Configuring node 'games' (ID 38)
+[20:05:16.541] [FINE] [Database] DB connection requested
+[20:05:16.541] [FINE] [DatabaseFetch] Fetching scan location of parent node: 57
+[20:05:16.541] [FINE] [DatabaseFetch] Result set obtained
+[20:05:16.541] [FINE] [OverviewController] Received scan location
+[20:05:16.541] [FINE] [OverviewController] Configuring node 'bbw' (ID 57)
+[20:05:16.541] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
+[20:05:16.543] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
+[20:05:16.543] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully fetched all entries of the default overview
+[20:05:16.546] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully built the final tree display
+[20:05:19.604] [INFO] [OverviewController] Attempting to load and display children of node: 57
+[20:05:19.605] [FINE] [Database] DB connection requested
+[20:05:19.605] [FINE] [DatabaseFetch] Fetching children for node with ID: 57
+[20:05:19.606] [FINE] [DatabaseFetch] Result set obtained
+[20:10:55.906] [INFO] [MainController] Application shutting down

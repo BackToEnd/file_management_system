@@ -159,6 +159,10 @@ public class OverviewController {
                 }
         );
     }
+
+    public void addNewParent(ItemRow newParent) {
+        ItemTreeNode newNode;
+    }
     // endregion
 
     // region Dealing with child items of parent nodes
@@ -195,4 +199,5 @@ public class OverviewController {
         }
     }
     // endregion
+
 }
