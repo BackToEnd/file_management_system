@@ -24,7 +24,7 @@ public class DatabaseInsert {
      * @param db Database instance
      * @return Operation status and status messages
      */
-    public static OperationResult<Void> insertNewSet(
+    public static OperationResult<ItemRow> insertNewSet(
             ParentNode parent, ArrayList<ItemRow> children, Database db
     ) {
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
@@ -115,7 +115,12 @@ public class DatabaseInsert {
                     DatabaseInsert.class.getName(),
                     "import.db.insert.commit.success", new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
+            ItemRow newParent = new ItemRow(
+                    parentId, parentItem.name(), parentItem.path(), parentItem.displayName(),
+                    parentItem.fileType(), parentItem.lastModified(), parentItem.size(),
+                    parentItem.status(), parentItem.parent(), parentItem.hasChildren()
+            );
+            return new OperationResult<>(OperationStatus.SUCCESS, newParent, feedback);
 
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);

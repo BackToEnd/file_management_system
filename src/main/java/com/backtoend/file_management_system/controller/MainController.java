@@ -1,7 +1,9 @@
 package com.backtoend.file_management_system.controller;
 
 import com.backtoend.file_management_system.Context;
+import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.service.ScanImport;
 import com.backtoend.file_management_system.util.OperationResult;
 import javafx.application.Platform;
@@ -25,14 +27,17 @@ public class MainController {
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
 
     // Constructor
-    public MainController(Context context) {
-        this.context = context;
+    public MainController() {
+        this.context = MainApplication.getContext();
     }
 
     @FXML
     private void initialize() {
         OperationResult<Void> showOverview = this.overviewController.buildTree();
         logger.result(this.getClass().getName(), showOverview);
+        this.context.toast().showGeneric(
+                showOverview.status(), "toast.main.overview.build"
+        );
     }
 
     @FXML
@@ -40,8 +45,14 @@ public class MainController {
         logger.info("Initiating ScanImport");
         Window window = (Window) ((Button) event.getSource()).getScene().getWindow();
         ScanImport scanImport = new ScanImport(this.context);
-        OperationResult<Void> result = scanImport.initiateScanImport(window);
+        OperationResult<ItemRow> result = scanImport.initiateScanImport(window);
         logger.result(this.getClass().getName(), result);
+        this.context.toast().showGeneric(
+                result.status(), "toast.main.scan.import"
+        );
+        if (result.isSuccessful()) {
+            this.overviewController.addNewParent(result.value());
+        }
     }
 
     @FXML

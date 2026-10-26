@@ -7,6 +7,7 @@ import com.backtoend.file_management_system.service.I18n;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -19,6 +20,12 @@ import java.util.ArrayList;
  */
 public class ModalController {
     private static final AppLogger logger = AppLogger.getLogger(ModalController.class);
+    private StackPane root;
+
+    // Getters, Setters
+    public void setRoot(StackPane root) {
+        this.root = root;
+    }
 
     /**
      * Display an overview of imported items and allow the user to proceed with the import or cancel<br>

@@ -37,7 +37,7 @@ public class ScanImport {
      * @param window Where any external screens this method creates should be displayed
      * @return Operation status and status messages
      */
-    public OperationResult<Void> initiateScanImport(Window window) {
+    public OperationResult<ItemRow> initiateScanImport(Window window) {
         logger.info("Initiating directory scan and import process");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
 
@@ -123,19 +123,20 @@ public class ScanImport {
                 "USER_SELECTION", 0, ItemStatus.ACTIVE
         );
 
-        OperationResult<Void> insertIntoDb = DatabaseInsert.insertNewSet(
+        OperationResult<ItemRow> insertIntoDb = DatabaseInsert.insertNewSet(
                 parentNode, items, this.context.db()
         );
         logger.result(this.getClass().getName(), insertIntoDb);
         if (!insertIntoDb.isSuccessful()) {
             return new OperationResult<>(insertIntoDb.status(), null, feedback);
         }
+        parentRow = insertIntoDb.value();
 
         feedback.add(new FeedbackMsg(
                 this.getClass().getName(),
             "modal.import.overview.success", new Object[] {}
         ));
-        return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
+        return new OperationResult<>(OperationStatus.SUCCESS, parentRow, feedback);
     }
 
     // === Utility Methods === \\

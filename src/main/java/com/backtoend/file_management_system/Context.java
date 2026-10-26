@@ -1,5 +1,7 @@
 package com.backtoend.file_management_system;
 
+import com.backtoend.file_management_system.controller.ModalController;
+import com.backtoend.file_management_system.controller.ToastController;
 import com.backtoend.file_management_system.service.DirectoryHandler;
 import com.backtoend.file_management_system.database.Database;
 
@@ -9,5 +11,10 @@ import com.backtoend.file_management_system.database.Database;
  * @param dirHandler DirectoryHandler instance
  * @param db Database instance
  */
-public record Context(DirectoryHandler dirHandler, Database db) {
+public record Context(
+        DirectoryHandler dirHandler,
+        Database db,
+        ToastController toast,
+        ModalController modal
+) {
 }
