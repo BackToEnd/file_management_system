@@ -31,12 +31,11 @@ public class MainController {
         this.context = MainApplication.getContext();
     }
 
-    @FXML
-    private void initialize() {
-        OperationResult<Void> showOverview = this.overviewController.buildTree();
-        logger.result(this.getClass().getName(), showOverview);
+    public void enableOverview() {
+        OperationResult<Void> result = this.overviewController.buildTree();
+        logger.result(this.getClass().getName(), result);
         this.context.toast().showGeneric(
-                showOverview.status(), "toast.main.overview.build"
+                result.status(), "toast.main.overview.build"
         );
     }
 

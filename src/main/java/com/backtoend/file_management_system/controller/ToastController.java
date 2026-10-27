@@ -2,6 +2,7 @@ package com.backtoend.file_management_system.controller;
 
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.enums.ToastType;
+import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.service.I18n;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -60,32 +61,19 @@ public class ToastController {
         this.setTimeout(5);
     }
 
-    public void showGeneric(OperationStatus status) {
-        switch (status) {
-            case FAILED:
-                this.showToast(ToastType.WARNING, "toast.generic.status.failed");
-                return;
-            case SUCCESS:
-                this.showToast(ToastType.SUCCESS, "toast.generic.status.success");
-                return;
-            case CANCELLED:
-                this.showToast(ToastType.INFO, "toast.generic.status.canceled");
-                return;
-            default:
-                this.showToast(ToastType.WARNING, "toast.generic.status.invalid");
-        }
-    }
-
     public void showGeneric(OperationStatus status, String text) {
         switch (status) {
             case FAILED:
-                this.showToast(ToastType.WARNING, text + ".failed");
+                this.showToast(ToastType.ERROR, text + ".failed");
                 return;
             case SUCCESS:
                 this.showToast(ToastType.SUCCESS, text + ".success");
                 return;
             case CANCELLED:
                 this.showToast(ToastType.INFO, text + ".canceled");
+                return;
+            case WARNING:
+                this.showToast(ToastType.WARNING, text + ".warning");
                 return;
             default:
                 this.showToast(ToastType.WARNING, "toast.generic.status.invalid");

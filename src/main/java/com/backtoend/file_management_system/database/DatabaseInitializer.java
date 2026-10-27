@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.backtoend.file_management_system.Context;
+import com.backtoend.file_management_system.enums.DbStatus;
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.util.FeedbackMsg;
@@ -87,6 +88,7 @@ public class DatabaseInitializer {
      * @return Operation status and status messages
      */
     public OperationResult<Void> initiateDB() {
+        this.context.db().setStatus(DbStatus.INITIALIZING);
         logger.info("Attempting to initialize DB");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
 
@@ -119,12 +121,14 @@ public class DatabaseInitializer {
                 }
             }
 
+            this.context.db().setStatus(DbStatus.READY);
             return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
         } catch (SQLException e) {
             logger.error("Unable to initialize DB: ", e);
             feedback.add(new FeedbackMsg(
                     this.getClass().getName(), "db.init.tables.failed", new Object[] {}
             ));
+            this.context.db().setStatus(DbStatus.FAILED);
             return new OperationResult<>(OperationStatus.FAILED, null, feedback);
         }
     }

@@ -12,6 +12,7 @@ import com.backtoend.file_management_system.service.DirectoryHandler;
 import com.backtoend.file_management_system.logging.LoggingConfig;
 import com.backtoend.file_management_system.util.OperationResult;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -40,12 +41,6 @@ public class MainApplication extends Application {
         Context context = new Context(dir, db, toast, modal);
         MainApplication.context = context;
 
-        // Initialize DB
-        DatabaseInitializer dbInit = new DatabaseInitializer(context);
-        OperationResult<Void> initStatus = dbInit.initiateDB();
-        // TODO: Actually handle situations where DB-initialization fails lol
-        logger.result(this.getClass().getName(), initStatus);
-
         // Showing initial stage
         FXMLLoader fxml = new FXMLLoader(MainApplication.class.getResource("main-view.fxml"));
         Scene scene = new Scene(fxml.load(), 700, 400);
@@ -71,7 +66,33 @@ public class MainApplication extends Application {
         stage.setScene(scene);
         stage.show();
 
-        toast.showGeneric(initStatus.status());
+        // DB initialization on background thread
+        Task<OperationResult<Void>> initializeDb = getOperationResultTask(context, fxml);
+        Thread thread = new Thread(initializeDb);
+        thread.setDaemon(true);
+        thread.start();
+        logger.info("This is a test");
+    }
+
+    private Task<OperationResult<Void>> getOperationResultTask(Context context, FXMLLoader fxml) {
+        DatabaseInitializer dbInit = new DatabaseInitializer(context);
+        Task<OperationResult<Void>> initializeDb = new Task<>() {
+            @Override
+            protected OperationResult<Void> call() {
+                return dbInit.initiateDB();
+            }
+        };
+        initializeDb.setOnSucceeded(event -> {
+            OperationResult<Void> result = initializeDb.getValue();
+            logger.result(this.getClass().getName(), result);
+            if (result.isSuccessful()) {
+                MainController ctrl = fxml.getController();
+                ctrl.enableOverview();
+            } else {
+                logger.warning("DB initialization failed horribly");
+            }
+        });
+        return initializeDb;
     }
 
     public static Context getContext() {

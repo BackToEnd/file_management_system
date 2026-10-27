@@ -59,7 +59,7 @@ public class AppLogger {
                 logger.info("[" + source + "] - " + m);
             });
         } else {
-            logger.warning("Operation failed:");
+            logger.warning("Operation failed with status {" + res.status().toString() + "}:");
             msgs.forEach(m -> {
                 logger.warning("[" + source + "] - " + m);
             });

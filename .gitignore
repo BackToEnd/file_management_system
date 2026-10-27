@@ -38,4 +38,7 @@ build/
 .DS_Store
 
 ### Database ###
-.db
+*.db
+
+### Logs ###
+*.log

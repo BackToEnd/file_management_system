@@ -6,6 +6,7 @@ import com.backtoend.file_management_system.controller.ModalController;
 import com.backtoend.file_management_system.database.DatabaseCheck;
 import com.backtoend.file_management_system.database.DatabaseFetch;
 import com.backtoend.file_management_system.database.DatabaseInsert;
+import com.backtoend.file_management_system.enums.DbStatus;
 import com.backtoend.file_management_system.enums.ItemStatus;
 import com.backtoend.file_management_system.enums.ParentExistence;
 import com.backtoend.file_management_system.logging.AppLogger;
@@ -40,6 +41,17 @@ public class ScanImport {
     public OperationResult<ItemRow> initiateScanImport(Window window) {
         logger.info("Initiating directory scan and import process");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+
+        // Check if DB is ready
+        if (this.context.db().getStatus() != DbStatus.READY) {
+            logger.warning("Unable to begin scan-import workflow; DB is not yet initialized");
+            feedback.add(new FeedbackMsg(
+                    this.getClass().getName(),
+                    "import.init.db.uninitialized",
+                    new Object[] {}
+            ));
+            return new OperationResult<>(OperationStatus.WARNING, null, feedback);
+        }
 
         // Open directory chooser and receive operation result w/ user selection
         OperationResult<String> directory = this.openDirChooser(window);
