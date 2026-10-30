@@ -3,23 +3,19 @@ package com.backtoend.file_management_system.controller;
 import com.backtoend.file_management_system.Context;
 import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.database.DatabaseFetch;
-import com.backtoend.file_management_system.enums.ItemStatus;
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.enums.ToastType;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ItemTreeNode;
 import com.backtoend.file_management_system.model.ParentNode;
-import com.backtoend.file_management_system.service.DirectoryHandler;
 import com.backtoend.file_management_system.service.I18n;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
-import com.sun.tools.javac.Main;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -178,7 +174,7 @@ public class OverviewController {
         node.expandedProperty().addListener(
                 (observable, wasExpanded, isExpanded) -> {
                     if (isExpanded && !node.areChildrenLoaded()) {
-                        this.loadChilren(node);
+                        this.loadChildren(node);
                     }
                 }
         );
@@ -186,9 +182,19 @@ public class OverviewController {
 
     /**
      * Adding a new parent folder to the core tree
-     * @param newParent Info on the new parent
+     * @param parentId ID of the new parent node
      */
-    public void addNewParent(ItemRow newParent) {
+    public void addNewParent(int parentId) {
+        ItemRow newParent;
+        try {
+            newParent = this.context.db().withConnection(conn ->
+                    DatabaseFetch.getInfo(parentId, conn)
+            );
+        } catch (SQLException e) {
+            logger.error("Database operation failed:", e);
+            this.context.toast().showToast(ToastType.ERROR, "toast.overview.add.failed");
+            return;
+        }
         logger.debug("Attempting to add new parent: " + newParent.name());
         ParentNode scanLocation;
         try {
@@ -208,14 +214,14 @@ public class OverviewController {
     // endregion
 
     // region Dealing with child items of parent nodes
-    // TODO: How can this method throw exceptions without blowing up the event listener?
+    // FIXME: How can this method throw exceptions without blowing up the event listener?
 
     /**
      * Loads all child items of an expandable tree item when it is expanded for the first time<br>
      * Can also safely be used to reload children of an already loaded tree item
      * @param parent The item whose children should be loaded
      */
-    private void loadChilren(ItemTreeNode parent) {
+    private void loadChildren(ItemTreeNode parent) {
         int parentId = parent.getValue().id();
         logger.info("Attempting to load and display children of node: " + parentId);
         parent.getChildren().clear();

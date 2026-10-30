@@ -17,6 +17,10 @@ public record ParentNode(
         ItemRow node, int scanDepth, String updateMode,
         String scanSource, int generation, ItemStatus status
 ) {
+    /**
+     * Formats the ParentNode into a printable String
+     * @return Printable String
+     */
     public String toString() {
         return MessageFormat.format(
                 "Printing ParentNode for Item '{0}' (ID: {1}): Scan depth '{2}' | Update mode '{3}' | "

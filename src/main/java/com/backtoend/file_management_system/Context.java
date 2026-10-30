@@ -10,6 +10,8 @@ import com.backtoend.file_management_system.database.Database;
  * while the application is running
  * @param dirHandler DirectoryHandler instance
  * @param db Database instance
+ * @param toast ToastController instance
+ * @param modal ModalController instance
  */
 public record Context(
         DirectoryHandler dirHandler,

@@ -71,9 +71,16 @@ public class MainApplication extends Application {
         Thread thread = new Thread(initializeDb);
         thread.setDaemon(true);
         thread.start();
-        logger.info("This is a test");
     }
 
+    // TODO: Implement proper error handling
+    /**
+     * Creates a Task responsible for initiating the DB, receives and logs a result upon completion,
+     * and loads the overview tree on success.
+     * @param context AppContext instance
+     * @param fxml FXMLLoader of MainController
+     * @return Task
+     */
     private Task<OperationResult<Void>> getOperationResultTask(Context context, FXMLLoader fxml) {
         DatabaseInitializer dbInit = new DatabaseInitializer(context);
         Task<OperationResult<Void>> initializeDb = new Task<>() {
@@ -95,6 +102,10 @@ public class MainApplication extends Application {
         return initializeDb;
     }
 
+    /**
+     * Allows any component to get the AppContext singleton from anywhere
+     * @return This session's AppContext instance
+     */
     public static Context getContext() {
         return MainApplication.context;
     }

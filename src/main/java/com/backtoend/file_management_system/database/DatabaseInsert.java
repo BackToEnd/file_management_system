@@ -21,118 +21,103 @@ public class DatabaseInsert {
      * deal with existing parent nodes. Even with existing nodes that are not yet scan locations.
      * @param parent An ItemRow of the parent directory
      * @param children A list of ItemRows located within the parent directory
-     * @param db Database instance
+     * @param conn Database connection
      * @return Operation status and status messages
      */
-    public static OperationResult<ItemRow> insertNewSet(
-            ParentNode parent, ArrayList<ItemRow> children, Database db
-    ) {
-        ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+    public static OperationResult<Integer> insertNewSet(
+            ParentNode parent, ArrayList<ItemRow> children, Connection conn
+    ) throws SQLException {
+    ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+        logger.info("Beginning insert transaction");
 
-        try (Connection conn = db.connect()) {
-            conn.setAutoCommit(false);
-            logger.info("Beginning insert transaction");
-
-            // Getting the parent ID
-            int parentId;
-            ItemRow parentItem = parent.node();
-            try {
-                if (parentItem.id() == -1) {
-                    logger.debug("Parent node has no ID; inserting new parent");
-                    parentId = DatabaseInsert.insertParentNode(parentItem, conn);
-                    // This operation will either return a valid ID,
-                    // or throw an SQLException
-                    feedback.add(new FeedbackMsg(
-                            DatabaseInsert.class.getName(),
-                            "import.db.insert.parent.success",
-                            new Object[] {parentItem.name()}
-                    ));
-                } else {
-                    parentId = parentItem.id();
-                }
-                logger.debug("Parent ID obtained: " + parentId);
-                if (!DatabaseFetch.isScanLocation(parentId, conn)) {
-                    logger.debug("Inserting scan location for parent node");
-                    DatabaseInsert.insertScanLocation(parentId, parent, conn);
-                    feedback.add(new FeedbackMsg(
-                            DatabaseInsert.class.getName(),
-                            "import.db.insert.parent.scanlocation", new Object[] {}
-                    ));
-                }
-            } catch (SQLException e) {
-                logger.error("Critical error encountered: ", e);
+        // Getting the parent ID
+        int parentId;
+        ItemRow parentItem = parent.node();
+        try {
+            if (parentItem.id() == -1) {
+                logger.debug("Parent node has no ID; inserting new parent");
+                parentId = DatabaseInsert.insertParentNode(parentItem, conn);
+                // This operation will either return a valid ID,
+                // or throw an SQLException
                 feedback.add(new FeedbackMsg(
                         DatabaseInsert.class.getName(),
-                        "import.db.insert.parent.failed", new Object[] {}
+                        "import.db.insert.parent.success",
+                        new Object[] {parentItem.name()}
                 ));
-                return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            } else {
+                parentId = parentItem.id();
             }
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.parent.process.success",
-                    new Object[] { parentItem.name() }
-            ));
-
-            // Inserting all child items
-            try {
-                for (ItemRow item : children) {
-                    DatabaseInsert.insertChildNode(parentId, item, conn);
-                }
+            logger.debug("Parent ID obtained: " + parentId);
+            if (!DatabaseFetch.isScanLocation(parentId, conn)) {
+                logger.debug("Inserting scan location for parent node");
+                DatabaseInsert.insertScanLocation(parentId, parent, conn);
                 feedback.add(new FeedbackMsg(
                         DatabaseInsert.class.getName(),
-                        "import.db.insert.children.success", new Object[] {}
+                        "import.db.insert.parent.scanlocation", new Object[] {}
                 ));
-            } catch (SQLException e) {
-                logger.error("Critical error encountered: ", e);
-                feedback.add(new FeedbackMsg(
-                        DatabaseInsert.class.getName(),
-                        "import.db.insert.children.failed", new Object[] {}
-                ));
-                try {
-                    conn.rollback();
-                } catch (SQLException rollbackException) {
-                    e.addSuppressed(rollbackException);
-                }
-                return new OperationResult<>(OperationStatus.FAILED, null, feedback);
-            } catch (IllegalArgumentException e) {
-                logger.error("Critical bug encountered: ", e);
-                feedback.add(new FeedbackMsg(
-                        DatabaseInsert.class.getName(),
-                        "import.db.insert.illegalargument", new Object[] {}
-                ));
-                try {
-                    conn.rollback();
-                } catch (SQLException rollbackException) {
-                    e.addSuppressed(rollbackException);
-                }
-                return new OperationResult<>(OperationStatus.FAILED, null, feedback);
             }
-
-            // Committing transaction
-            conn.commit();
-
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.commit.success", new Object[] {}
-            ));
-            ItemRow newParent = new ItemRow(
-                    parentId, parentItem.name(), parentItem.path(), parentItem.displayName(),
-                    parentItem.fileType(), parentItem.lastModified(), parentItem.size(),
-                    parentItem.status(), parentItem.parent(), parentItem.hasChildren()
-            );
-            return new OperationResult<>(OperationStatus.SUCCESS, newParent, feedback);
-
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
             feedback.add(new FeedbackMsg(
                     DatabaseInsert.class.getName(),
-                "import.db.insert.sqlexception", new Object[] {}
+                    "import.db.insert.parent.failed", new Object[] {}
             ));
-
-            return new OperationResult<>(
-                    OperationStatus.FAILED, null, feedback
-            );
+            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
         }
+        feedback.add(new FeedbackMsg(
+                DatabaseInsert.class.getName(),
+                "import.db.insert.parent.process.success",
+                new Object[] { parentItem.name() }
+        ));
+
+        // Inserting all child items
+        try {
+            for (ItemRow item : children) {
+                DatabaseInsert.insertChildNode(parentId, item, conn);
+            }
+            feedback.add(new FeedbackMsg(
+                    DatabaseInsert.class.getName(),
+                    "import.db.insert.children.success", new Object[] {}
+            ));
+        } catch (SQLException e) {
+            logger.error("Critical error encountered: ", e);
+            feedback.add(new FeedbackMsg(
+                    DatabaseInsert.class.getName(),
+                    "import.db.insert.children.failed", new Object[] {}
+            ));
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackException) {
+                e.addSuppressed(rollbackException);
+            }
+            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+        } catch (IllegalArgumentException e) {
+            logger.error("Critical bug encountered: ", e);
+            feedback.add(new FeedbackMsg(
+                    DatabaseInsert.class.getName(),
+                    "import.db.insert.illegalargument", new Object[] {}
+            ));
+            try {
+                conn.rollback();
+            } catch (SQLException rollbackException) {
+                e.addSuppressed(rollbackException);
+            }
+            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+        }
+
+        // Committing transaction
+        conn.commit();
+
+        feedback.add(new FeedbackMsg(
+                DatabaseInsert.class.getName(),
+                "import.db.insert.commit.success", new Object[] {}
+        ));
+        ItemRow newParent = new ItemRow(
+                parentId, parentItem.name(), parentItem.path(), parentItem.displayName(),
+                parentItem.fileType(), parentItem.lastModified(), parentItem.size(),
+                parentItem.status(), parentItem.parent(), parentItem.hasChildren()
+        );
+        return new OperationResult<>(OperationStatus.SUCCESS, newParent.id(), feedback);
     }
 
     // === Utility Methods === \\

@@ -97,6 +97,7 @@ public class DatabaseFetch {
                 WHERE id IN (
                 SELECT node_id FROM scan_location
                 );
+                AND parent IS NULL
                 """;
         ArrayList<ItemRow> list = new ArrayList<>();
         logger.debug("Fetching all parent items");
@@ -148,6 +149,43 @@ public class DatabaseFetch {
             }
             throw new SQLException(
                     "Requested scan location was not returned by the DB"
+            );
+        }
+    }
+
+    public static ItemRow getInfo(int id, Connection conn) throws SQLException {
+        String query = """
+                SELECT *, CASE
+                WHEN id IN (
+                SELECT node_id FROM scan_location)
+                THEN 1
+                ELSE 0
+                END AS has_children
+                FROM node
+                WHERE id = ?;
+                """;
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            ResultSet result = stmt.executeQuery();
+            if (result.next()) {
+                String name = result.getString("name");
+                String path = result.getString("path");
+                String displayName = result.getString("display_name");
+                String fileType = result.getString("file_type");
+                long lastModified = result.getLong("last_modified");
+                double size = result.getDouble("size");
+                ItemStatus status = ItemStatus.valueOf(result.getString("status"));
+                Integer parent = result.getInt("parent");
+                if (result.wasNull()) {
+                    parent = null;
+                }
+                boolean hasChildren = result.getBoolean("has_children");
+                return new ItemRow(
+                        id, name, path, displayName, fileType, lastModified, size, status, parent, hasChildren
+                );
+            }
+            throw new SQLException(
+                    "Requested item could not be fetched"
             );
         }
     }

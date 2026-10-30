@@ -22,6 +22,10 @@ public record ItemRow(
         int id, String name, String path, String displayName, String fileType,
         long lastModified, double size, ItemStatus status, Integer parent, boolean hasChildren
 ) {
+    /**
+     * Formats the ItemRow into a printable String
+     * @return Printable String of all contained values
+     */
     public String toString(){
         return MessageFormat.format(
                 "Printing ItemRow '{0}' (ID: {1}): Path '{2}' | Display name '{3}' | File type '{4}' | "
@@ -31,6 +35,41 @@ public record ItemRow(
                         Instant.ofEpochMilli(this.lastModified), this.size, this.status.toString(),
                         this.parent, this.hasChildren
                 }
+        );
+    }
+
+    /**
+     * Clones this ItemRow instance but replaces the ID
+     * @param id The new ID
+     * @return Cloned ItemRow instance
+     */
+    public ItemRow setNewId(int id) {
+        return new ItemRow(
+                id, this.name, this.path, this.displayName, this.fileType,
+                this.lastModified, this.size, this.status, this.parent, this.hasChildren
+        );
+    }
+
+    /**
+     * Clones this ItemRow instance but replaces the parent ID
+     * @param id The new parent ID
+     * @return Cloned ItemRow instance
+     */
+    public ItemRow setNewParent(Integer id) {
+        return new ItemRow(
+                this.id, this.name, this.path, this.displayName, this.fileType,
+                this.lastModified, this.size, this.status, id, this.hasChildren
+        );
+    }
+
+    /**
+     * Clones this ItemRow instance but sets the value of `hasChildren` to `true`
+     * @return Cloned ItemRow instance
+     */
+    public ItemRow makeParent() {
+        return new ItemRow(
+                this.id, this.name, this.path, this.displayName, this.fileType,
+                this.lastModified, this.size, this.status, this.parent, true
         );
     }
 }

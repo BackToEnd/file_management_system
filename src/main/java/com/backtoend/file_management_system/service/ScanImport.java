@@ -3,6 +3,7 @@ package com.backtoend.file_management_system.service;
 import com.backtoend.file_management_system.Context;
 import com.backtoend.file_management_system.controller.FileExplorerController;
 import com.backtoend.file_management_system.controller.ModalController;
+import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.database.DatabaseCheck;
 import com.backtoend.file_management_system.database.DatabaseFetch;
 import com.backtoend.file_management_system.database.DatabaseInsert;
@@ -15,6 +16,7 @@ import com.backtoend.file_management_system.model.ParentNode;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
 import com.backtoend.file_management_system.enums.OperationStatus;
+import javafx.concurrent.Task;
 import javafx.stage.Window;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,133 +28,192 @@ import java.util.ArrayList;
 public class ScanImport {
     private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(ScanImport.class);
+    private boolean scanInProgress = false;
+    private int parentNodeId;
 
     public ScanImport(Context context) {
         this.context = context;
     }
+    public void handleScanImport(Window window, ScanImportCallback callback) {
+        // Checking if there is already a scan in progress
+        if (this.scanInProgress) {
+            logger.warning(
+                    "Unable to begin scan-import; "
+                    + "There is already a scan-import in progress"
+            );
+            // TODO: Implement error-handling
+            return;
+        }
+        this.scanInProgress = true;
 
-    /**
-     * Begins the import process; Opens a directory chooser, processes user selection,
-     * displays an overview menu, allows the user to choose whether to import or cancel,
-     * and parses content into the DB
-     * @param window Where any external screens this method creates should be displayed
-     * @return Operation status and status messages
-     */
-    public OperationResult<ItemRow> initiateScanImport(Window window) {
         logger.info("Initiating directory scan and import process");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+        Database db = this.context.db();
 
-        // Check if DB is ready
-        if (this.context.db().getStatus() != DbStatus.READY) {
-            logger.warning("Unable to begin scan-import workflow; DB is not yet initialized");
+        // Check if the DB is ready
+        if (db.getStatus() != DbStatus.READY) {
+            logger.warning("Unable to begin scan-import; DB is not yet initialized");
             feedback.add(new FeedbackMsg(
                     this.getClass().getName(),
                     "import.init.db.uninitialized",
                     new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.WARNING, null, feedback);
+            // TODO: Implement error-handling
+            this.scanInProgress = false;
+            return;
         }
 
-        // Open directory chooser and receive operation result w/ user selection
-        OperationResult<String> directory = this.openDirChooser(window);
-        logger.result(this.getClass().getName(), directory);
-        feedback.addAll(directory.msg());
-        if (!directory.isSuccessful() || directory.value() == null) {
-            // A canceled directory selection does not mean that the selection failed
-            return new OperationResult<>(directory.status(), null, feedback);
+        // Open directory chooser
+        OperationResult<String> dirChooser = this.openDirChooser(window);
+        logger.result(this.getClass().getName(), dirChooser);
+        feedback.addAll(dirChooser.msg());
+        if (!dirChooser.isSuccessful() || dirChooser.value() == null) {
+            // TODO: Implement error-handling
+            logger.warning("Directory chooser failed");
+            this.scanInProgress = false;
+            return;
         }
-        feedback.addAll(directory.msg());
+        String scanPath = dirChooser.value();
 
         // Checking if the chosen path already exists as a node
-        String path = directory.value();
-        int nodeId = -1;
+        this.parentNodeId = -1;
         try {
-            ParentExistence result = DatabaseCheck.doesParentExist(path, context.db());
-            if (result == ParentExistence.IS_SCAN_LOCATION) {
-                feedback.add(
-                        new FeedbackMsg(
-                                this.getClass().getName(),
-                                "import.init.path.exists.scan",
-                                new Object[] {}
-                        )
+            ParentExistence doesNodeExist = db.withConnection(
+                    conn -> DatabaseCheck.doesParentExist(scanPath, conn)
+            );
+            if (doesNodeExist == ParentExistence.IS_SCAN_LOCATION) {
+                feedback.add(new FeedbackMsg(
+                        this.getClass().getName(),
+                        "import.init.path.exists.scan",
+                        new Object[] {}
+                ));
+                // TODO: Implement error-handling
+                logger.warning("Re-scanning existing directories is not yet supported :<");
+                this.scanInProgress = false;
+                return;
+            } else if (doesNodeExist == ParentExistence.IS_NODE) {
+                this.parentNodeId = db.withConnection(
+                        conn -> DatabaseFetch.getNodeId(scanPath, conn)
                 );
-                return new OperationResult<>(OperationStatus.FAILED, null, feedback);
-            }
-            if (result == ParentExistence.IS_NODE) {
-                nodeId = DatabaseFetch.getNodeId(path, context.db().connect());
             }
         } catch (SQLException e) {
-            logger.error("Critical error encountered: ", e);
-            feedback.add(
-                    new FeedbackMsg(
-                            this.getClass().getName(),
-                            "import.init.path.exists.sqlexception",
-                            new Object[] {}
-                    )
-            );
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
-        }
-
-        // Parsing directory
-        ArrayList<ItemRow> items;
-        try {
-            items = DirectoryHandler.parseDir(path);
-        } catch (IOException e) {
-            logger.error("Critical error encountered: ", e);
-            feedback.add(
-                    new FeedbackMsg(
-                            this.getClass().getName(),
-                        "import.init.parse.failure", new Object[] {}
-                    )
-            );
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
-        }
-
-        // Display import overview
-        OperationResult<Void> beginImport = showOverview(window, items);
-        logger.result(this.getClass().getName(), beginImport);
-        feedback.addAll(beginImport.msg());
-        if (!beginImport.isSuccessful()) {
-            return new OperationResult<>(beginImport.status(), null, feedback);
-        }
-        feedback.addAll(beginImport.msg());
-
-        // Get ItemRow for parent path
-        ItemRow parentRow;
-        try {
-            parentRow = DirectoryHandler.parseParent(path);
-        } catch (IOException e) {
-            logger.error("Critical error encountered: ", e);
+            logger.error("Database error encountered:", e);
             feedback.add(new FeedbackMsg(
                     this.getClass().getName(),
-                    "import.init.parse.parent.failed", new Object[] {}
+                    "import.init.path.exists.sqlexception",
+                    new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            // TODO: Implement error-handling
+            this.scanInProgress = false;
+            return;
         }
-        // TODO: Replace this constructor with a method to allow user input of all passed parameters
-        ParentNode parentNode = new ParentNode(
-                parentRow, 0, "MANUAL",
-                "USER_SELECTION", 0, ItemStatus.ACTIVE
-        );
 
-        OperationResult<ItemRow> insertIntoDb = DatabaseInsert.insertNewSet(
-                parentNode, items, this.context.db()
-        );
-        logger.result(this.getClass().getName(), insertIntoDb);
-        if (!insertIntoDb.isSuccessful()) {
-            return new OperationResult<>(insertIntoDb.status(), null, feedback);
-        }
-        parentRow = insertIntoDb.value();
+        // Parsing the selected directory
+        Task<ArrayList<ItemRow>> parseDirTask = new Task<>() {
+            @Override
+            protected ArrayList<ItemRow> call() throws IOException {
+                return DirectoryHandler.parseDir(scanPath);
+            }
+        };
+        parseDirTask.setOnFailed(event -> {
+            logger.error("File operation failed:", parseDirTask.getException());
+            feedback.add(new FeedbackMsg(
+                    this.getClass().getName(),
+                    "import.init.parse.failure",
+                    new Object[] {}
+            ));
+            // TODO: Implement error-handling
+            this.scanInProgress = false;
+        });
+        parseDirTask.setOnSucceeded(event -> {
+            ArrayList<ItemRow> items = parseDirTask.getValue();
 
-        feedback.add(new FeedbackMsg(
-                this.getClass().getName(),
-            "modal.import.overview.success", new Object[] {}
-        ));
-        return new OperationResult<>(OperationStatus.SUCCESS, parentRow, feedback);
+            // Displaying import overview
+            OperationResult<Void> showOverview = showOverview(window, items);
+            logger.result(this.getClass().getName(), showOverview);
+            feedback.addAll(showOverview.msg());
+
+            if (!showOverview.isSuccessful()) {
+                logger.warning("Import overview failed");
+                // TODO: Implement error-handling
+                this.scanInProgress = false;
+                return;
+            }
+
+            // Preparing DB insert
+            ItemRow parentRow;
+            try {
+                parentRow = getParentRow(scanPath);
+            } catch (IOException e) {
+                logger.error("File operation failed:", e);
+                feedback.add(new FeedbackMsg(
+                        this.getClass().getName(),
+                        "import.init.parse.parent.failed",
+                        new Object[] {}
+                ));
+                // TODO: Implement error-handling
+                this.scanInProgress = false;
+                return;
+            }
+            ParentNode parentNode = getScanLocation(parentRow);
+
+            // Yes, I am creating a task inside a task. I'm sorry.
+            Task<OperationResult<Integer>> bulkDbInsert = new Task<>() {
+                @Override
+                protected OperationResult<Integer> call() throws SQLException {
+                    return db.withTransaction(conn ->
+                            DatabaseInsert.insertNewSet(
+                                    parentNode, items, conn
+                            ));
+                }
+            };
+            bulkDbInsert.setOnFailed(newEvent -> {
+                logger.error("Database operation failed:", bulkDbInsert.getException());
+                feedback.addAll(bulkDbInsert.getValue().msg());
+                // TODO: Implement error-handling
+                this.scanInProgress = false;
+            });
+            bulkDbInsert.setOnSucceeded(newEvent -> {
+                feedback.addAll(bulkDbInsert.getValue().msg());
+                callback.onSuccess(bulkDbInsert.getValue().value());
+                this.scanInProgress = false;
+            });
+            Thread insertThread = new Thread(bulkDbInsert);
+            insertThread.setDaemon(true);
+            insertThread.start();
+        });
+        Thread scanDirectory = new Thread(parseDirTask);
+        scanDirectory.setDaemon(true);
+        scanDirectory.start();
     }
 
     // === Utility Methods === \\
 
+    /**
+     * Creates an ItemRow instance for the selected directory
+     * @param path Scanned directory
+     * @return ItemRow instance with info about the directory item
+     * @throws IOException If any file operation cannot be executed
+     */
+    private ItemRow getParentRow(String path) throws IOException {
+        ItemRow parent = DirectoryHandler.parseParent(path);
+        if (this.parentNodeId != -1) {
+            parent = parent.setNewId(this.parentNodeId);
+        }
+        return parent;
+    }
+
+    // TODO: Allow the user to define these values
+    /**
+     * Creates a ParentNode instance for the given parent node
+     * @param parent Scan location ItemRow
+     * @return The created parent node
+     */
+    private ParentNode getScanLocation(ItemRow parent) {
+        return new ParentNode(
+                parent, 0, "MANUAL", "USER_SELECTION", 0, ItemStatus.ACTIVE
+        );
+    }
     /**
      * Displays a directory chooser and allows the user to pick a directory
      * @param window Where the directory chooser should be opened

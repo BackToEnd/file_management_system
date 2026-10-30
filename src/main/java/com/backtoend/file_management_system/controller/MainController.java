@@ -25,33 +25,21 @@ public class MainController {
     private OverviewController overviewController;
     private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
+    private final ScanImport scanImport;
 
     // Constructor
     public MainController() {
         this.context = MainApplication.getContext();
-    }
-
-    public void enableOverview() {
-        OperationResult<Void> result = this.overviewController.buildTree();
-        logger.result(this.getClass().getName(), result);
-        this.context.toast().showGeneric(
-                result.status(), "toast.main.overview.build"
-        );
+        this.scanImport = new ScanImport(this.context);
     }
 
     @FXML
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating ScanImport");
         Window window = (Window) ((Button) event.getSource()).getScene().getWindow();
-        ScanImport scanImport = new ScanImport(this.context);
-        OperationResult<ItemRow> result = scanImport.initiateScanImport(window);
-        logger.result(this.getClass().getName(), result);
-        this.context.toast().showGeneric(
-                result.status(), "toast.main.scan.import"
+        this.scanImport.handleScanImport(window,
+                itemId -> overviewController.addNewParent(itemId)
         );
-        if (result.isSuccessful()) {
-            this.overviewController.addNewParent(result.value());
-        }
     }
 
     @FXML
@@ -61,4 +49,15 @@ public class MainController {
     }
 
     // === Utility Methods === \\
+
+    /**
+     * Generates the overview tree; should only be called after DB initialization finishes successfully
+     */
+    public void enableOverview() {
+        OperationResult<Void> result = this.overviewController.buildTree();
+        logger.result(this.getClass().getName(), result);
+        this.context.toast().showGeneric(
+                result.status(), "toast.main.overview.build"
+        );
+    }
 }

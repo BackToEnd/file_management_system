@@ -11,8 +11,7 @@ import java.sql.*;
 public class DatabaseCheck {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseCheck.class);
 
-public static ParentExistence doesParentExist(String path, Database db) throws SQLException {
-        Connection conn = db.connect();
+public static ParentExistence doesParentExist(String path, Connection conn) throws SQLException {
         logger.debug("Checking if '" + path + "' exists in DB");
         int parentId = DatabaseFetch.getNodeId(path, conn);
         if (parentId == -1) {

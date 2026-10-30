@@ -1,45 +1,69 @@
-[16:11:51.313] [INFO] [file_management_system] Logger initialized
-[16:11:51.314] [INFO] [file_management_system] Log directory: logs
-[16:11:51.315] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
-[16:11:51.316] [INFO] [Database] DB connection requested, but DB has not yet been initialized
-[16:11:51.426] [INFO] [Database] Successfully connected to DB
-[16:11:51.427] [FINE] [DirectoryHandler] Instance created
-[16:11:52.058] [INFO] [MainApplication] This is a test
-[16:11:52.059] [INFO] [DatabaseInitializer] Attempting to initialize DB
-[16:11:52.059] [INFO] [Database] DB connection requested, but DB has not yet been initialized
-[16:11:52.060] [FINE] [DatabaseInitializer] Connection established
-[16:11:52.069] [INFO] [DatabaseInitializer] All tables either created or skipped
-[16:11:52.069] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
-[16:11:52.079] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
-[16:11:52.079] [INFO] [Database] DB connection requested, but DB has not yet been initialized
-[16:11:52.081] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
-[16:11:52.083] [INFO] [DatabaseCheck] Column found
-[16:11:52.096] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
-[16:11:52.097] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
-[16:11:52.098] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
-[16:11:52.098] [INFO] [OverviewController] Attempting to generate tree table view
-[16:11:52.098] [FINE] [OverviewController] Attempting to fetch parent nodes from DB
-[16:11:52.103] [FINE] [DatabaseFetch] Fetching all parent items
-[16:11:52.104] [FINE] [DatabaseFetch] Result set obtained
-[16:11:52.109] [INFO] [OverviewController] Attempting to build base tree
-[16:11:52.110] [FINE] [DatabaseFetch] Fetching scan location of parent node: 1
-[16:11:52.112] [FINE] [DatabaseFetch] Result set obtained
-[16:11:52.119] [FINE] [OverviewController] Received scan location
-[16:11:52.119] [FINE] [OverviewController] Configuring node 'db_design_schulung' (ID 1)
-[16:11:52.120] [FINE] [DatabaseFetch] Fetching scan location of parent node: 10
-[16:11:52.120] [FINE] [DatabaseFetch] Result set obtained
-[16:11:52.121] [FINE] [OverviewController] Received scan location
-[16:11:52.121] [FINE] [OverviewController] Configuring node 'Animation Memes' (ID 10)
-[16:11:52.121] [FINE] [DatabaseFetch] Fetching scan location of parent node: 12
-[16:11:52.122] [FINE] [DatabaseFetch] Result set obtained
-[16:11:52.122] [FINE] [OverviewController] Received scan location
-[16:11:52.122] [FINE] [OverviewController] Configuring node 'OCs' (ID 12)
-[16:11:52.122] [FINE] [DatabaseFetch] Fetching scan location of parent node: 39
-[16:11:52.122] [FINE] [DatabaseFetch] Result set obtained
-[16:11:52.123] [FINE] [OverviewController] Received scan location
-[16:11:52.123] [FINE] [OverviewController] Configuring node 'd&d' (ID 39)
-[16:11:52.160] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
-[16:11:52.160] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
-[16:11:52.160] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully fetched all entries of the default overview
-[16:11:52.160] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully built the final tree display
-[16:12:08.368] [INFO] [MainController] Application shutting down
+[12:04:43.343] [INFO] [file_management_system] Logger initialized
+[12:04:43.345] [INFO] [file_management_system] Log directory: logs
+[12:04:43.347] [FINE] [Database] Identified DB path: jdbc:sqlite:data\filesystem.db
+[12:04:43.348] [INFO] [Database] DB connection requested, but DB has not yet been initialized
+[12:04:43.524] [INFO] [Database] Successfully connected to DB
+[12:04:43.526] [FINE] [DirectoryHandler] Instance created
+[12:04:44.291] [INFO] [DatabaseInitializer] Attempting to initialize DB
+[12:04:44.292] [INFO] [Database] DB connection requested, but DB has not yet been initialized
+[12:04:44.293] [FINE] [DatabaseInitializer] Connection established
+[12:04:44.300] [INFO] [DatabaseInitializer] All tables either created or skipped
+[12:04:44.300] [FINE] [DatabaseInitializer] Attempting to apply constraint(s) to table {node}, column {parent}
+[12:04:44.302] [INFO] [DatabaseCheck] Checking table {node} for column {parent}
+[12:04:44.302] [INFO] [Database] DB connection requested, but DB has not yet been initialized
+[12:04:44.306] [FINE] [DatabaseCheck] Connection established, statement created, result obtained
+[12:04:44.308] [INFO] [DatabaseCheck] Column found
+[12:04:44.321] [INFO] [MainApplication] Received operation result from {com.backtoend.file_management_system.MainApplication}
+[12:04:44.321] [INFO] [MainApplication] [com.backtoend.file_management_system.MainApplication] Operation completed successfully
+[12:04:44.323] [FINE] [MainApplication] [com.backtoend.file_management_system.MainApplication] - (com.backtoend.file_management_system.database.DatabaseInitializer) Successfully created or skipped all tables
+[12:04:44.323] [INFO] [OverviewController] Attempting to generate tree table view
+[12:04:44.323] [FINE] [OverviewController] Attempting to fetch parent nodes from DB
+[12:04:44.328] [FINE] [DatabaseFetch] Fetching all parent items
+[12:04:44.330] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.341] [INFO] [OverviewController] Attempting to build base tree
+[12:04:44.345] [FINE] [DatabaseFetch] Fetching scan location of parent node: 1
+[12:04:44.352] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.353] [FINE] [OverviewController] Received scan location
+[12:04:44.354] [FINE] [OverviewController] Configuring node 'db_design_schulung' (ID 1)
+[12:04:44.358] [FINE] [DatabaseFetch] Fetching scan location of parent node: 10
+[12:04:44.358] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.359] [FINE] [OverviewController] Received scan location
+[12:04:44.360] [FINE] [OverviewController] Configuring node 'Animation Memes' (ID 10)
+[12:04:44.361] [FINE] [DatabaseFetch] Fetching scan location of parent node: 12
+[12:04:44.363] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.363] [FINE] [OverviewController] Received scan location
+[12:04:44.363] [FINE] [OverviewController] Configuring node 'OCs' (ID 12)
+[12:04:44.364] [FINE] [DatabaseFetch] Fetching scan location of parent node: 39
+[12:04:44.365] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.366] [FINE] [OverviewController] Received scan location
+[12:04:44.367] [FINE] [OverviewController] Configuring node 'd&d' (ID 39)
+[12:04:44.368] [FINE] [DatabaseFetch] Fetching scan location of parent node: 49
+[12:04:44.368] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.369] [FINE] [OverviewController] Received scan location
+[12:04:44.369] [FINE] [OverviewController] Configuring node 'PHP' (ID 49)
+[12:04:44.370] [FINE] [DatabaseFetch] Fetching scan location of parent node: 69
+[12:04:44.371] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.371] [FINE] [OverviewController] Received scan location
+[12:04:44.371] [FINE] [OverviewController] Configuring node 'Folklore' (ID 69)
+[12:04:44.372] [FINE] [DatabaseFetch] Fetching scan location of parent node: 78
+[12:04:44.373] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.373] [FINE] [OverviewController] Received scan location
+[12:04:44.374] [FINE] [OverviewController] Configuring node 'Documents' (ID 78)
+[12:04:44.375] [FINE] [DatabaseFetch] Fetching scan location of parent node: 82
+[12:04:44.376] [FINE] [DatabaseFetch] Result set obtained
+[12:04:44.377] [FINE] [OverviewController] Received scan location
+[12:04:44.377] [FINE] [OverviewController] Configuring node 'bbw' (ID 82)
+[12:04:44.453] [INFO] [MainController] Received operation result from {com.backtoend.file_management_system.controller.MainController}
+[12:04:44.454] [INFO] [MainController] [com.backtoend.file_management_system.controller.MainController] Operation completed successfully
+[12:04:44.454] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully fetched all entries of the default overview
+[12:04:44.454] [FINE] [MainController] [com.backtoend.file_management_system.controller.MainController] - (com.backtoend.file_management_system.controller.OverviewController) Successfully built the final tree display
+[12:04:46.856] [INFO] [MainController] Initiating ScanImport
+[12:04:46.857] [INFO] [ScanImport] Initiating directory scan and import process
+[12:04:46.857] [INFO] [DirectoryHandler] Initiating directory chooser
+[12:04:46.858] [FINE] [DirectoryHandler] Identified last directory: [ C:\Users\PeterCon]
+[12:04:53.730] [INFO] [ScanImport] Received operation result from {com.backtoend.file_management_system.service.ScanImport}
+[12:04:53.730] [INFO] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] Operation completed successfully
+[12:04:53.730] [FINE] [ScanImport] [com.backtoend.file_management_system.service.ScanImport] - (com.backtoend.file_management_system.controller.FileExplorerController) User selected a directory: C:\Users\PeterCon\Documents\Documents
+[12:04:53.732] [FINE] [DatabaseCheck] Checking if 'C:\Users\PeterCon\Documents\Documents' exists in DB
+[12:04:53.733] [FINE] [DatabaseCheck] Path is a scan location
+[12:04:53.734] [WARNING] [ScanImport] Re-scanning existing directories is not yet supported :<
