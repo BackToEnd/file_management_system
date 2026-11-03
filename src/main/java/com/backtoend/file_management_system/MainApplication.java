@@ -2,11 +2,10 @@ package com.backtoend.file_management_system;
 
 import com.backtoend.file_management_system.controller.MainController;
 import com.backtoend.file_management_system.controller.ModalController;
-import com.backtoend.file_management_system.controller.OverviewController;
 import com.backtoend.file_management_system.controller.ToastController;
 import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.database.DatabaseInitializer;
-import com.backtoend.file_management_system.enums.ToastType;
+import com.backtoend.file_management_system.enums.DbStatus;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.service.DirectoryHandler;
 import com.backtoend.file_management_system.logging.LoggingConfig;
@@ -22,24 +21,21 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * Main application class and starting point of this application
  */
 public class MainApplication extends Application {
     private final static AppLogger logger = AppLogger.getLogger(MainApplication.class);
-    private static Context context;
+    private static final Database database = new Database("filesystem.db");
+    private static final DirectoryHandler directoryHandler = new DirectoryHandler();
+    private static final ToastController toastController = new ToastController();
+
+    // TODO: Eliminate the need for `Context` and instead have components pull directly from static getters
     @Override
     public void start(Stage stage) throws IOException {
         LoggingConfig.configure();
-
-        // Preparation
-        Database db = new Database("filesystem.db");
-        DirectoryHandler dir = new DirectoryHandler();
-        ToastController toast = new ToastController();
-        ModalController modal = new ModalController();
-        Context context = new Context(dir, db, toast, modal);
-        MainApplication.context = context;
 
         // Showing initial stage
         logger.debug("Attempting to load main view FXML file");
@@ -62,54 +58,56 @@ public class MainApplication extends Application {
         scene.setRoot(overlayRoot);
 
         // Configuring toast and modal controllers
-        toast.setToastLayer(toastLayer);
+        toastController.setToastLayer(toastLayer);
 
         stage.setTitle("File Management System");
         stage.setScene(scene);
         stage.show();
 
         // DB initialization on background thread
-        Task<OperationResult<Void>> initializeDb = getOperationResultTask(context, fxml);
+        Task<OperationResult<Void>> initializeDb = getOperationResultTask(fxml);
         Thread thread = new Thread(initializeDb);
         thread.setDaemon(true);
         thread.start();
     }
 
+    // Getters
+    public static Database getDatabaseInstance() { return database; }
+    public static DirectoryHandler getDirectoryHandlerInstance() { return directoryHandler; }
+    public static ToastController getToastControllerInstance() { return toastController; }
+
     // TODO: Implement proper error handling
     /**
      * Creates a Task responsible for initiating the DB, receives and logs a result upon completion,
-     * and loads the overview tree on success.
-     * @param context AppContext instance
+     * and loads the overview tree on success
      * @param fxml FXMLLoader of MainController
      * @return Task
      */
-    private Task<OperationResult<Void>> getOperationResultTask(Context context, FXMLLoader fxml) {
-        DatabaseInitializer dbInit = new DatabaseInitializer(context);
+    private Task<OperationResult<Void>> getOperationResultTask(FXMLLoader fxml) {
+        DatabaseInitializer dbInit = new DatabaseInitializer();
         Task<OperationResult<Void>> initializeDb = new Task<>() {
             @Override
-            protected OperationResult<Void> call() {
-                return dbInit.initiateDB();
+            protected OperationResult<Void> call() throws SQLException {
+                return database.withConnection(dbInit::initiateDB);
             }
         };
         initializeDb.setOnSucceeded(event -> {
             OperationResult<Void> result = initializeDb.getValue();
-            logger.result(this.getClass().getName(), result);
+            logger.result(result);
             if (result.isSuccessful()) {
                 MainController ctrl = fxml.getController();
                 ctrl.enableOverview();
+                database.setStatus(DbStatus.READY);
             } else {
-                logger.warning("DB initialization failed horribly");
+                logger.warning("DB initialization could not be completed");
+                database.setStatus(DbStatus.NOT_INITIALIZED);
             }
         });
+        initializeDb.setOnFailed(event -> {
+            logger.error("Database encountered during initialization: ", initializeDb.getException());
+            database.setStatus(DbStatus.FAILED);
+        });
         return initializeDb;
-    }
-
-    /**
-     * Allows any component to get the AppContext singleton from anywhere
-     * @return This session's AppContext instance
-     */
-    public static Context getContext() {
-        return MainApplication.context;
     }
 
     public static void main(String[] args) {

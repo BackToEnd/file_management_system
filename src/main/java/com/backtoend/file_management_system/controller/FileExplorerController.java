@@ -53,24 +53,17 @@ public class FileExplorerController {
         // Check whether the user selected a path or canceled
         if (selection != null) {
             dirHandler.setLastDir(selection.getPath());
-            list.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            list.add(FeedbackMsg.create(
                     "explorer.directory.result.obtained",
                     new Object[] { selection.getAbsolutePath() }
             ));
-            return new OperationResult<String>(
-                    OperationStatus.SUCCESS, selection.getAbsolutePath(), list
-            );
+            return OperationResult.create(OperationStatus.SUCCESS, selection.getAbsolutePath(), list);
         } else {
-            list.add(
-                    new FeedbackMsg(
-                            this.getClass().getName(),
+            list.add(FeedbackMsg.create(
                             "explorer.directory.result.canceled",
                             new Object[] {})
             );
-            return new OperationResult<String>(
-                    OperationStatus.CANCELLED, null, list
-            );
+            return OperationResult.create(OperationStatus.CANCELED, null, list);
         }
     }
 }

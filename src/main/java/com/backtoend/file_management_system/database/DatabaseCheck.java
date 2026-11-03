@@ -36,10 +36,10 @@ public class DatabaseCheck {
     /// Checks if the specified table already has a column with the specified name
     /// @param table The name of the table
     /// @param column The name of the column
-    /// @param db Database instance
+    /// @param conn Database connection
     /// @return `true` if the specified table already contains a column with the specified name, `false` otherwise
     /// @throws SQLException If any database operation fails
-    public static boolean columnExists(String table, String column, Database db) throws SQLException {
+    public static boolean columnExists(String table, String column, Connection conn) throws SQLException {
         logger.info("Checking table {" + table + "} for column {" + column + "}");
         // The PRAGMA statement required to retrieve information about the specified table
         String test = "PRAGMA table_info(\""
@@ -47,8 +47,7 @@ public class DatabaseCheck {
                 + "\")";
 
         // Try-with-resource block to auto-close Connection, Statement, and ResultSet
-        try (Connection conn = db.connect();
-             Statement stmt = conn.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet result = stmt.executeQuery(test)) {
             logger.debug("Connection established, statement created, result obtained");
             // Iterating through the result set to check if the specified column name is mentioned
@@ -58,8 +57,8 @@ public class DatabaseCheck {
                     return true;
                 }
             }
+            logger.info("Column not found");
+            return false;
         }
-        logger.info("Column not found");
-        return false;
     }
 }

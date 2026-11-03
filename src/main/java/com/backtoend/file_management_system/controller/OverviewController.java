@@ -1,7 +1,7 @@
 package com.backtoend.file_management_system.controller;
 
-import com.backtoend.file_management_system.Context;
 import com.backtoend.file_management_system.MainApplication;
+import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.database.DatabaseFetch;
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.enums.ToastType;
@@ -38,7 +38,8 @@ public class OverviewController {
     /// Third `TreeTableColumn`; contains the item's path
     @FXML
     private TreeTableColumn<ItemRow, String> pathCol;
-    private final Context context;
+    private final Database db;
+    private final ToastController toast;
 
     /// Default initialization of this controller at first creation - defines text bindings for placeholder label and table headers,
     /// and sets cell value factories for each column
@@ -75,7 +76,8 @@ public class OverviewController {
     }
 
     public OverviewController() {
-        this.context = MainApplication.getContext();
+        this.db = MainApplication.getDatabaseInstance();
+        this.toast = MainApplication.getToastControllerInstance();
     }
 
     // === Utility Methods === \\
@@ -93,20 +95,18 @@ public class OverviewController {
         logger.debug("Attempting to fetch parent nodes from DB");
         ArrayList<ItemRow> parentItems;
         try {
-            parentItems = this.context.db()
+            parentItems = this.db
                     .withConnection(DatabaseFetch::getAllParentItems);
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "overview.fetch.parent.all.failed",
                     new Object[] {}
             ));
-            this.context.toast().showToast(ToastType.ERROR, "toast.overview.build.fetch.failed");
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            this.toast.showToast(ToastType.ERROR, "toast.overview.build.fetch.failed");
+            return OperationResult.create(OperationStatus.FAILED, null, feedback);
         }
-        feedback.add(new FeedbackMsg(
-                this.getClass().getName(),
+        feedback.add(FeedbackMsg.create(
                 "overview.fetch.parent.all.success",
                 new Object[] {}
         ));
@@ -114,21 +114,19 @@ public class OverviewController {
         // Attempting to build the tree
         try {
             this.treeView.setRoot(this.buildBaseTree(parentItems));
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "overview.build.tree.base.success",
                     new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
+            return OperationResult.create(OperationStatus.SUCCESS, null, feedback);
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "overview.build.tree.base.failed",
                     new Object[] {}
             ));
-            this.context.toast().showToast(ToastType.ERROR, "toast.overview.build.display.failed");
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            this.toast.showToast(ToastType.ERROR, "toast.overview.build.display.failed");
+            return OperationResult.create(OperationStatus.FAILED, null, feedback);
         }
     }
 
@@ -145,7 +143,7 @@ public class OverviewController {
         ItemTreeNode root = new ItemTreeNode(null);
         logger.info("Attempting to build base tree");
         for (ItemRow item : parents) {
-            ScanLocation scanLocation = this.context.db()
+            ScanLocation scanLocation = this.db
                     .withConnection(conn ->
                             DatabaseFetch.getScanLocationOf(item, conn)
                     );
@@ -193,18 +191,18 @@ public class OverviewController {
     public void addNewParent(int parentId) {
         ItemRow newParent;
         try {
-            newParent = this.context.db().withConnection(conn ->
+            newParent = this.db.withConnection(conn ->
                     DatabaseFetch.getInfo(parentId, conn)
             );
         } catch (SQLException e) {
             logger.error("Database operation failed:", e);
-            this.context.toast().showToast(ToastType.ERROR, "toast.overview.add.failed");
+            this.toast.showToast(ToastType.ERROR, "toast.overview.add.failed");
             return;
         }
         logger.debug("Attempting to add new parent: " + newParent.name());
         ScanLocation scanLocation;
         try {
-            scanLocation = this.context.db()
+            scanLocation = this.db
                     .withConnection(conn ->
                             DatabaseFetch.getScanLocationOf(newParent, conn)
                     );
@@ -214,7 +212,7 @@ public class OverviewController {
             this.treeView.getRoot().getChildren().add(item);
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
-            this.context.toast().showToast(ToastType.ERROR, "toast.overview.add.source.failed");
+            this.toast.showToast(ToastType.ERROR, "toast.overview.add.source.failed");
         }
     }
     // endregion
@@ -231,7 +229,7 @@ public class OverviewController {
 
         // Attempting to load child items
         try {
-            ArrayList<ItemRow> children = this.context.db()
+            ArrayList<ItemRow> children = this.db
                     .withConnection(conn ->
                             DatabaseFetch.getChildrenOf(parentId, conn)
                     );
@@ -240,7 +238,7 @@ public class OverviewController {
 
                 // Fetching scan location if a child is a scan location itself
                 if (item.hasChildren()) {
-                    ScanLocation scanLocation = this.context.db()
+                    ScanLocation scanLocation = this.db
                             .withConnection(conn ->
                                     DatabaseFetch.getScanLocationOf(item, conn)
                             );

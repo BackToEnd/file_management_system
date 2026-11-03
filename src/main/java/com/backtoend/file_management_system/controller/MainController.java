@@ -1,6 +1,5 @@
 package com.backtoend.file_management_system.controller;
 
-import com.backtoend.file_management_system.Context;
 import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.service.I18n;
@@ -24,16 +23,14 @@ public class MainController {
     /// Button that causes the application to shut down
     @FXML
     private Button killBtn;
-    /// `AppContext` singleton
-    private final Context context;
+
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
     /// Locally available `ScanImport` instance
     private final ScanImport scanImport;
 
     // Constructor
         public MainController() {
-            context = MainApplication.getContext();
-            scanImport = new ScanImport(context);
+            scanImport = new ScanImport();
         }
     @FXML
     private void initialize() {
@@ -51,8 +48,7 @@ public class MainController {
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating ScanImport");
         Window window = (Window) ((Button) event.getSource()).getScene().getWindow();
-        this.scanImport.handleScanImport(window,
-                itemId -> overviewController.addNewParent(itemId)
+        this.scanImport.handleScanImport(window,itemId -> overviewController.addNewParent(itemId)
         );
     }
 
@@ -68,8 +64,8 @@ public class MainController {
     ///  successfully and should **not** be called before the initialization finishes
     public void enableOverview() {
         OperationResult<Void> result = this.overviewController.buildTree();
-        logger.result(this.getClass().getName(), result);
-        this.context.toast().showGeneric(
+        logger.result(result);
+        MainApplication.getToastControllerInstance().showGeneric(
                 result.status(), "toast.main.overview.build"
         );
     }

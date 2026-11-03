@@ -1,6 +1,6 @@
 package com.backtoend.file_management_system.service;
 
-import com.backtoend.file_management_system.Context;
+import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.controller.FileExplorerController;
 import com.backtoend.file_management_system.controller.ModalController;
 import com.backtoend.file_management_system.database.Database;
@@ -25,7 +25,6 @@ import java.util.ArrayList;
 /// Service class handling the scan-import workflow
 /// @author Rogue049
 public class ScanImport {
-    private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(ScanImport.class);
     /// Keeps track of whether a scan is currently in process;
     /// required to prevent two scans being active at the same time
@@ -33,10 +32,6 @@ public class ScanImport {
     /// Locally remembers the ID of a parent directory; easier than
     /// passing it into different methods as an argument
     private int parentNodeId;
-
-    public ScanImport(Context context) {
-        this.context = context;
-    }
 
     /// Performs the entire scan-import process:\
     /// 1. Opens a directory chooser to allow the user to pick a directory. Properly accounts for
@@ -64,13 +59,12 @@ public class ScanImport {
 
         logger.info("Initiating directory scan and import process");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
-        Database db = this.context.db();
+        Database db = MainApplication.getDatabaseInstance();
 
         // Check if the DB is ready
         if (db.getStatus() != DbStatus.READY) {
             logger.warning("Unable to begin scan-import; DB is not yet initialized");
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "import.init.db.uninitialized",
                     new Object[] {}
             ));
@@ -81,7 +75,7 @@ public class ScanImport {
 
         // Open directory chooser
         OperationResult<String> dirChooser = this.openDirChooser(window);
-        logger.result(this.getClass().getName(), dirChooser);
+        logger.result(dirChooser);
         feedback.addAll(dirChooser.msg());
         if (!dirChooser.isSuccessful() || dirChooser.value() == null) {
             // TODO: Implement error-handling
@@ -98,8 +92,7 @@ public class ScanImport {
                     conn -> DatabaseCheck.doesParentExist(scanPath, conn)
             );
             if (doesNodeExist == ParentExistence.IS_SCAN_LOCATION) {
-                feedback.add(new FeedbackMsg(
-                        this.getClass().getName(),
+                feedback.add(FeedbackMsg.create(
                         "import.init.path.exists.scan",
                         new Object[] {}
                 ));
@@ -114,8 +107,7 @@ public class ScanImport {
             }
         } catch (SQLException e) {
             logger.error("Database error encountered:", e);
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "import.init.path.exists.sqlexception",
                     new Object[] {}
             ));
@@ -133,8 +125,7 @@ public class ScanImport {
         };
         parseDirTask.setOnFailed(event -> {
             logger.error("File operation failed:", parseDirTask.getException());
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
+            feedback.add(FeedbackMsg.create(
                     "import.init.parse.failure",
                     new Object[] {}
             ));
@@ -146,7 +137,7 @@ public class ScanImport {
 
             // Displaying import overview
             OperationResult<Void> showOverview = showOverview(window, items);
-            logger.result(this.getClass().getName(), showOverview);
+            logger.result(showOverview);
             feedback.addAll(showOverview.msg());
 
             if (!showOverview.isSuccessful()) {
@@ -162,8 +153,7 @@ public class ScanImport {
                 parentRow = getParentRow(scanPath);
             } catch (IOException e) {
                 logger.error("File operation failed:", e);
-                feedback.add(new FeedbackMsg(
-                        this.getClass().getName(),
+                feedback.add(FeedbackMsg.create(
                         "import.init.parse.parent.failed",
                         new Object[] {}
                 ));
@@ -233,7 +223,7 @@ public class ScanImport {
     /// Status will be `SUCCESS` if the user selected a directory, `FAILED` if anything in this process went
     /// wrong, and `CANCELED` if the user closed the window without selecting a directory.
     private OperationResult<String> openDirChooser(Window window) {
-        FileExplorerController fExCon = new FileExplorerController(this.context.dirHandler());
+        FileExplorerController fExCon = new FileExplorerController(MainApplication.getDirectoryHandlerInstance());
         return fExCon.openDirectoryChooser(window);
     }
 
@@ -249,25 +239,25 @@ public class ScanImport {
             boolean startImport = ModalController.showImportPreview(window, items);
             ArrayList<FeedbackMsg> feedback = new ArrayList<>();
             if (startImport) {
-                feedback.add(new FeedbackMsg(
-                        this.getClass().getName(),
-                        "modal.import.overview.accepted", new Object[] {}
+                feedback.add(FeedbackMsg.create(
+                        "modal.import.overview.accepted",
+                        new Object[] {}
                 ));
-                return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
+                return OperationResult.create(OperationStatus.SUCCESS, null, feedback);
             }
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
-                    "modal.import.overview.denied", new Object[] {}
+            feedback.add(FeedbackMsg.create(
+                    "modal.import.overview.denied",
+                    new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.CANCELLED, null, feedback);
+            return OperationResult.create(OperationStatus.CANCELED, null, feedback);
         } catch (IOException e) {
             logger.error("Critical error encountered: ", e);
             ArrayList<FeedbackMsg> feedback = new ArrayList<>();
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(),
-                    "modal.import.overview.failed", new Object[] {}
+            feedback.add(FeedbackMsg.create(
+                    "modal.import.overview.failed",
+                    new Object[] {}
             ));
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            return OperationResult.create(OperationStatus.FAILED, null, feedback);
         }
     }
 }

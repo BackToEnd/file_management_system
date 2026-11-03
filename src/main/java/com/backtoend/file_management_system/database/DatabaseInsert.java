@@ -41,8 +41,7 @@ public class DatabaseInsert {
                 parentId = DatabaseInsert.insertParentNode(parentItem, conn);
                 // This operation will either return a valid ID,
                 // or throw an SQLException
-                feedback.add(new FeedbackMsg(
-                        DatabaseInsert.class.getName(),
+                feedback.add(FeedbackMsg.create(
                         "import.db.insert.parent.success",
                         new Object[] {parentItem.name()}
                 ));
@@ -53,9 +52,9 @@ public class DatabaseInsert {
             if (!DatabaseFetch.isScanLocation(parentId, conn)) {
                 logger.debug("Inserting scan location for parent node");
                 DatabaseInsert.insertScanLocation(parentId, parent, conn);
-                feedback.add(new FeedbackMsg(
-                        DatabaseInsert.class.getName(),
-                        "import.db.insert.parent.scanlocation", new Object[] {}
+                feedback.add(FeedbackMsg.create(
+                        "import.db.insert.parent.scanlocation",
+                        new Object[] {}
                 ));
             }
         } catch (SQLException e) {
@@ -65,8 +64,7 @@ public class DatabaseInsert {
                     e
             );
         }
-        feedback.add(new FeedbackMsg(
-                DatabaseInsert.class.getName(),
+        feedback.add(FeedbackMsg.create(
                 "import.db.insert.parent.process.success",
                 new Object[] { parentItem.name() }
         ));
@@ -76,9 +74,9 @@ public class DatabaseInsert {
             for (ItemRow item : children) {
                 DatabaseInsert.insertChildNode(parentId, item, conn);
             }
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.children.success", new Object[] {}
+            feedback.add(FeedbackMsg.create(
+                    "import.db.insert.children.success",
+                    new Object[] {}
             ));
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
@@ -93,20 +91,11 @@ public class DatabaseInsert {
                     e
             );
         }
-
-        // Committing transaction
-        conn.commit();
-
-        feedback.add(new FeedbackMsg(
-                DatabaseInsert.class.getName(),
-                "import.db.insert.commit.success", new Object[] {}
+        feedback.add(FeedbackMsg.create(
+                "import.db.insert.commit.success",
+                new Object[] {}
         ));
-        ItemRow newParent = new ItemRow(
-                parentId, parentItem.name(), parentItem.path(), parentItem.displayName(),
-                parentItem.fileType(), parentItem.lastModified(), parentItem.size(),
-                parentItem.status(), parentItem.parent(), parentItem.hasChildren()
-        );
-        return new OperationResult<>(OperationStatus.SUCCESS, newParent.id(), feedback);
+        return OperationResult.create(OperationStatus.SUCCESS, parentId, feedback);
     }
 
     // === Utility Methods === \\

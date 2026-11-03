@@ -13,7 +13,7 @@ package com.backtoend.file_management_system.enums;
 /// @author Rogue049
 public enum OperationStatus {
     SUCCESS,
-    CANCELLED,
+    CANCELED,
     WARNING,
     FAILED
 }

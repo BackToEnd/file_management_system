@@ -2,7 +2,6 @@ package com.backtoend.file_management_system.controller;
 
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.enums.ToastType;
-import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.service.I18n;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -88,7 +87,7 @@ public class ToastController {
             case SUCCESS:
                 this.showToast(ToastType.SUCCESS, text + ".success");
                 return;
-            case CANCELLED:
+            case CANCELED:
                 this.showToast(ToastType.INFO, text + ".canceled");
                 return;
             case WARNING:

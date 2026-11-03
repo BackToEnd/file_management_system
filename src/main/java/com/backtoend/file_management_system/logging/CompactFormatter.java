@@ -27,6 +27,7 @@ public class CompactFormatter extends Formatter {
         String time = TIME_FORMAT.format(Instant.ofEpochMilli(record.getMillis()));
         String level = record.getLevel().getName();
         String source = record.getLoggerName();
+        String method = record.getSourceMethodName();
 
         if (source != null && source.contains(".")) {
             source = source.substring(source.lastIndexOf('.') + 1);
@@ -36,9 +37,13 @@ public class CompactFormatter extends Formatter {
         StringBuilder output = new StringBuilder()
                 .append('[').append(time).append("] ")
                 .append('[').append(level).append("] ")
-                .append('[').append(source).append("] ")
-                .append(msg)
-                .append(System.lineSeparator());
+                .append('[').append(source).append("] > ").append(method).append(": ")
+                .append(msg).append(System.lineSeparator());
+//                .append('[').append(time).append("] ")
+//                .append('[').append(level).append("] ")
+//                .append('[').append(source).append("] ")
+//                .append(msg)
+//                .append(System.lineSeparator());
 
         // Handling exceptions
         if (record.getThrown() != null) {

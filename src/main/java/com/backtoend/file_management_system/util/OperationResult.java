@@ -2,9 +2,10 @@ package com.backtoend.file_management_system.util;
 
 
 import com.backtoend.file_management_system.enums.OperationStatus;
+import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.logging.SourceLocation;
 import com.backtoend.file_management_system.service.FeedbackMsgContainer;
 
-import java.lang.annotation.Inherited;
 import java.util.ArrayList;
 
 /// Record class keeping track of the outcome of an operation
@@ -17,16 +18,21 @@ import java.util.ArrayList;
 public record OperationResult<T>(
         OperationStatus status,
         T value,
-        ArrayList<FeedbackMsg> msg
+        ArrayList<FeedbackMsg> msg,
+        SourceLocation source
 ) implements FeedbackMsgContainer {
     public boolean isSuccessful() {
         return status == OperationStatus.SUCCESS;
     }
     public boolean isCancelled() {
-        return status == OperationStatus.CANCELLED;
+        return status == OperationStatus.CANCELED;
     }
     public boolean isFailed() {
         return status == OperationStatus.FAILED;
+    }
+
+    public static <T> OperationResult<T> create(OperationStatus status, T value, ArrayList<FeedbackMsg> msg) {
+        return new OperationResult<>(status, value, msg, AppLogger.getCaller());
     }
 
     @Override

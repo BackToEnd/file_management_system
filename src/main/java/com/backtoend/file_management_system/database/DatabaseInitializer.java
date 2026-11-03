@@ -3,10 +3,10 @@ package com.backtoend.file_management_system.database;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.backtoend.file_management_system.Context;
+import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.enums.DbStatus;
 import com.backtoend.file_management_system.enums.OperationStatus;
+import com.backtoend.file_management_system.exceptions.OperationException;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
@@ -15,7 +15,7 @@ import com.backtoend.file_management_system.util.OperationResult;
 /// all required tables and adding all constraint columns
 /// @author Rogue049
 public class DatabaseInitializer {
-    private final Context context;
+    private final Database db;
     private static final AppLogger logger = AppLogger.getLogger(DatabaseInitializer.class);
     private final HashMap<String, String> constraints;
 
@@ -71,9 +71,9 @@ public class DatabaseInitializer {
     // endregion
 
     // Constructor
-    public DatabaseInitializer(Context context) {
+    public DatabaseInitializer() {
+        this.db = MainApplication.getDatabaseInstance();
         this.constraints = new HashMap<>();
-        this.context = context;
         this.constraints.put("node/parent", """
                 ALTER TABLE node
                 ADD COLUMN parent INTEGER REFERENCES node (id)
@@ -82,6 +82,7 @@ public class DatabaseInitializer {
 
     // === Utility Functions === \\
 
+    // TODO: Should this method be called with `db.withConnection()`?
     /// Begins the DB initialization process by first attempting to create all tables,
     /// skipping any tables that already exist, then attempting to add constraint columns\
     /// Deals with any resulting SQLExceptions itself.\
@@ -89,23 +90,32 @@ public class DatabaseInitializer {
     /// `READY`
     /// @return An operation result with status and messages. Status will be `SUCCESS` if the
     /// initialization goes through without any problems, and `FAILED` if an SQLException is thrown
-    public OperationResult<Void> initiateDB() {
-        this.context.db().setStatus(DbStatus.INITIALIZING);
+    public OperationResult<Void> initiateDB(Connection conn) throws SQLException{
+        // Checking if the DB already has something going on
+        if (this.db.getStatus() != DbStatus.NOT_INITIALIZED) {
+            throw new IllegalStateException(
+                    "Database initialization could not complete due to"
+                    + "an invalid database status. Expected: "
+                    + DbStatus.NOT_INITIALIZED.toString()
+                    + "Got: " + this.db.getStatus().toString()
+            );
+        }
+
+        // Beginning initialization
+        this.db.setStatus(DbStatus.INITIALIZING);
         logger.info("Attempting to initialize DB");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
 
         // Establishing a connection to the DB
-        try (Connection conn = this.context.db().connect();
-             Statement stmt = conn.createStatement();
-             ) {
-            logger.debug("Connection established");
+        try (Statement stmt = conn.createStatement()) {
 
             // Creating all tables that do not yet exist
             for (String table : this.tables) {
                 stmt.execute(table);
             }
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName() , "db.init.tables.create.all.success", new Object[] {}
+            feedback.add(FeedbackMsg.create(
+                    "db.init.tables.create.all.success",
+                    new Object[] {}
             ));
             logger.info("All tables either created or skipped");
 
@@ -113,25 +123,16 @@ public class DatabaseInitializer {
             for (HashMap.Entry<String, String> set : this.constraints.entrySet()) {
                 String[] check = set.getKey().split("/");
                 logger.debug("Attempting to apply constraint(s) to table {" + check[0] + "}, column {" + check[1] + "}");
-                if (!DatabaseCheck.columnExists(check[0], check[1], this.context.db())) {
+                if (!DatabaseCheck.columnExists(check[0], check[1], conn)) {
                     logger.info("Applying missing column {" + check[1] + "} to table {" + check[0] + "}");
                     stmt.execute(set.getValue());
-                    feedback.add(new FeedbackMsg(
-                            this.getClass().getName(), "db.init.tables.alter.success",
+                    feedback.add(FeedbackMsg.create(
+                            "db.init.tables.alter.success",
                             new Object[] { check[0], check[1] }
                     ));
                 }
             }
-
-            this.context.db().setStatus(DbStatus.READY);
-            return new OperationResult<>(OperationStatus.SUCCESS, null, feedback);
-        } catch (SQLException e) {
-            logger.error("Unable to initialize DB: ", e);
-            feedback.add(new FeedbackMsg(
-                    this.getClass().getName(), "db.init.tables.failed", new Object[] {}
-            ));
-            this.context.db().setStatus(DbStatus.FAILED);
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            return OperationResult.create(OperationStatus.SUCCESS, null, feedback);
         }
     }
 }
