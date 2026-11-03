@@ -11,14 +11,15 @@ import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
 
-/**
- * Database helper class that initializes the DB by creating all required tables and applying all required restraints
- */
+/// Database helper class that initializes the database by creating
+/// all required tables and adding all constraint columns
+/// @author Rogue049
 public class DatabaseInitializer {
     private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(DatabaseInitializer.class);
+    private final HashMap<String, String> constraints;
 
-    // Variables relevant for DB initialization and table creation
+    // region Variables relevant for DB initialization and table creation
     private final String[] tables = {
             """
             CREATE TABLE IF NOT EXISTS node (
@@ -67,7 +68,7 @@ public class DatabaseInitializer {
             );
             """
     };
-    private final HashMap<String, String> constraints;
+    // endregion
 
     // Constructor
     public DatabaseInitializer(Context context) {
@@ -81,12 +82,13 @@ public class DatabaseInitializer {
 
     // === Utility Functions === \\
 
-    /**
-     * Initializes the database by creating all required tables (if they do not exist yet)
-     * and adding all columns created at a later date (allows upgrading app version without
-     * wiping your DB!)
-     * @return Operation status and status messages
-     */
+    /// Begins the DB initialization process by first attempting to create all tables,
+    /// skipping any tables that already exist, then attempting to add constraint columns\
+    /// Deals with any resulting SQLExceptions itself.\
+    /// If the initialization is successful, it will set `Database`'s initialization status to
+    /// `READY`
+    /// @return An operation result with status and messages. Status will be `SUCCESS` if the
+    /// initialization goes through without any problems, and `FAILED` if an SQLException is thrown
     public OperationResult<Void> initiateDB() {
         this.context.db().setStatus(DbStatus.INITIALIZING);
         logger.info("Attempting to initialize DB");

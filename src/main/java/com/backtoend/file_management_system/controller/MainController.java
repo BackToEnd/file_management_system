@@ -3,36 +3,50 @@ package com.backtoend.file_management_system.controller;
 import com.backtoend.file_management_system.Context;
 import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.logging.AppLogger;
-import com.backtoend.file_management_system.model.ItemRow;
+import com.backtoend.file_management_system.service.I18n;
 import com.backtoend.file_management_system.service.ScanImport;
 import com.backtoend.file_management_system.util.OperationResult;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.fxml.FXML;
 import javafx.stage.Window;
 
-/**
- * Main controller class responsible for displaying any content on the main app window,
- * as well as connecting different other controllers and workflows initiated
- * by user action
- */
+    /// Main controller class handling the main app interface
+    /// @author Rogue049
 public class MainController {
-    @FXML
-    private Label pathLabel;
+    /// `OverviewController` instance defined within this controller's FXML file
     @FXML
     private OverviewController overviewController;
+    /// Button that triggers the scan/import process
+    @FXML
+    private Button browseBtn;
+    /// Button that causes the application to shut down
+    @FXML
+    private Button killBtn;
+    /// `AppContext` singleton
     private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
+    /// Locally available `ScanImport` instance
     private final ScanImport scanImport;
 
     // Constructor
-    public MainController() {
-        this.context = MainApplication.getContext();
-        this.scanImport = new ScanImport(this.context);
+        public MainController() {
+            context = MainApplication.getContext();
+            scanImport = new ScanImport(context);
+        }
+    @FXML
+    private void initialize() {
+        logger.info("Initiating main application interface");
+        I18n i = I18n.getInstance();
+        logger.trace("Creating ScanImport instance");
+        logger.trace("Attempting to configure buttons");
+        browseBtn.textProperty().bind(i.text("main.button.browse"));
+        killBtn.textProperty().bind(i.text("main.button.terminate"));
     }
 
+    /// Initiates the scan/import process
+    /// @param event The event created by the pressed import button
     @FXML
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating ScanImport");
@@ -42,6 +56,7 @@ public class MainController {
         );
     }
 
+    /// Shuts down the application
     @FXML
     private void onExit() {
         logger.info("Application shutting down");
@@ -49,10 +64,8 @@ public class MainController {
     }
 
     // === Utility Methods === \\
-
-    /**
-     * Generates the overview tree; should only be called after DB initialization finishes successfully
-     */
+    /// Generates the overview tree; is called by `MainApplication` after DB initialization finishes
+    ///  successfully and should **not** be called before the initialization finishes
     public void enableOverview() {
         OperationResult<Void> result = this.overviewController.buildTree();
         logger.result(this.getClass().getName(), result);

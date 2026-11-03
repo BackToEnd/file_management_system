@@ -5,14 +5,13 @@ import com.backtoend.file_management_system.controller.ToastController;
 import com.backtoend.file_management_system.service.DirectoryHandler;
 import com.backtoend.file_management_system.database.Database;
 
-/**
- * Record class keeping track of class instances that should persist and be universally accessible by all other classes
- * while the application is running
- * @param dirHandler DirectoryHandler instance
- * @param db Database instance
- * @param toast ToastController instance
- * @param modal ModalController instance
- */
+/// Record class keeping track of all globally available singletons
+/// @param dirHandler {@link DirectoryHandler} instance
+/// @param db {@link Database} instance
+/// @param toast {@link ToastController} instance
+/// @param modal {@link ModalController} instance
+/// @deprecated Currently investigating a proper way to replace this thing with something more convenient
+@Deprecated(forRemoval = true)
 public record Context(
         DirectoryHandler dirHandler,
         Database db,

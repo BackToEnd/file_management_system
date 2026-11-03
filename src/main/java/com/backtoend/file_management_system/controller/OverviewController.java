@@ -8,7 +8,7 @@ import com.backtoend.file_management_system.enums.ToastType;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ItemTreeNode;
-import com.backtoend.file_management_system.model.ParentNode;
+import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.service.I18n;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
@@ -19,24 +19,29 @@ import javafx.scene.control.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- * Controller responsible for displaying any kind of DB output on the main app interface<br>
- * Is rendered by MainController upon app start
- */
+/// Controller class used to render the overview tree on the main app interface
+/// @author Rogue049
 public class OverviewController {
     private static final AppLogger logger = AppLogger.getLogger(OverviewController.class);
+    /// `TreeTableView` instance from the FXML file
     @FXML
     private TreeTableView<ItemRow> treeView;
+    /// Placeholder label of the `TreeTableView` if it does not contain any items
     @FXML
     private Label placeholder;
+    /// First `TreeTableColumn`; contains the item's display name
     @FXML
     private TreeTableColumn<ItemRow, String> nameCol;
+    /// Second `TreeTableColumn`; contains the item's file type
     @FXML
     private TreeTableColumn<ItemRow, String> typeCol;
+    /// Third `TreeTableColumn`; contains the item's path
     @FXML
     private TreeTableColumn<ItemRow, String> pathCol;
     private final Context context;
 
+    /// Default initialization of this controller at first creation - defines text bindings for placeholder label and table headers,
+    /// and sets cell value factories for each column
     @FXML
     private void initialize() {
         I18n i = I18n.getInstance();
@@ -75,10 +80,11 @@ public class OverviewController {
 
     // === Utility Methods === \\
 
-    /**
-     * Attempts to build the overview display TreeTableView from database output
-     * @return Operation status and status messages
-     */
+    // TODO: Make async where necessary
+
+    /// Attempts to build the initial tree structure consisting solely of parent items
+    /// @return An operation result with operation status; status is `SUCCESSFUL` if the
+    /// base tree can be built without any issues, and is otherwise `FAILED`
     public OperationResult<Void> buildTree() {
         logger.info("Attempting to generate tree table view");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
@@ -129,22 +135,22 @@ public class OverviewController {
 
     // region Creating the base tree of parent items
 
-    /**
-     * Constructs the base tree from parent nodes fetched from the DB
-     * @param parents List of all fetched parent items
-     * @return Root element of the newly built tree
-     * @throws SQLException If it cannot fetch information about a parent's scan location
-     */
+    /// Creates a root `ItemTreeNode` and attaches all fetched base items as children,
+    /// sets up expansion event listeners, and returns the created root item
+    /// @param parents `ItemRow` list of base items
+    /// @return The created `TreeTableView` root item
+    /// @throws SQLException If it cannot fetch additional information about each parent's
+    /// scan location from the DB
     private ItemTreeNode buildBaseTree(ArrayList<ItemRow> parents) throws SQLException {
         ItemTreeNode root = new ItemTreeNode(null);
         logger.info("Attempting to build base tree");
         for (ItemRow item : parents) {
-            ParentNode parentNode = this.context.db()
+            ScanLocation scanLocation = this.context.db()
                     .withConnection(conn ->
-                            DatabaseFetch.getParentNodeOf(item, conn)
+                            DatabaseFetch.getScanLocationOf(item, conn)
                     );
             logger.debug("Received scan location");
-            ItemTreeNode treeNode = new ItemTreeNode(item, parentNode);
+            ItemTreeNode treeNode = new ItemTreeNode(item, scanLocation);
             this.configureNode(treeNode);
             root.getChildren().add(treeNode);
         }
@@ -154,10 +160,9 @@ public class OverviewController {
 
     // region Loading new tree nodes
 
-    /**
-     * Adds placeholder children and event listeners to parent nodes
-     * @param node An item tree node
-     */
+    /// Configures tree items by adding a placeholder child to parent items and adding event listeners.
+    /// Passed items with no children will be ignored
+    /// @param node The node to be configured
     private void configureNode(ItemTreeNode node) {
         // No need to configure nodes without children
         if (!node.getValue().hasChildren()) {
@@ -180,10 +185,11 @@ public class OverviewController {
         );
     }
 
-    /**
-     * Adding a new parent folder to the core tree
-     * @param parentId ID of the new parent node
-     */
+    // TODO: Implement a way to add existing children as parents
+    /// Adds a new parent item to the tree.
+    ///
+    /// **TODO**: Adapt this method and all previous fetch steps to be able to add child items as parents
+    /// @param parentId The ID of a parent item
     public void addNewParent(int parentId) {
         ItemRow newParent;
         try {
@@ -196,11 +202,11 @@ public class OverviewController {
             return;
         }
         logger.debug("Attempting to add new parent: " + newParent.name());
-        ParentNode scanLocation;
+        ScanLocation scanLocation;
         try {
             scanLocation = this.context.db()
                     .withConnection(conn ->
-                            DatabaseFetch.getParentNodeOf(newParent, conn)
+                            DatabaseFetch.getScanLocationOf(newParent, conn)
                     );
             logger.debug("Received scan location");
             ItemTreeNode item = new ItemTreeNode(newParent, scanLocation);
@@ -216,11 +222,8 @@ public class OverviewController {
     // region Dealing with child items of parent nodes
     // FIXME: How can this method throw exceptions without blowing up the event listener?
 
-    /**
-     * Loads all child items of an expandable tree item when it is expanded for the first time<br>
-     * Can also safely be used to reload children of an already loaded tree item
-     * @param parent The item whose children should be loaded
-     */
+    /// Loads all child items of a parent node and attaches them to the parent
+    /// @param parent Parent node
     private void loadChildren(ItemTreeNode parent) {
         int parentId = parent.getValue().id();
         logger.info("Attempting to load and display children of node: " + parentId);
@@ -237,11 +240,11 @@ public class OverviewController {
 
                 // Fetching scan location if a child is a scan location itself
                 if (item.hasChildren()) {
-                    ParentNode parentNode = this.context.db()
+                    ScanLocation scanLocation = this.context.db()
                             .withConnection(conn ->
-                                    DatabaseFetch.getParentNodeOf(item, conn)
+                                    DatabaseFetch.getScanLocationOf(item, conn)
                             );
-                    child = new ItemTreeNode(item, parentNode);
+                    child = new ItemTreeNode(item, scanLocation);
                 } else {
                     child = new ItemTreeNode(item);
                 }

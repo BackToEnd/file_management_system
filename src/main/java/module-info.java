@@ -8,6 +8,7 @@ module com.backtoend.file_management_system {
     requires org.controlsfx.controls;
     requires java.sql;
     requires jdk.compiler;
+    requires org.jetbrains.annotations;
 
     exports com.backtoend.file_management_system;
     exports com.backtoend.file_management_system.controller;

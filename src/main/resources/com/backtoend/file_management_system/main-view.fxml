@@ -12,7 +12,7 @@
     </padding>
     <fx:include source="tree-view.fxml" fx:id="overview" VBox.vgrow="ALWAYS"/>
     <HBox spacing="10" alignment="BOTTOM_RIGHT">
-        <Button text="Browse..." onAction="#onChooseDirectory"/>
-        <Button text="Terminate..." onAction="#onExit"/>
+        <Button fx:id="browseBtn" onAction="#onChooseDirectory"/>
+        <Button fx:id="killBtn" onAction="#onExit"/>
     </HBox>
 </VBox>

@@ -12,7 +12,7 @@ import com.backtoend.file_management_system.enums.ItemStatus;
 import com.backtoend.file_management_system.enums.ParentExistence;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
-import com.backtoend.file_management_system.model.ParentNode;
+import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
 import com.backtoend.file_management_system.enums.OperationStatus;
@@ -22,18 +22,34 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- * Scan-Import service class that maintains the directory parsing and importing workflow
- */
+/// Service class handling the scan-import workflow
+/// @author Rogue049
 public class ScanImport {
     private final Context context;
     private static final AppLogger logger = AppLogger.getLogger(ScanImport.class);
+    /// Keeps track of whether a scan is currently in process;
+    /// required to prevent two scans being active at the same time
     private boolean scanInProgress = false;
+    /// Locally remembers the ID of a parent directory; easier than
+    /// passing it into different methods as an argument
     private int parentNodeId;
 
     public ScanImport(Context context) {
         this.context = context;
     }
+
+    /// Performs the entire scan-import process:\
+    /// 1. Opens a directory chooser to allow the user to pick a directory. Properly accounts for
+    /// the directory chooser being closed instead of choosing a directory.
+    /// 2. Browses the content of the directory, properly accounting for insufficient permission to do so.
+    /// 3. Displays an import overview that allows the user to either proceed with the
+    /// import, or cancel the import and discard all scanned items.
+    /// 4. Bulk-inserts all scanned items and their parent path into the database if
+    /// the user proceeds with the import using a transaction, which is rolled back in case any SQLException
+    /// is thrown in the process.
+    /// @param window The window on which directory chooser and import overview should be displayed
+    /// @param callback An operation to execute after this method has run; this should be a method
+    ///                 updating the overview tree. The callback is executed on the main application thread.
     public void handleScanImport(Window window, ScanImportCallback callback) {
         // Checking if there is already a scan in progress
         if (this.scanInProgress) {
@@ -155,7 +171,7 @@ public class ScanImport {
                 this.scanInProgress = false;
                 return;
             }
-            ParentNode parentNode = getScanLocation(parentRow);
+            ScanLocation scanLocation = getScanLocation(parentRow);
 
             // Yes, I am creating a task inside a task. I'm sorry.
             Task<OperationResult<Integer>> bulkDbInsert = new Task<>() {
@@ -163,7 +179,7 @@ public class ScanImport {
                 protected OperationResult<Integer> call() throws SQLException {
                     return db.withTransaction(conn ->
                             DatabaseInsert.insertNewSet(
-                                    parentNode, items, conn
+                                    scanLocation, items, conn
                             ));
                 }
             };
@@ -189,12 +205,10 @@ public class ScanImport {
 
     // === Utility Methods === \\
 
-    /**
-     * Creates an ItemRow instance for the selected directory
-     * @param path Scanned directory
-     * @return ItemRow instance with info about the directory item
-     * @throws IOException If any file operation cannot be executed
-     */
+    /// Fetches information about the chosen path
+    /// @param path User-selected path
+    /// @return An `ItemRow` of the selected path
+    /// @throws IOException If the path cannot be accessed
     private ItemRow getParentRow(String path) throws IOException {
         ItemRow parent = DirectoryHandler.parseParent(path);
         if (this.parentNodeId != -1) {
@@ -204,32 +218,32 @@ public class ScanImport {
     }
 
     // TODO: Allow the user to define these values
-    /**
-     * Creates a ParentNode instance for the given parent node
-     * @param parent Scan location ItemRow
-     * @return The created parent node
-     */
-    private ParentNode getScanLocation(ItemRow parent) {
-        return new ParentNode(
+    /// Creates a {@link ScanLocation} of the chosen path
+    /// @param parent Previously created {@link ItemRow} of the user-selected path
+    /// @return `ScanLocation` instance
+    private ScanLocation getScanLocation(ItemRow parent) {
+        return new ScanLocation(
                 parent, 0, "MANUAL", "USER_SELECTION", 0, ItemStatus.ACTIVE
         );
     }
-    /**
-     * Displays a directory chooser and allows the user to pick a directory
-     * @param window Where the directory chooser should be opened
-     * @return Operation status, user-selected directory (can be null), and status messages
-     */
+
+    /// Opens a new {@link javafx.stage.DirectoryChooser} to allow the user to pick a directory
+    /// @param window Where the `DirectoryChooser` should open
+    /// @return An {@link OperationResult} containing status, messages, and the selected path (nullable).
+    /// Status will be `SUCCESS` if the user selected a directory, `FAILED` if anything in this process went
+    /// wrong, and `CANCELED` if the user closed the window without selecting a directory.
     private OperationResult<String> openDirChooser(Window window) {
         FileExplorerController fExCon = new FileExplorerController(this.context.dirHandler());
         return fExCon.openDirectoryChooser(window);
     }
 
-    /**
-     * Displays an import overview screen and allows the user to choose whether to proceed with the import or cancel the process
-     * @param window Where the overview should be displayed
-     * @param items List of scanned items to be displayed
-     * @return Operation status and status messages
-     */
+    // TODO: This thing does not account for recursive scanning yet
+    /// Displays the import preview to the user, containing all detected items contained within the parent folder.
+    /// @param window Where the preview modal should be displayed
+    /// @param items A list of scanned child items to be displayed
+    /// @return An {@link OperationResult} containing status and messages. Status will be `SUCCESS` if
+    /// the user allowed the import and nothing else went wrong, `CANCELED` if the user rejected the import,
+    /// and `FAILED` if any problem was encountered.
     private OperationResult<Void> showOverview(Window window, ArrayList<ItemRow> items) {
         try {
             boolean startImport = ModalController.showImportPreview(window, items);

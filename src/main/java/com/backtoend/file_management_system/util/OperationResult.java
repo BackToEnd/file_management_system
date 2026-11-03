@@ -2,21 +2,23 @@ package com.backtoend.file_management_system.util;
 
 
 import com.backtoend.file_management_system.enums.OperationStatus;
+import com.backtoend.file_management_system.service.FeedbackMsgContainer;
 
+import java.lang.annotation.Inherited;
 import java.util.ArrayList;
 
-/**
- * Record class keeping track of the result of a complex operation, a return type, and any feedback messages
- * @param status The success status of the operation
- * @param value A value that would normally have been returned by the operation that returns an instance of this class
- * @param msg A list of feedback messages
- * @param <T> The return type of an operation that returns an instance of this class
- */
+/// Record class keeping track of the outcome of an operation
+/// @param status Operation {@link OperationStatus} defining the outcome of
+///               the operation
+/// @param value The value returned by the process creating this instance
+/// @param msg A list of {@link FeedbackMsg}s containing status updates
+/// @param <T> The datatype returned by the process creating this instance
+/// @author Rogue049
 public record OperationResult<T>(
         OperationStatus status,
         T value,
         ArrayList<FeedbackMsg> msg
-) {
+) implements FeedbackMsgContainer {
     public boolean isSuccessful() {
         return status == OperationStatus.SUCCESS;
     }
@@ -27,27 +29,8 @@ public record OperationResult<T>(
         return status == OperationStatus.FAILED;
     }
 
-    /**
-     * Formats all stored messages into a format that can easily be displayed to the user
-     * @return List of all stored messages
-     */
-    public ArrayList<String> getAllMsgs() {
-        ArrayList<String> res = new ArrayList<>();
-        this.msg.forEach(m -> {
-            res.add(m.getMsg());
-        });
-        return res;
-    }
-
-    /**
-     * Formats all stored messages into a format that can be used for logging
-     * @return List of all stored messages
-     */
-    public ArrayList<String> logAllMsg() {
-        ArrayList<String> res = new ArrayList<>();
-        this.msg.forEach(m -> {
-            res.add(m.logMsg());
-        });
-        return res;
+    @Override
+    public ArrayList<FeedbackMsg> getAllMessages() {
+        return this.msg;
     }
 }

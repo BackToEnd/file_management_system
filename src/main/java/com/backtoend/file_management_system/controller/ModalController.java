@@ -7,34 +7,24 @@ import com.backtoend.file_management_system.service.I18n;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/**
- * Controller responsible for displaying any external screens outside MainController,
- * as well as processing any user actions on those screens
- */
+/// Controller class displaying modal windows above the main application window
+/// @author Rogue049
 public class ModalController {
     private static final AppLogger logger = AppLogger.getLogger(ModalController.class);
-    private StackPane root;
-
-    // Getters, Setters
-    public void setRoot(StackPane root) {
-        this.root = root;
-    }
-
-    /**
-     * Display an overview of imported items and allow the user to proceed with the import or cancel<br>
-     * Loads the FXML file "import-overview.fxml" together with the corresponding ImportController
-     * @param owner The window on which the modal should be displayed
-     * @param list A list of ItemRows to be displayed on the overview
-     * @return Whether the user wants to proceed with the import or discard scanned items
-     * @throws IOException If the FXML file cannot be loaded properly
-     */
+    /// Displays the preview of a directory selected by the user during the scan/import process.
+    /// Allows the user to either proceed with the import, or reject and discard all scanned items.
+    ///
+    /// Loads the "import-overview.fxml" file and the corresponding `ImportController`.
+    /// @param owner The window on which the import preview should be displayed
+    /// @param list An `ItemRow` list of scanned items
+    /// @return `true` if the user wants to proceed with the import, `false` if the user rejects the import
+    /// @throws IOException If the FXML file cannot be loaded
     public static boolean showImportPreview(Window owner, ArrayList<ItemRow> list) throws IOException {
         logger.info("Attempting to load FXML file");
         I18n i = I18n.getInstance();

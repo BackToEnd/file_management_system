@@ -5,13 +5,19 @@ import com.backtoend.file_management_system.logging.AppLogger;
 
 import java.sql.*;
 
-/**
- * Utility DB helper class that does everything that isn't considered a fetch or insert per se
- */
+/// Database helper class that performs DB operations that neither qualify as
+/// inserts nor selects.
+/// @author Rogue049
 public class DatabaseCheck {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseCheck.class);
 
-public static ParentExistence doesParentExist(String path, Connection conn) throws SQLException {
+    /// Checks if a node with the given path already exists in the DB, either as regular node, or as scan location
+    /// @param path The path to be checked
+    /// @param conn A database connection
+    /// @return `MISSING` if the path does not exist in the DB yet, `IS_NODE` if the path already exists
+    /// as a node, or `IS_SCAN_LOCATION` if the path exists as node and scan location
+    /// @throws SQLException If any database operation fails
+    public static ParentExistence doesParentExist(String path, Connection conn) throws SQLException {
         logger.debug("Checking if '" + path + "' exists in DB");
         int parentId = DatabaseFetch.getNodeId(path, conn);
         if (parentId == -1) {
@@ -26,16 +32,13 @@ public static ParentExistence doesParentExist(String path, Connection conn) thro
         return ParentExistence.IS_NODE;
     }
 
-    /**
-     * Check if the given column exists in the given table;<br>
-     * Used during initialization to add missing columns only if necessary
-     * in order to prevent SQLExceptions
-     * @param table The table
-     * @param column The column
-     * @param db Database instance
-     * @return Whether the given table contains a column with the given name
-     * @throws SQLException In case the connection to the DB cannot be established, or the given table does not exist
-     */
+    // TODO: Use `.withConnection` and pass a connection rather than a DB instance as parameter
+    /// Checks if the specified table already has a column with the specified name
+    /// @param table The name of the table
+    /// @param column The name of the column
+    /// @param db Database instance
+    /// @return `true` if the specified table already contains a column with the specified name, `false` otherwise
+    /// @throws SQLException If any database operation fails
     public static boolean columnExists(String table, String column, Database db) throws SQLException {
         logger.info("Checking table {" + table + "} for column {" + column + "}");
         // The PRAGMA statement required to retrieve information about the specified table

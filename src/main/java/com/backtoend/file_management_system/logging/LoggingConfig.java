@@ -8,8 +8,15 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/// Logging config initializer that defines logging levels and handlers
 public final class LoggingConfig {
+    /// The default logger namespace
     private static final String LOGGER_NAME = "com.backtoend.file_management_system";
+
+    /// Configures the `java.util.logging.Logger` used application-wide.\
+    /// By default, file logging is set to `Level.ALL`, console logging to `Level.FINE`.
+    /// Applies {@link CompactFormatter} to both logging handlers. Logs will be written into `./logs/application.log`
+    /// @throws IOException If it is unable to check whether the logging directory exists, or cannot create the logging directory
     public static void configure() throws IOException {
         // Logging directory
         Path logDirectory = Path.of("logs");

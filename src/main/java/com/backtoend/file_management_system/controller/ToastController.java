@@ -14,6 +14,12 @@ import javafx.util.Duration;
 
 import java.util.HashMap;
 
+// TODO: Currently unable to display multiple toasts at once; can only display one single toast.
+//  Toast is only visible for 5s no matter the severity.
+//  Fix that to allow tracking multiple toasts, and adjust toast visibility time based on severity.
+
+/// Controller class managing and displaying toasts
+/// @author Rogue049
 public class ToastController {
     private final static I18n i = I18n.getInstance();
     private HashMap<ToastType, String> colorCodes = new HashMap<>();
@@ -38,11 +44,16 @@ public class ToastController {
     }
 
     // Getters, Setters
+
+    /// Sets the VBox layer on which toasts are supposed to be displayed
+    /// @param layer Display layer
     public void setToastLayer(VBox layer) {
         this.layer = layer;
         layer.getChildren().add(toast);
     }
 
+    /// Sets a timer after which the toast will disappear
+    /// @param s How many seconds the toast should remain visible
     private void setTimeout(int s) {
         Timeline timeout = new Timeline(
                 new KeyFrame(
@@ -54,6 +65,10 @@ public class ToastController {
     }
 
     // region Displaying various notifications
+
+    /// Displays a toast with the given type and text
+    /// @param type Toast type
+    /// @param text Translation key of the toast text
     public void showToast(ToastType type, String text) {
         this.toast.setText(i.get(text));
         this.toast.setStyle("-fx-background-color: " + this.colorCodes.get(type));
@@ -61,6 +76,10 @@ public class ToastController {
         this.setTimeout(5);
     }
 
+    /// Displays a generic toast based on an operation status and provided text
+    /// @param status Operation status
+    /// @param text Translation key of the toast text. Based on type, the corresponding suffix is appended;
+    ///             `.failed`, `.success`, `.canceled`, or `.warning`. Do not add the last '.' to the passed key.
     public void showGeneric(OperationStatus status, String text) {
         switch (status) {
             case FAILED:

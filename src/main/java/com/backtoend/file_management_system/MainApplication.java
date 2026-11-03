@@ -42,8 +42,11 @@ public class MainApplication extends Application {
         MainApplication.context = context;
 
         // Showing initial stage
+        logger.debug("Attempting to load main view FXML file");
         FXMLLoader fxml = new FXMLLoader(MainApplication.class.getResource("main-view.fxml"));
+        logger.trace("FXMLLoader created");
         Scene scene = new Scene(fxml.load(), 700, 400);
+
 
         // Installing scene on a StackPane
         Parent root = scene.getRoot();
@@ -60,7 +63,6 @@ public class MainApplication extends Application {
 
         // Configuring toast and modal controllers
         toast.setToastLayer(toastLayer);
-        modal.setRoot(overlayRoot);
 
         stage.setTitle("File Management System");
         stage.setScene(scene);

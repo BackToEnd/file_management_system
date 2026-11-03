@@ -3,29 +3,31 @@ package com.backtoend.file_management_system.database;
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
-import com.backtoend.file_management_system.model.ParentNode;
+import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
 import java.sql.*;
 import java.util.ArrayList;
 
-/**
- * Database helper class that handles any sort of DB insert operations
- */
+/// Database helper class that inserts data into the DB
+/// @author Rogue049
 public class DatabaseInsert {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseInsert.class);
 
-    /**
-     * Inserts the content of a directory into the DB<br>
-     * This method can currently not update existing directories, but it CAN
-     * deal with existing parent nodes. Even with existing nodes that are not yet scan locations.
-     * @param parent An ItemRow of the parent directory
-     * @param children A list of ItemRows located within the parent directory
-     * @param conn Database connection
-     * @return Operation status and status messages
-     */
+    // TODO: This method is NOT yet equipped to deal with parents that are child items as well
+    /// Inserts a newly scanned directory into the DB.\
+    /// This method is equipped to adequately deal with a parent node that already exists in the DB
+    /// as node and as scan location.
+    /// @param parent Scan location of the parent item, containing an item row with all parent info
+    /// @param children List of child items
+    /// @param conn Database connection
+    /// @return An operation result with status and messages; status will be `SUCCESS` if the
+    /// bulk-insert was successful, or `FAILED` if any error was encountered
+    /// @throws SQLException If any database operation fails or is caught within a helper function
+    /// @throws RuntimeException If the helper function used to insert child items receives either two
+    /// valid parent IDs, or no valid parent ID
     public static OperationResult<Integer> insertNewSet(
-            ParentNode parent, ArrayList<ItemRow> children, Connection conn
+            ScanLocation parent, ArrayList<ItemRow> children, Connection conn
     ) throws SQLException {
     ArrayList<FeedbackMsg> feedback = new ArrayList<>();
         logger.info("Beginning insert transaction");
@@ -58,11 +60,10 @@ public class DatabaseInsert {
             }
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.parent.failed", new Object[] {}
-            ));
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            throw new SQLException(
+                    "Unable to insert new parent node or fetch information about the existing parent node",
+                    e
+            );
         }
         feedback.add(new FeedbackMsg(
                 DatabaseInsert.class.getName(),
@@ -81,28 +82,16 @@ public class DatabaseInsert {
             ));
         } catch (SQLException e) {
             logger.error("Critical error encountered: ", e);
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.children.failed", new Object[] {}
-            ));
-            try {
-                conn.rollback();
-            } catch (SQLException rollbackException) {
-                e.addSuppressed(rollbackException);
-            }
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            throw new SQLException(
+                    "Unable to insert child items into the DB due to a database error",
+                    e
+            );
         } catch (IllegalArgumentException e) {
             logger.error("Critical bug encountered: ", e);
-            feedback.add(new FeedbackMsg(
-                    DatabaseInsert.class.getName(),
-                    "import.db.insert.illegalargument", new Object[] {}
-            ));
-            try {
-                conn.rollback();
-            } catch (SQLException rollbackException) {
-                e.addSuppressed(rollbackException);
-            }
-            return new OperationResult<>(OperationStatus.FAILED, null, feedback);
+            throw new RuntimeException(
+                    "Unable to insert child items into the DB, either due to a missing or duplicate parent ID",
+                    e
+            );
         }
 
         // Committing transaction
@@ -122,13 +111,11 @@ public class DatabaseInsert {
 
     // === Utility Methods === \\
 
-    /**
-     * Inserts a parent item into the DB and returns the newly inserted record's ID
-     * @param item The ItemRow of the parent item
-     * @param conn A DB connection
-     * @return The ID of the inserted item
-     * @throws SQLException If the query cannot be executed for any reason
-     */
+    /// Inserts a new parent node into the DB and returns the resulting ID
+    /// @param item Information about the parent item
+    /// @param conn Database connection
+    /// @return The ID of the inserted item
+    /// @throws SQLException If the insert fails, returns no ID, or the operation otherwise fails
     private static int insertParentNode(ItemRow item, Connection conn) throws SQLException {
         logger.trace(item.toString());
         String query = """
@@ -169,13 +156,15 @@ public class DatabaseInsert {
         return parentId;
     }
 
-    /**
-     * Inserts a child item into the DB, linking to the provided parent ID
-     * @param parentId Nullable parent ID in case ItemRows were created before parent ID was known
-     * @param item ItemRow of the child item to be inserted
-     * @param conn DB connection
-     * @throws SQLException If the query cannot be executed for any reason
-     */
+    /// Inserts a child item into the DB.\
+    /// To account for newly scanned directories, which first create `ItemRow` instances and *then* insert into
+    /// the DB (hence, neither child nor parent items have IDs), a parent ID can be passed into this method
+    /// as a nullable parameter.
+    /// @param parentId The ID of the parent node; can be `null`
+    /// @param item An item; if the parent ID is `null`, this one should have a valid parent ID
+    /// @param conn Database connection
+    /// @throws SQLException If the insert operation fails
+    /// @throws IllegalArgumentException If either two valid or two invalid parent IDs are passed as parameters
     private static void insertChildNode(Integer parentId, ItemRow item, Connection conn) throws SQLException {
         logger.trace(item.toString() + " || Alternative ID: " + parentId);
         if (parentId != null && item.parent() != null) {
@@ -213,21 +202,23 @@ public class DatabaseInsert {
         }
     }
 
-    /**
-     * Inserts a parent node's scan location into the DB
-     * @param parentId Nullable parent ID in case parent ItemRow and ParentNode were created before its ID was known
-     * @param node ParentNode of the scan location
-     * @param conn DB connection
-     * @throws SQLException If the query cannot be executed for any reason
-     */
-    private static void insertScanLocation(Integer parentId, ParentNode node, Connection conn) throws SQLException {
-        logger.trace(node.toString() + " || Alternative ID: " + parentId);
-        if (parentId != null && node.node().parent() != null) {
+    /// Inserts the scan location of a parent item.\
+    /// For newly scanned directories, the passed `ScanLocation` may not contain an `ItemRow` with a
+    /// valid parent ID; therefore, a nullable ID may be passed as an argument.
+    /// @param nodeId The ID of the node; can be `null`
+    /// @param node A parent item's scan location; if the ID is null, this one should
+    ///             contain an `ItemRow` with a valid ID
+    /// @param conn Database connection
+    /// @throws SQLException If the insert operation fails
+    /// @throws IllegalArgumentException If either two valid or two invalid node IDs are passed as parameters
+    private static void insertScanLocation(Integer nodeId, ScanLocation node, Connection conn) throws SQLException {
+        logger.trace(node.toString() + " || Alternative ID: " + nodeId);
+        if (nodeId != null && node.node().parent() != null) {
             throw new IllegalArgumentException(
                     "Only one parent ID should be provided"
             );
         }
-        Integer effectiveParent = parentId != null ? parentId : node.node().parent();
+        Integer effectiveParent = nodeId != null ? nodeId : node.node().parent();
         if (effectiveParent == null) {
             throw new IllegalArgumentException(
                     "Parent ID is required to insert child node"

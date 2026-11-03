@@ -4,17 +4,17 @@ import com.backtoend.file_management_system.service.I18n;
 
 import java.text.MessageFormat;
 
-/**
- * Record class keeping track of any kinds of process feedback
- * @param source Name of the class that created this message; relevant for message history
- * @param key Resource bundle translation key
- * @param args Any number of additional arguments, which will be formatted with the translation key
- */
+/// Record class keeping track of operation feedback messages
+/// @param source Name of the class that created this instance
+/// @param key Translation key describing what process caused this
+///            message to be created
+/// @param args Additional arguments that will later be formatted
+///             into the message
+/// @author Rogue049
 public record FeedbackMsg(String source, String key, Object[] args) {
-    /**
-     * Formats the stored message
-     * @return The formatted message
-     */
+    /// Transforms the message into a properly formatted message,
+    /// including all passed arguments
+    /// @return The formatted message
     public String getMsg() {
         I18n i = I18n.getInstance();
         return MessageFormat.format(
@@ -22,10 +22,9 @@ public record FeedbackMsg(String source, String key, Object[] args) {
         );
     }
 
-    /**
-     * Formats the stored message into a loggable String
-     * @return The stored message
-     */
+    /// Transforms the message into a loggable String containing
+    /// its source as well as the formatted message content
+    /// @return Loggable String
     public String logMsg() {
         return ("(" + this.source() + ") " + this.getMsg());
     }

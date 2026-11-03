@@ -1,0 +1,10 @@
+PowerShell command to view live log at the moment is `Get-Content -LiteralPath logs\application.log -Tail 100 -Wait`,
+executed from a PowerShell window inside this folder.
+This is a PowerShell command, it does not work in CMD. To open a PowerShell window, either right-click anywhere inside this folder and select "Open PowerShell window" (shift + right-click on Windows 10),
+or press the Windows key, type "PowerShell" and navigate into this folder with "cd Disk:\Path\To\This\Folder". Then paste in the above command and press enter.
+
+CTRL+C to stop viewing the log.
+CTRL+L to clear the console.
+Arrow up to paste in the previous command again.
+I would have included some automated way to view the log at real-time, but was unable to get that to work without keeping the content of the previous log at app restart.
+Will provide a cleaner solution for this if I ever do come across one.

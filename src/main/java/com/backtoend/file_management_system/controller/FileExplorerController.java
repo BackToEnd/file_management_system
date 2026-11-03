@@ -8,23 +8,31 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import java.io.File;
 import java.util.ArrayList;
-
 import com.backtoend.file_management_system.service.DirectoryHandler;
 import javafx.stage.Window;
 
+/// Controller class handling any kinds of directory and file choosers
+/// @author Rogue049
 public class FileExplorerController {
+    /// `DirectoryHandler` instance utilized by this controller
     private final DirectoryHandler dirHandler;
     private static final AppLogger logger = AppLogger.getLogger(DirectoryHandler.class);
+
     // Constructor
     public FileExplorerController(DirectoryHandler dirHandler) {
         this.dirHandler = dirHandler;
     }
 
-    /**
-     * Opens a directory chooser and allows the user to choose a path
-     * @param window The window on which the directory chooser should be displayed
-     * @return Operation status and selected path
-     */
+//    /**
+//     * Opens a directory chooser and allows the user to choose a path
+//     * @param window The window on which the directory chooser should be displayed
+//     * @return Operation status and selected path
+//     */
+    ///
+    /// Opens a new DirectoryChooser, allowing the user to pick a directory
+    /// @param window The window on which the DirectoryChooser should be displayed
+    /// @return Operation status and selected path; status will be `CANCELLED` if the user
+    /// closed the window without selecting a path
     public OperationResult<String> openDirectoryChooser(Window window) {
         ArrayList<FeedbackMsg> list = new ArrayList<>();
         logger.info("Initiating directory chooser");

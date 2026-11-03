@@ -3,27 +3,26 @@ package com.backtoend.file_management_system.database;
 import com.backtoend.file_management_system.enums.ItemStatus;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
-import com.backtoend.file_management_system.model.ParentNode;
+import com.backtoend.file_management_system.model.ScanLocation;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-/**
- * Database helper class responsible for retrieving any kinds of information from the DB
- */
+/// Database helper class that fetches data from the DB
+/// @author Rogue049
 public class DatabaseFetch {
 
     private static final AppLogger logger = AppLogger.getLogger(DatabaseFetch.class);
     // === Utility Methods === \\
 
-    /**
-     * Fetches the ID of a node with the given path
-     * @param path Path to a file or directory
-     * @param conn DB connection
-     * @return The ID of the node with the specified path, or -1
-     * @throws SQLException If the query cannot be executed for any reason
-     */
+    // TODO: Potentially fixed the problem I thought this method had
+    /// Attempts to get a node ID for the specified path. Can properly deal with a path that does not exist in the DB yet.
+    /// @param path A directory path
+    /// @param conn Database connection
+    /// @return The retrieved node ID if one was found, or -1
+    /// @throws SQLException If any database operation fails
     public static int getNodeId(String path, Connection conn) throws SQLException {
+        int id = -1;
         String query = """
                 SELECT id FROM node
                 WHERE path = ?
@@ -31,20 +30,20 @@ public class DatabaseFetch {
         PreparedStatement stmt = conn.prepareStatement(query);
         stmt.setString(1, path);
         ResultSet res = stmt.executeQuery();
-        int id = res.getInt(1);
-        if (res.wasNull()) {
-            return -1;
+        if (res.next()) {
+            id = res.getInt(1);
+            if (res.wasNull()) {
+                id = -1;
+            }
         }
         return id;
     }
 
-    /**
-     * Checks whether the given NodeID also exists as a scan location
-     * @param nodeId The ID of the node to be checked
-     * @param conn DB connection
-     * @return Whether the NodeID is also a scan location
-     * @throws SQLException If the query cannot be executed for any reason
-     */
+    /// Checks if a node also exists as a scan location
+    /// @param nodeId The ID of the node to be checked
+    /// @param conn Database connection
+    /// @return `true` if the node is a scan location, otherwise `false`
+    /// @throws SQLException If any database operation fails
     public static boolean isScanLocation(int nodeId, Connection conn) throws SQLException {
         String query = """
                 SELECT node_id FROM scan_location
@@ -56,6 +55,11 @@ public class DatabaseFetch {
         return res.next();
     }
 
+    /// Fetches all children of a parent node
+    /// @param parentId The ID of the parent node
+    /// @param conn Database connection
+    /// @return A list of all retrieved child items
+    /// @throws SQLException If any database operation fails
     public static ArrayList<ItemRow> getChildrenOf(int parentId, Connection conn) throws SQLException {
         String query = """
                 SELECT *, CASE
@@ -91,6 +95,10 @@ public class DatabaseFetch {
         }
     }
 
+    /// Fetches all root parent items that have no parents of their own
+    /// @param conn Database connection
+    /// @return A list of all root parent items
+    /// @throws SQLException If any database operation fails
     public static ArrayList<ItemRow> getAllParentItems(Connection conn) throws SQLException {
         String query = """
                 SELECT * FROM node
@@ -125,7 +133,13 @@ public class DatabaseFetch {
         }
     }
 
-    public static ParentNode getParentNodeOf(ItemRow item, Connection conn) throws SQLException {
+    /// Fetches the scan location of the provided item
+    /// @param item A parent item that ideally exists in the DB
+    /// @param conn Database connection
+    /// @return The retrieved scan location
+    /// @throws SQLException Either if any database operation fails, or if the
+    /// passed item is not a parent with a scan location
+    public static ScanLocation getScanLocationOf(ItemRow item, Connection conn) throws SQLException {
         String query = """
                 SELECT * FROM scan_location
                 WHERE node_id = ?;
@@ -136,7 +150,7 @@ public class DatabaseFetch {
             ResultSet result = stmt.executeQuery();
             logger.debug("Result set obtained");
             if (result.next()) {
-                return new ParentNode(
+                return new ScanLocation(
                         item,
                         result.getInt("scan_depth"),
                         result.getString("update_mode"),
@@ -153,6 +167,12 @@ public class DatabaseFetch {
         }
     }
 
+    /// Fetches all information about an item based on its ID\
+    /// Primarily used when inserting new parents into the overview tree
+    /// @param id The ID of the item
+    /// @param conn Database connection
+    /// @return An item row containing all fetched information
+    /// @throws SQLException If any database operation fails
     public static ItemRow getInfo(int id, Connection conn) throws SQLException {
         String query = """
                 SELECT *, CASE

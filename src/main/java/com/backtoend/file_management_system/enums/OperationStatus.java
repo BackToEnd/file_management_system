@@ -1,13 +1,16 @@
 package com.backtoend.file_management_system.enums;
 
-/**
- * Defines all possible outcomes of any bigger operation;<br>
- * - `SUCCESS` if the operation has completed successfully and without any errors<br>
- * - `CANCELLED` if the operation was cancelled by the user<br>
- * - `WARNING` if an error was encountered, but the error does not require any action from the user<br>
- * - `FAILED` if something went wrong, and the user should be informed that the operation could not be completed;
- * usually because this failure is fatal and terminated a process initiated by the user
- */
+/// Defines all possible states an operation have when returning;
+/// - `SUCCESS` for successful operations that have caused no major issues
+/// - `CANCELED` for operations canceled either by the user, or by other
+/// means that do not require the user's direct attention
+/// - `WARNING` for operations that either cannot be initiated, e.g. due
+/// to another background process still running, or to let the user know
+/// that something non-critical went wrong
+/// - `FAILED` for operations that ran into a critical error, which requires
+/// the user's direct attention, e.g. a scan/import directory scanning
+/// or bulk-database-insert failing
+/// @author Rogue049
 public enum OperationStatus {
     SUCCESS,
     CANCELLED,
