@@ -3,7 +3,6 @@ package com.backtoend.file_management_system.logging;
 import com.backtoend.file_management_system.util.ErrorResult;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -55,7 +54,7 @@ public class AppLogger {
     }
 
     // TODO: Find a fix for lambda expressions related to async processes showing up weird
-    /// Helper function for {@link getCallerFrame}, which would otherwise have too many conditions to be convenient.\
+    /// Helper function for `getCallerFrame``, which would otherwise have too many conditions to be convenient.\
     /// Filters out whether the passed frame belongs to an internal process that should be ignored as a source.
     /// @param frame The frame to be checked
     /// @return `true` if the frame belongs to any internal class (javafx, java, jdk, sun),
@@ -71,106 +70,254 @@ public class AppLogger {
                 || className.equals(OperationResult.class.getName())
                 || className.equals(ErrorResult.class.getName());
     }
+
+
     // === All logging methods === \\
 
-    /// Logs a regular log message
+    // region Logging info messages
+    /// Logs a regular info message
     /// @param msg String message to be logged
-    public void info(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void info(String msg, String sourceMethod, String sourceClass) {
         logger.logp(
                 Level.INFO,
-                caller.getClassName(),
-                caller.getMethodName(),
+                sourceClass,
+                sourceMethod,
                 msg
         );
     }
+    /// Logs a regular info message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    public void info(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        info(msg, sourceMethod, caller.getEffectiveClassName());
+    }
+    /// Logs a regular info message
+    /// @param msg String message to be logged
+    public void info(String msg) {
+        SourceLocation caller = getCaller();
+        info(msg, caller.sourceMethod(), caller.getEffectiveClassName());
+    }
+    // endregion
 
+    // region Logging warning messages
+    /// Logs a warning message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void warning(String msg, String sourceMethod, String sourceClass) {
+        logger.logp(
+                Level.WARNING,
+                sourceClass,
+                sourceMethod,
+                msg
+        );
+    }
+    /// Logs a warning message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lamda-safe logging
+    public void warning(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        warning(msg, sourceMethod, caller.getEffectiveClassName());
+    }
     /// Logs a warning message
     /// @param msg String message to be logged
     public void warning(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
-        logger.logp(
-                Level.WARNING,
-                caller.getClassName(),
-                caller.getMethodName(),
-                msg
-        );
+        SourceLocation caller = getCaller();
+        warning(msg, caller.sourceMethod(), caller.getEffectiveClassName());
     }
+    // endregion
 
-    /// Logs a severe message
+    // region Logging error messages
+    /// Logs an error or exception
     /// @param msg String message to be logged
-    public void severe(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    /// @param error Throwable error
+    public void error(String msg, String sourceMethod, String sourceClass, Throwable error) {
         logger.logp(
                 Level.SEVERE,
-                caller.getClassName(),
-                caller.getMethodName(),
+                sourceClass,
+                sourceMethod,
+                msg,
+                error
+        );
+    }
+    /// Logs an error or exception
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void error(String msg, String sourceMethod, String sourceClass) {
+        error(msg, sourceMethod, sourceClass, null);
+    }/// Logs an error or exception
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param error Throwable error
+    public void error(String msg, String sourceMethod, Throwable error) {
+        SourceLocation caller = getCaller();
+        error(msg, sourceMethod, caller.getEffectiveClassName(), error);
+    }
+    /// Logs an error or exception
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    public void error(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        error(msg, sourceMethod, caller.getEffectiveClassName(), null);
+    }
+    /// Logs an error or exception
+    /// @param msg String message to be logged
+    /// @param error Throwable error
+    public void error(String msg, Throwable error) {
+        SourceLocation caller = getCaller();
+        error(msg, caller.sourceMethod(), caller.getEffectiveClassName(), error);
+    }
+    /// Logs an error or exception
+    /// @param msg String message to be logged
+    public void error(String msg) {
+        SourceLocation caller = getCaller();
+        error(msg, caller.sourceMethod(), caller.getEffectiveClassName(), null);
+    }
+    // endregion
+
+    // region Logging config messages
+    /// Logs a config message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void config(String msg, String sourceMethod, String sourceClass) {
+        logger.logp(
+                Level.CONFIG,
+                sourceClass,
+                sourceMethod,
                 msg
         );
     }
-
+    /// Logs a config message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    public void config(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        config(msg, sourceMethod, caller.getEffectiveClassName());
+    }
     /// Logs a config message
     /// @param msg String message to be logged
     public void config(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
+        SourceLocation caller = getCaller();
+        config(msg, caller.sourceMethod(), caller.getEffectiveClassName());
+    }
+    // endregion
+
+    // region Logging debug messages
+    /// Logs a debug message with an error
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    /// @param error Throwable error
+    public void debug(String msg, String sourceMethod, String sourceClass, Throwable error) {
         logger.logp(
-                Level.CONFIG,
-                caller.getClassName(),
-                caller.getMethodName(),
-                msg
+                Level.FINE,
+                sourceClass,
+                sourceMethod,
+                msg,
+                error
         );
     }
-
-    /// Logs a debug message (not visible on the console by default)
+    /// Logs a debug message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void debug(String msg, String sourceMethod, String sourceClass) {
+        debug(msg, sourceMethod, sourceClass, null);
+    }
+    /// Logs a debug message with an error
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param error Throwable error
+    public void debug(String msg, String sourceMethod, Throwable error) {
+        SourceLocation caller = getCaller();
+        debug(msg, sourceMethod, caller.getEffectiveClassName(), error);
+    }
+    /// Logs a debug message
+    /// @param msg String message to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    public void debug(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        debug(msg, sourceMethod, caller.getEffectiveClassName(), null);
+    }
+    /// Logs a debug message with an error
+    /// @param msg String message to be logged
+    /// @param error Throwable error
+    public void debug(String msg, Throwable error) {
+        SourceLocation caller = getCaller();
+        debug(msg, caller.sourceMethod(), caller.getEffectiveClassName(), error);
+    }
+    /// Logs a debug message
     /// @param msg String message to be logged
     public void debug(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
-        logger.logp(
-                Level.FINE,
-                caller.getClassName(),
-                caller.getMethodName(),
-                msg
-        );
+        SourceLocation caller = getCaller();
+        debug(msg, caller.sourceMethod(), caller.getEffectiveClassName(), null);
     }
+    // endregion
 
-    /// Logs a message on the lowest-priority logging level (`FINEST`)
+    // region Logging trace messages
+    /// Logs a trace message
     /// @param msg String message to be logged
-    public void trace(String msg) {
-        StackWalker.StackFrame caller = getCallerFrame();
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
+    public void trace(String msg, String sourceMethod, String sourceClass) {
         logger.logp(
                 Level.FINEST,
-                caller.getClassName(),
-                caller.getMethodName(),
+                sourceClass,
+                sourceMethod,
                 msg
         );
     }
-
-    /// Logs an error message, as well as a throwable error
+    /// Logs a trace message
     /// @param msg String message to be logged
-    /// @param error Throwable responsible for this log message
-    public void error(String msg, Throwable error) {
-        StackWalker.StackFrame caller = getCallerFrame();
-        logger.logp(
-                Level.SEVERE,
-                caller.getClassName(),
-                caller.getMethodName(),
-                msg,
-                error
-        );
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    public void trace(String msg, String sourceMethod) {
+        SourceLocation caller = getCaller();
+        trace(msg, sourceMethod, caller.getEffectiveClassName());
     }
-
-    /// Logs a debug message and throwable error on second-lowest logging level (`FINE`)
+    /// Logs a trace message
     /// @param msg String message to be logged
-    /// @param error Throwable to be logged
-    public void debug(String msg, Throwable error) {
-        StackWalker.StackFrame caller = getCallerFrame();
-        logger.logp(
-                Level.FINE,
-                caller.getClassName(),
-                caller.getMethodName(),
-                msg,
-                error
+    public void trace(String msg) {
+        SourceLocation caller = getCaller();
+        trace(msg, caller.sourceMethod(), caller.getEffectiveClassName());
+    }
+    // endregion
+
+    // region Logging operation results
+    public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
+        // Gathering result source information
+        String resultProviderClass = result.source().getEffectiveClassName();
+        String resultProviderMethod = result.source().sourceMethod();
+        info(
+                MessageFormat.format("Received operation result from [{0} > {1}]", new Object[] {resultProviderClass, resultProviderMethod}),
+                sourceMethod,
+                sourceClass
         );
+
+        // Preparing log levels and announcement message
+
     }
 
     /// Logs an operation result. Logging level depends on operation status:
@@ -248,5 +395,19 @@ public class AppLogger {
                     m
             );
         });
+    }
+
+    /// Allows safe logging from inside callback lambda expression
+    /// @param msg
+    /// @param source
+    /// @param level
+    public void thread(String msg, String source, Level level) {
+        StackWalker.StackFrame caller = getCallerFrame();
+        logger.logp(
+                level,
+                caller.getClassName(),
+                source,
+                msg
+        );
     }
 }
