@@ -1,12 +1,5 @@
 package com.backtoend.file_management_system.logging;
 
-import com.backtoend.file_management_system.util.ErrorResult;
-import com.backtoend.file_management_system.util.FeedbackMsg;
-import com.backtoend.file_management_system.util.OperationResult;
-import com.backtoend.file_management_system.util.TriConsumer;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.logging.Level;
 
 /// App-specific logger system, based on `java.util.logging.Logger`\
@@ -66,11 +59,11 @@ public class AppLogger {
         String className = frame.getClassName();
         String methodName = frame.getMethodName();
 
-        return className.equals(AppLogger.class.getName())
-//                || methodName.startsWith("lambda$")
-                || className.equals(FeedbackMsg.class.getName())
-                || className.equals(OperationResult.class.getName())
-                || className.equals(ErrorResult.class.getName());
+        return className.equals(AppLogger.class.getName()
+//                || className.equals(FeedbackMsg.class.getName())
+//                || className.equals(OperationResult.class.getName())
+//                || className.equals(ErrorResult.class.getName()
+                );
     }
 
 
@@ -313,64 +306,64 @@ public class AppLogger {
     /// @param sourceMethod Name of the method that called this one; relevant for callback-
     ///                     and lambda-safe logging
     /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
-    public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
-        // Gathering result source information
-        String resultProviderClass = result.source().getEffectiveClassName();
-        String resultProviderMethod = result.source().sourceMethod();
-
-        // Preparing log levels and announcement message
-        String announceResult;
-        TriConsumer<String, String, String> logResult;
-        TriConsumer<String, String, String> logMsg;
-        switch (result.status()) {
-            case SUCCESS:
-                logResult = this::info;
-                logMsg = this::debug;
-                announceResult = " - Concluded successfully";
-                break;
-            case CANCELED:
-                logResult = this::info;
-                logMsg = this::debug;
-                announceResult = " - Canceled by user";
-                break;
-            case WARNING:
-                logResult = this::warning;
-                logMsg = this::info;
-                announceResult = " - Unable to perform operation";
-                break;
-            case FAILED:
-                logResult = this::error;
-                logMsg = this::error;
-                announceResult = " - Critical error encountered; unable to proceed";
-                break;
-            default:
-                logResult = this::warning;
-                logMsg = this::info;
-                announceResult = " - Unknown operation status: {" + result.status().toString() + "}";
-        }
-
-        // Logging messages
-        logResult.accept(
-                MessageFormat.format(
-                        "Received operation result from [{0} > {1}] {2}",
-                        new Object[] { resultProviderClass, resultProviderMethod, announceResult}
-                ),
-                sourceMethod, sourceClass
-        );
-        ArrayList<String> feedback = result.getLoggableMessages();
-        feedback.forEach(msg -> {
-            logMsg.accept(
-                    msg,
-                    sourceMethod,
-                    sourceClass
-            );
-        });
-    }
-    /// Logs the content of an operation result
-    /// @param result Operation result to be logged
-    public void result(OperationResult<?> result) {
-        SourceLocation caller = getCaller();
-        result(result, caller.sourceMethod(), caller.getEffectiveClassName());
-    }
+//    public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
+//        // Gathering result source information
+//        String resultProviderClass = result.source().getEffectiveClassName();
+//        String resultProviderMethod = result.source().sourceMethod();
+//
+//        // Preparing log levels and announcement message
+//        String announceResult;
+//        TriConsumer<String, String, String> logResult;
+//        TriConsumer<String, String, String> logMsg;
+//        switch (result.status()) {
+//            case SUCCESS:
+//                logResult = this::info;
+//                logMsg = this::debug;
+//                announceResult = " - Concluded successfully";
+//                break;
+//            case CANCELED:
+//                logResult = this::info;
+//                logMsg = this::debug;
+//                announceResult = " - Canceled by user";
+//                break;
+//            case WARNING:
+//                logResult = this::warning;
+//                logMsg = this::info;
+//                announceResult = " - Unable to perform operation";
+//                break;
+//            case FAILED:
+//                logResult = this::error;
+//                logMsg = this::error;
+//                announceResult = " - Critical error encountered; unable to proceed";
+//                break;
+//            default:
+//                logResult = this::warning;
+//                logMsg = this::info;
+//                announceResult = " - Unknown operation status: {" + result.status().toString() + "}";
+//        }
+//
+//        // Logging messages
+//        logResult.accept(
+//                MessageFormat.format(
+//                        "Received operation result from [{0} > {1}] {2}",
+//                        new Object[] { resultProviderClass, resultProviderMethod, announceResult}
+//                ),
+//                sourceMethod, sourceClass
+//        );
+//        ArrayList<String> feedback = result.getLoggableMessages();
+//        feedback.forEach(msg -> {
+//            logMsg.accept(
+//                    msg,
+//                    sourceMethod,
+//                    sourceClass
+//            );
+//        });
+//    }
+//    /// Logs the content of an operation result
+//    /// @param result Operation result to be logged
+//    public void result(OperationResult<?> result) {
+//        SourceLocation caller = getCaller();
+//        result(result, caller.sourceMethod(), caller.getEffectiveClassName());
+//    }
     // endregion
 }

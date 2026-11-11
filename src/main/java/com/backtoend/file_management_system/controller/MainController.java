@@ -1,69 +1,67 @@
 package com.backtoend.file_management_system.controller;
 
-import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.logging.AppLogger;
-import com.backtoend.file_management_system.service.I18n;
-import com.backtoend.file_management_system.service.ScanImport;
-import com.backtoend.file_management_system.util.OperationResult;
+import com.backtoend.file_management_system.util.I18n;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.stage.Window;
 
-    /// Main controller class handling the main app interface
-    /// @author Rogue049
+/// Main controller class. Handles user interactions with main application elements,
+/// initiates relevant processes, maintains all other base UI controllers.
+/// @author Rogue049
 public class MainController {
-    /// `OverviewController` instance defined within this controller's FXML file
+    private static final AppLogger logger = AppLogger.getLogger(MainController.class);
+    private final I18n i = I18n.getInstance();
+
+    // region FXML elements
+    /// {@link OverviewController} instance
     @FXML
     private OverviewController overviewController;
-    /// Button that triggers the scan/import process
+    /// Pressing this button initiates a scan-import process
     @FXML
     private Button browseBtn;
-    /// Button that causes the application to shut down
+    /// Pressing this button terminates the application
     @FXML
     private Button killBtn;
+    // endregion
 
-    private static final AppLogger logger = AppLogger.getLogger(MainController.class);
-    /// Locally available `ScanImport` instance
-    private final ScanImport scanImport;
-
-    // Constructor
+    /// Constructor. Creates a new `MainController` instance and configures all required attributes.
     public MainController() {
-            scanImport = new ScanImport();
-        }
+        // Initialization things
+    }
 
+    /// Initialization of this controller. Creates string bindings for
+    /// all main UI elements.
     @FXML
     private void initialize() {
         logger.info("Initiating main application interface");
-        I18n i = I18n.getInstance();
-        logger.trace("Creating ScanImport instance");
-        logger.trace("Attempting to configure buttons");
-        browseBtn.textProperty().bind(i.text("main.button.browse"));
-        killBtn.textProperty().bind(i.text("main.button.terminate"));
+        browseBtn.textProperty().bind(i.bind("main.buttons.browse"));
+        killBtn.textProperty().bind(i.bind("main.buttons.kill"));
     }
 
-    /// Initiates the scan/import process
-    /// @param event The event created by the pressed import button
+    // TODO: Link scan-import process in Javadoc comment
+    /// Initiate the scan-import process.
+    /// @param event event created by the import button being pressed
     @FXML
     private void onChooseDirectory(ActionEvent event) {
-        logger.info("Initiating ScanImport");
+        logger.info("Initiating scan-import sequence");
         Window window = ((Button) event.getSource()).getScene().getWindow();
-        this.scanImport.scanImportProcess(window,itemId -> overviewController.addNewParent(itemId)
-        );
+        // TODO: Hook up scan-import workflow
     }
 
-    /// Shuts down the application
+    // TODO: Make sure this method works with any ongoing background processes
+    /// Shut down the application
     @FXML
     private void onExit() {
         logger.info("Application shutting down");
         Platform.exit();
     }
 
-    // === Utility Methods === \\
-    /// Generates the overview tree; is called by `MainApplication` after DB initialization finishes
-    ///  successfully and should **not** be called before the initialization finishes
+    /// Begins generating the overview tree after the DB initialization
+    /// completes. Should **not** be called before the initialization finishes.
     public void enableOverview() {
-        overviewController.initiateBaseTree();
+        // TODO: Call a method that begins building the overview tree
     }
 }
