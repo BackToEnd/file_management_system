@@ -15,7 +15,6 @@ public class DatabaseFetch {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseFetch.class);
     // === Utility Methods === \\
 
-    // TODO: Potentially fixed the problem I thought this method had
     /// Attempts to get a node ID for the specified path. Can properly deal with a path that does not exist in the DB yet.
     /// @param path A directory path
     /// @param conn Database connection
@@ -102,10 +101,9 @@ public class DatabaseFetch {
     public static ArrayList<ItemRow> getAllParentItems(Connection conn) throws SQLException {
         String query = """
                 SELECT * FROM node
-                WHERE id IN (
-                SELECT node_id FROM scan_location
-                );
-                AND parent IS NULL
+                INNER JOIN scan_location sl
+                ON sl.node_id = node.id
+                WHERE parent IS NULL;
                 """;
         ArrayList<ItemRow> list = new ArrayList<>();
         logger.debug("Fetching all parent items");

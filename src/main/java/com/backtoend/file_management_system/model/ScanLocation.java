@@ -33,4 +33,15 @@ public record ScanLocation(
                 }
         );
     }
+
+    /// Copies all values of this instance into a new instance,
+    /// replacing the original ItemRow with the new one
+    /// @param node The new ItemRow
+    /// @return The cloned instance
+    public ScanLocation setNewItemRow(ItemRow node) {
+        return new ScanLocation(
+                node, this.scanDepth, this.updateMode,
+                this.scanSource, this.generation, this.status
+        );
+    }
 }

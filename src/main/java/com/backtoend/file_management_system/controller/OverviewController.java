@@ -5,6 +5,7 @@ import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.database.DatabaseFetch;
 import com.backtoend.file_management_system.enums.OperationStatus;
 import com.backtoend.file_management_system.enums.ToastType;
+import com.backtoend.file_management_system.enums.TreeItemStatus;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ItemTreeNode;
@@ -13,11 +14,16 @@ import com.backtoend.file_management_system.service.I18n;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /// Controller class used to render the overview tree on the main app interface
 /// @author Rogue049
@@ -40,6 +46,7 @@ public class OverviewController {
     private TreeTableColumn<ItemRow, String> pathCol;
     private final Database db;
     private final ToastController toast;
+    private final HashMap<Integer, ItemTreeNode> itemTreeNodes;
 
     /// Default initialization of this controller at first creation - defines text bindings for placeholder label and table headers,
     /// and sets cell value factories for each column
@@ -78,58 +85,100 @@ public class OverviewController {
     public OverviewController() {
         this.db = MainApplication.getDatabaseInstance();
         this.toast = MainApplication.getToastControllerInstance();
+        this.itemTreeNodes = new HashMap<>();
     }
 
     // === Utility Methods === \\
 
-    // TODO: Make async where necessary
-
-    /// Attempts to build the initial tree structure consisting solely of parent items
-    /// @return An operation result with operation status; status is `SUCCESSFUL` if the
-    /// base tree can be built without any issues, and is otherwise `FAILED`
-    public OperationResult<Void> buildTree() {
-        logger.info("Attempting to generate tree table view");
+    public void initiateBaseTree() {
+        logger.info("Attempting to create the base tree table view");
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+        ArrayList<ItemRow> baseItems;
 
-        // Attempting to fetch parent items
-        logger.debug("Attempting to fetch parent nodes from DB");
-        ArrayList<ItemRow> parentItems;
-        try {
-            parentItems = this.db
-                    .withConnection(DatabaseFetch::getAllParentItems);
-        } catch (SQLException e) {
-            logger.error("Critical error encountered: ", e);
-            feedback.add(FeedbackMsg.create(
-                    "overview.fetch.parent.all.failed",
-                    new Object[] {}
-            ));
-            this.toast.showToast(ToastType.ERROR, "toast.overview.build.fetch.failed");
-            return OperationResult.create(OperationStatus.FAILED, null, feedback);
-        }
-        feedback.add(FeedbackMsg.create(
-                "overview.fetch.parent.all.success",
-                new Object[] {}
-        ));
-
-        // Attempting to build the tree
-        try {
-            this.treeView.setRoot(this.buildBaseTree(parentItems));
-            feedback.add(FeedbackMsg.create(
-                    "overview.build.tree.base.success",
-                    new Object[] {}
-            ));
-            return OperationResult.create(OperationStatus.SUCCESS, null, feedback);
-        } catch (SQLException e) {
-            logger.error("Critical error encountered: ", e);
-            feedback.add(FeedbackMsg.create(
-                    "overview.build.tree.base.failed",
-                    new Object[] {}
-            ));
-            this.toast.showToast(ToastType.ERROR, "toast.overview.build.display.failed");
-            return OperationResult.create(OperationStatus.FAILED, null, feedback);
-        }
+        // Fetching parent items
+        logger.info("Asynchronously loading base tree items");
+        Task<ArrayList<ScanLocation>> baseItemTask = getBaseItemsTask(feedback);
+        Thread thread = new Thread(baseItemTask);
+        thread.setDaemon(true);
+        thread.start();
     }
 
+    /// Creates a task used for asynchronously fetching all information
+    /// on base items. Base items exist both as node and scan location,
+    /// and have no parent of their own.
+    /// @param feedback Array list of feedback messages
+    /// @return Runnable task
+    private Task<ArrayList<ScanLocation>> getBaseItemsTask(
+            ArrayList<FeedbackMsg> feedback
+    ) {
+        Task<ArrayList<ScanLocation>> task = new Task<>() {
+            @Override
+            protected ArrayList<ScanLocation> call() throws SQLException {
+                ArrayList<ItemRow> baseItems = db
+                        .withConnection(DatabaseFetch::getAllParentItems);
+                ArrayList<ScanLocation> scanLocations = new ArrayList<>();
+                logger.info(
+                        "Obtained base items",
+                        "getBaseItemsTask",
+                        this.getClass().getName()
+                );
+                for (ItemRow item : baseItems) {
+                    scanLocations.add(
+                            db.withConnection(conn ->
+                                    DatabaseFetch.getScanLocationOf(item, conn)
+                            )
+                    );
+                }
+                logger.debug(
+                        "Obtained scan locations to all items",
+                        "getBaseItemsTask",
+                        this.getClass().getName()
+                );
+                return scanLocations;
+            }
+        };
+        task.setOnFailed(event -> {
+            feedback.add(FeedbackMsg.create(
+                    "overview.fetch.parent.all.failed",
+                    new Object[] {},
+                    "getBaseItemsTask",
+                    this.getClass().getName()
+            ));
+            logger.error(
+                    "Unable to fetch parent items:",
+                    "getBaseItemsTask",
+                    this.getClass().getName(),
+                    task.getException()
+                    );
+            // TODO: Error-handling
+        });
+        task.setOnSucceeded(event -> {
+            feedback.add(FeedbackMsg.create(
+                    "overview.fetch.parent.all.success",
+                    new Object[] {},
+                    "getBaseItemsTask",
+                    this.getClass().getName()
+            ));
+
+            // Attempting to build the tree
+            this.populateBaseTree(task.getValue());
+        });
+        return task;
+    }
+
+    private void populateBaseTree(ArrayList<ScanLocation> parents) {
+        ItemTreeNode root = new ItemTreeNode(null);
+        logger.info("Attempting to populate the base tree");
+        for (ScanLocation item : parents) {
+            ItemTreeNode treeNode = new ItemTreeNode(
+                    item.node(),
+                    item
+            );
+            this.configureNode(treeNode);
+            root.getChildren().add(treeNode);
+        }
+        this.treeView.setRoot(root);
+    }
 
     // region Creating the base tree of parent items
 
@@ -162,17 +211,23 @@ public class OverviewController {
     /// Passed items with no children will be ignored
     /// @param node The node to be configured
     private void configureNode(ItemTreeNode node) {
-        // No need to configure nodes without children
-        if (!node.getValue().hasChildren()) {
-            return;
-        }
-
-        logger.debug("Configuring node '" + node.getValue().name() + "' (ID " + node.getValue().id() + ")");
-        // Adding placeholder child
-        node.getChildren().add(
-                new ItemTreeNode(null)
+        logger.debug(
+                "Configuring node '"
+                        + node.getValue().name() + "' (ID "
+                        + node.getValue().id() + ")"
+        );
+        // Adding the item to the HashMap
+        this.itemTreeNodes.put(
+                node.getValue().id(),
+                node
         );
 
+        // Attaching dummy child to parent nodes w/o children
+        if (node.getValue().hasChildren() && node.isLeaf()) {
+            node.getChildren().add(
+                    new ItemTreeNode(null)
+            );
+        }
         // Adding event listener for node expansion
         node.expandedProperty().addListener(
                 (observable, wasExpanded, isExpanded) -> {
@@ -185,8 +240,6 @@ public class OverviewController {
 
     // TODO: Implement a way to add existing children as parents
     /// Adds a new parent item to the tree.
-    ///
-    /// **TODO**: Adapt this method and all previous fetch steps to be able to add child items as parents
     /// @param parentId The ID of a parent item
     public void addNewParent(int parentId) {
         ItemRow newParent;
@@ -217,9 +270,132 @@ public class OverviewController {
     }
     // endregion
 
+    // TODO: Properly deal with thrown IllegalStateExceptions
+    //  Also, implement a way to refresh the tree
+    public void addOrUpdateParent(ScanLocation parent) {
+        ToastController toasts = MainApplication.getToastControllerInstance();
+
+        // Checking if the provided parent already exists as a loaded node
+        try {
+            if (this.itemTreeNodes.containsKey(parent.node().id())) {
+                logger.info(MessageFormat.format(
+                        "Item with ID {0} is already a loaded node",
+                        new Object[] {parent.node().id()}
+                ));
+                this.updateWithScanLocation(parent);
+                return;
+            }
+        } catch (IllegalStateException e) {
+            logger.error("Illegal state encountered:", e);
+            toasts.showToast(
+                    ToastType.WARNING,
+                    "toast.overview.update.existing"
+            );
+        }
+
+        // Checking if the provided parent is a root item
+        if (parent.node().parent() == null) {
+            logger.info(MessageFormat.format(
+                            "Adding item with ID {0} as new base item",
+                            new Object[] {parent.node().id()}
+            ));
+            this.updateBaseTree(parent);
+            return;
+        }
+
+        // Checking if the provided parent has a loaded parent item
+        try {
+            int parentRootId = parent.node().parent();
+            if (this.itemTreeNodes.containsKey(parentRootId)) {
+                ItemTreeNode parentRootNode = this.itemTreeNodes.get(parentRootId);
+                if (parentRootNode.areChildrenLoaded()) {
+                    logger.info(MessageFormat.format(
+                            "Adding item with ID {0} to its parent node" +
+                                    "with ID {1}",
+                            new Object[] {parent.node().id(), parentRootId}
+                    ));
+                    return;
+                }
+            }
+        } catch (IllegalStateException e) {
+            logger.error("Illegal state encountered:", e);
+            toasts.showToast(
+                    ToastType.WARNING,
+                    "toast.overview.update.parent.add"
+            );
+        }
+
+        // New parent is neither an existing node, nor a new base item,
+        // nor the child of a node whose children are already loaded -
+        // This item can be ignored and lazy-loaded later
+        logger.info(MessageFormat.format(
+                        "Item with ID {0} will be ignored",
+                        new Object[] {parent.node().id()}
+        ));
+    }
+
+    /// Updates an existing node with the provided scan location,
+    /// updating the node's value and scan location, removing all
+    /// existing children, reloading existing children if the node was
+    /// previously expanded, and add a dummy child if it was not
+    /// @param scanLocation New scan location of the target node
+    private void updateWithScanLocation(ScanLocation scanLocation) {
+        int itemId = scanLocation.node().id();
+        ItemTreeNode node = this.itemTreeNodes.get(itemId);
+        // Checking if this node is currently being reloaded
+        if (node.getStatus() == TreeItemStatus.LOADING) {
+            logger.warning("Unable to update node while a reload is already in progress");
+            throw new IllegalStateException("Cannot update nodes while a reload is in progress");
+        }
+        boolean initialState = node.isExpanded();
+        this.removeChildrenOf(node);
+        node.reset(scanLocation);
+        // Loading child items and expanding the node if it was previously expanded
+        if (initialState) {
+            this.loadChildren(node);
+            node.setExpanded(true);
+        } else {
+            // Otherwise add dummy child
+            node.getChildren().add(new ItemTreeNode(null));
+        }
+    }
+
+    /// Inserts a new base item into the overview tree
+    /// @param scanLocation Scan location with information about the new base item
+    private void updateBaseTree(ScanLocation scanLocation) {
+        ItemTreeNode item = new ItemTreeNode(scanLocation.node(), scanLocation);
+        this.configureNode(item);
+        this.treeView.getRoot().getChildren().add(item);
+    }
+
+    /// Attaches a new child item to the ItemTreeNode with the child's
+    /// parent ID
+    /// @param newChild ScanLocation of the new child item
+    private void addNewChildTo(ScanLocation newChild) {
+        int parentId = newChild.node().parent();
+        ItemTreeNode parentNode = this.itemTreeNodes.get(parentId);
+        // Checking if the parent node is currently reloading
+        if (parentNode.getStatus() == TreeItemStatus.LOADING) {
+            logger.warning("Unable to update parent node while a reload is already in progress");
+            throw new IllegalStateException("Cannot update nodes while a reload is in progress");
+        }
+        ItemTreeNode childNode = new ItemTreeNode(newChild.node(), newChild);
+        this.configureNode(childNode);
+        parentNode.getChildren().add(childNode);
+    }
+
+    /// Removes the IDs of all child items of the provided parent from
+    /// this instance's ID -> ItemTreeNode map, does not clear children
+    /// of the parent ItemTreeNode.
+    /// @param parent Item tree node whose children should be removed
+    private void removeChildrenOf(ItemTreeNode parent) {
+        ArrayList<Integer> childrenIds = parent.getChildIds();
+        childrenIds.forEach(this.itemTreeNodes::remove);
+    }
+
     // region Dealing with child items of parent nodes
     // FIXME: How can this method throw exceptions without blowing up the event listener?
-
+    // TODO: Make this process async
     /// Loads all child items of a parent node and attaches them to the parent
     /// @param parent Parent node
     private void loadChildren(ItemTreeNode parent) {

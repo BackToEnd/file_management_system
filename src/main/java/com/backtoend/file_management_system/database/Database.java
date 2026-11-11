@@ -44,8 +44,6 @@ public class Database {
         return this.status;
     }
 
-    // TODO: Remove all unnecessary usages of this method, replace all calls with `.withConnection` or `.withTransaction`,
-    //  and make this method private
 
     ///Shortcut for creating a DB connection
     /// @return DB connection

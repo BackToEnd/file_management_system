@@ -6,8 +6,6 @@ import com.backtoend.file_management_system.service.I18n;
 
 import java.text.MessageFormat;
 
-// FIXME: Message logging, usages
-
 /// Record class keeping track of operation feedback messages
 /// @param source Name of the class that created this instance
 /// @param key Translation key describing what process caused this
@@ -21,6 +19,10 @@ public record FeedbackMsg(String key, Object[] args, SourceLocation source) {
         return new FeedbackMsg(
                 key, args, AppLogger.getCaller()
         );
+    }
+    public static FeedbackMsg create(String key, Object[] args, String sourceMethod, String sourceClass) {
+        SourceLocation source = new SourceLocation(sourceClass, sourceMethod);
+        return new FeedbackMsg(key, args, source);
     }
     /// Transforms the message into a properly formatted message,
     /// including all passed arguments

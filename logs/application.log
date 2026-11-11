@@ -1,107 +1,86 @@
-[15:55:11.706] [INFO] [file_management_system] > configure: Logger initialized
-[15:55:11.708] [INFO] [file_management_system] > configure: Log directory: logs
-[15:55:11.709] [FINE] [MainApplication] > start: Attempting to load main view FXML file
-[15:55:11.717] [FINEST] [MainApplication] > start: FXMLLoader created
-[15:55:11.908] [INFO] [MainController] > initialize: Initiating main application interface
-[15:55:11.909] [FINEST] [MainController] > initialize: Creating ScanImport instance
-[15:55:11.909] [FINEST] [MainController] > initialize: Attempting to configure buttons
-[15:55:12.225] [INFO] [Database] > withConnection: Attempting DB operation, but DB has not yet been initialized
-[15:55:12.225] [INFO] [Database] > connect: DB connection requested, but DB has not yet been initialized
-[15:55:12.227] [INFO] [DatabaseInitializer] > initiateDB: Attempting to initialize DB
-[15:55:12.235] [INFO] [DatabaseInitializer] > initiateDB: All tables either created or skipped
-[15:55:12.235] [FINE] [DatabaseInitializer] > initiateDB: Attempting to apply constraint(s) to table {node}, column {parent}
-[15:55:12.237] [INFO] [DatabaseCheck] > columnExists: Checking table {node} for column {parent}
-[15:55:12.241] [FINE] [DatabaseCheck] > columnExists: Connection established, statement created, result obtained
-[15:55:12.244] [INFO] [DatabaseCheck] > columnExists: Column found
-[15:55:12.250] [INFO] [MainApplication] > result: Received operation result from [DatabaseInitializer > initiateDB]
-[15:55:12.251] [INFO] [MainApplication] > lambda$getOperationResultTask$0: Result: [DatabaseInitializer / initiateDB] - Concluded successfully
-[15:55:12.253] [FINE] [MainApplication] > lambda$getOperationResultTask$0: Message: [DatabaseInitializer / initiateDB] Successfully created or skipped all tables
-[15:55:12.254] [INFO] [OverviewController] > buildTree: Attempting to generate tree table view
-[15:55:12.254] [FINE] [OverviewController] > buildTree: Attempting to fetch parent nodes from DB
-[15:55:12.256] [INFO] [Database] > withConnection: Attempting DB operation, but DB has not yet been initialized
-[15:55:12.256] [INFO] [Database] > connect: DB connection requested, but DB has not yet been initialized
-[15:55:12.258] [FINE] [DatabaseFetch] > getAllParentItems: Fetching all parent items
-[15:55:12.260] [FINE] [DatabaseFetch] > getAllParentItems: Result set obtained
-[15:55:12.271] [INFO] [OverviewController] > buildBaseTree: Attempting to build base tree
-[15:55:12.272] [INFO] [Database] > withConnection: Attempting DB operation, but DB has not yet been initialized
-[15:55:12.272] [INFO] [Database] > connect: DB connection requested, but DB has not yet been initialized
-[15:55:12.274] [FINE] [DatabaseFetch] > getScanLocationOf: Fetching scan location of parent node: 1
-[15:55:12.280] [FINE] [DatabaseFetch] > getScanLocationOf: Result set obtained
-[15:55:12.281] [FINE] [OverviewController] > buildBaseTree: Received scan location
-[15:55:12.282] [FINE] [OverviewController] > configureNode: Configuring node 'Desktop' (ID 1)
-[15:55:12.284] [INFO] [Database] > withConnection: Attempting DB operation, but DB has not yet been initialized
-[15:55:12.284] [INFO] [Database] > connect: DB connection requested, but DB has not yet been initialized
-[15:55:12.286] [FINE] [DatabaseFetch] > getScanLocationOf: Fetching scan location of parent node: 8
-[15:55:12.287] [FINE] [DatabaseFetch] > getScanLocationOf: Result set obtained
-[15:55:12.287] [FINE] [OverviewController] > buildBaseTree: Received scan location
-[15:55:12.287] [FINE] [OverviewController] > configureNode: Configuring node 'db_design_schulung' (ID 8)
-[15:55:12.348] [INFO] [MainController] > result: Received operation result from [OverviewController > buildTree]
-[15:55:12.349] [INFO] [MainController] > enableOverview: Result: [OverviewController / buildTree] - Concluded successfully
-[15:55:12.349] [FINE] [MainController] > enableOverview: Message: [OverviewController / buildTree] Successfully fetched all entries of the default overview
-[15:55:12.349] [FINE] [MainController] > enableOverview: Message: [OverviewController / buildTree] Successfully built the final tree display
-[15:55:15.391] [INFO] [MainController] > onChooseDirectory: Initiating ScanImport
-[15:55:15.392] [INFO] [ScanImport] > handleScanImport: Initiating directory scan and import process
-[15:55:15.393] [INFO] [DirectoryHandler] > openDirectoryChooser: Initiating directory chooser
-[15:55:15.394] [FINE] [DirectoryHandler] > openDirectoryChooser: Identified last directory: [ C:\Users\PeterCon]
-[15:55:24.391] [INFO] [ScanImport] > result: Received operation result from [FileExplorerController > openDirectoryChooser]
-[15:55:24.391] [INFO] [ScanImport] > handleScanImport: Result: [FileExplorerController / openDirectoryChooser] - Concluded successfully
-[15:55:24.391] [FINE] [ScanImport] > handleScanImport: Message: [FileExplorerController / openDirectoryChooser] User selected a directory: C:\Users\PeterCon\Documents\Hackers
-[15:55:24.393] [FINE] [DatabaseCheck] > doesParentExist: Checking if 'C:\Users\PeterCon\Documents\Hackers' exists in DB
-[15:55:24.394] [FINE] [DatabaseCheck] > doesParentExist: Path is not a node
-[15:55:24.397] [INFO] [DirectoryHandler] > parseDir: Parsing directory: C:\Users\PeterCon\Documents\Hackers
-[15:55:24.398] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers' is a directory
-[15:55:24.399] [INFO] [ModalController] > showImportPreview: Attempting to load FXML file
-[15:55:24.421] [FINE] [ModalController] > showImportPreview: Scene preparation complete
-[15:55:25.993] [INFO] [ImportController] > cancelImport: Selection canceled
-[15:55:26.001] [INFO] [ScanImport] > result: Received operation result from [ScanImport > showOverview]
-[15:55:26.002] [INFO] [ScanImport] > lambda$handleScanImport$3: Result: [ScanImport / showOverview] - Canceled by user
-[15:55:26.002] [FINE] [ScanImport] > lambda$handleScanImport$3: Message: [ScanImport / showOverview] Import was canceled - User rejected the imported data
-[15:55:26.002] [WARNING] [ScanImport] > lambda$handleScanImport$3: Import overview failed
-[15:55:27.234] [INFO] [MainController] > onChooseDirectory: Initiating ScanImport
-[15:55:27.235] [INFO] [ScanImport] > handleScanImport: Initiating directory scan and import process
-[15:55:27.235] [INFO] [DirectoryHandler] > openDirectoryChooser: Initiating directory chooser
-[15:55:27.235] [FINE] [DirectoryHandler] > openDirectoryChooser: Identified last directory: [ C:\Users\PeterCon\Documents\Hackers]
-[15:55:30.657] [INFO] [ScanImport] > result: Received operation result from [FileExplorerController > openDirectoryChooser]
-[15:55:30.658] [INFO] [ScanImport] > handleScanImport: Result: [FileExplorerController / openDirectoryChooser] - Concluded successfully
-[15:55:30.658] [FINE] [ScanImport] > handleScanImport: Message: [FileExplorerController / openDirectoryChooser] User selected a directory: C:\Users\PeterCon\Documents\Hackers\Hackers
-[15:55:30.659] [FINE] [DatabaseCheck] > doesParentExist: Checking if 'C:\Users\PeterCon\Documents\Hackers\Hackers' exists in DB
-[15:55:30.660] [FINE] [DatabaseCheck] > doesParentExist: Path is not a node
-[15:55:30.661] [INFO] [DirectoryHandler] > parseDir: Parsing directory: C:\Users\PeterCon\Documents\Hackers\Hackers
-[15:55:30.662] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers\.obsidian' is a directory
-[15:55:30.662] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers\Core Game Idea.md' is a directory
-[15:55:30.664] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers\Groups' is a directory
-[15:55:30.664] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers\Relations.canvas' is a directory
-[15:55:30.666] [INFO] [ModalController] > showImportPreview: Attempting to load FXML file
-[15:55:30.673] [FINE] [ModalController] > showImportPreview: Scene preparation complete
-[15:55:32.343] [INFO] [ImportController] > handleImport: Selection accepted, proceeding to DB entries
-[15:55:32.349] [INFO] [ScanImport] > result: Received operation result from [ScanImport > showOverview]
-[15:55:32.350] [INFO] [ScanImport] > lambda$handleScanImport$3: Result: [ScanImport / showOverview] - Concluded successfully
-[15:55:32.350] [FINE] [ScanImport] > lambda$handleScanImport$3: Message: [ScanImport / showOverview] Import was accepted - Beginning bulk databank insert
-[15:55:32.350] [INFO] [DirectoryHandler] > parseParent: Getting ItemRow for path: C:\Users\PeterCon\Documents\Hackers\Hackers
-[15:55:32.350] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Hackers\Hackers' is a directory
-[15:55:32.354] [INFO] [DatabaseInsert] > insertNewSet: Beginning insert transaction
-[15:55:32.355] [FINE] [DatabaseInsert] > insertNewSet: Parent node has no ID; inserting new parent
-[15:55:32.374] [FINEST] [DatabaseInsert] > insertParentNode: ItemRow[id=-1, name=Hackers, path=C:\Users\PeterCon\Documents\Hackers\Hackers, displayName=Hackers, fileType=Folder, lastModified=1760444494051, size=8192.0, status=ACTIVE, parent=null, hasChildren=true]
-[15:55:32.391] [FINE] [DatabaseInsert] > insertNewSet: Parent ID obtained: 17
-[15:55:32.391] [FINE] [DatabaseInsert] > insertNewSet: Inserting scan location for parent node
-[15:55:32.397] [FINEST] [DatabaseInsert] > insertScanLocation: ScanLocation[node=ItemRow[id=-1, name=Hackers, path=C:\Users\PeterCon\Documents\Hackers\Hackers, displayName=Hackers, fileType=Folder, lastModified=1760444494051, size=8192.0, status=ACTIVE, parent=null, hasChildren=true], scanDepth=0, updateMode=MANUAL, scanSource=USER_SELECTION, generation=0, status=ACTIVE] || Alternative ID: 17
-[15:55:32.397] [FINEST] [DatabaseInsert] > insertScanLocation: ScanLocation[node=ItemRow[id=-1, name=Hackers, path=C:\Users\PeterCon\Documents\Hackers\Hackers, displayName=Hackers, fileType=Folder, lastModified=1760444494051, size=8192.0, status=ACTIVE, parent=null, hasChildren=true], scanDepth=0, updateMode=MANUAL, scanSource=USER_SELECTION, generation=0, status=ACTIVE]
-[15:55:32.398] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=.obsidian, path=C:\Users\PeterCon\Documents\Hackers\Hackers\.obsidian, displayName=.obsidian, fileType=Folder, lastModified=1756895889015, size=0.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 17
-[15:55:32.399] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Core Game Idea.md, path=C:\Users\PeterCon\Documents\Hackers\Hackers\Core Game Idea.md, displayName=Core Game Idea.md, fileType=File, lastModified=1756906832704, size=5167.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 17
-[15:55:32.399] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Groups, path=C:\Users\PeterCon\Documents\Hackers\Hackers\Groups, displayName=Groups, fileType=Folder, lastModified=1756895978247, size=0.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 17
-[15:55:32.399] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Relations.canvas, path=C:\Users\PeterCon\Documents\Hackers\Hackers\Relations.canvas, displayName=Relations.canvas, fileType=File, lastModified=1756897985278, size=6846.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 17
-[15:55:32.418] [FINE] [OverviewController] > addNewParent: Attempting to add new parent: Hackers
-[15:55:32.419] [FINE] [DatabaseFetch] > getScanLocationOf: Fetching scan location of parent node: 17
-[15:55:32.420] [FINE] [DatabaseFetch] > getScanLocationOf: Result set obtained
-[15:55:32.420] [FINE] [OverviewController] > addNewParent: Received scan location
-[15:55:32.420] [FINE] [OverviewController] > configureNode: Configuring node 'Hackers' (ID 17)
-[15:55:34.604] [INFO] [OverviewController] > loadChildren: Attempting to load and display children of node: 17
-[15:55:34.606] [FINE] [DatabaseFetch] > getChildrenOf: Fetching children for node with ID: 17
-[15:55:34.607] [FINE] [DatabaseFetch] > getChildrenOf: Result set obtained
-[15:55:36.214] [INFO] [OverviewController] > loadChildren: Attempting to load and display children of node: 8
-[15:55:36.215] [FINE] [DatabaseFetch] > getChildrenOf: Fetching children for node with ID: 8
-[15:55:36.217] [FINE] [DatabaseFetch] > getChildrenOf: Result set obtained
-[15:55:37.510] [INFO] [OverviewController] > loadChildren: Attempting to load and display children of node: 1
-[15:55:37.511] [FINE] [DatabaseFetch] > getChildrenOf: Fetching children for node with ID: 1
-[15:55:37.512] [FINE] [DatabaseFetch] > getChildrenOf: Result set obtained
-[15:55:40.223] [INFO] [MainController] > onExit: Application shutting down
+[12:52:02.471] [INFO] [file_management_system] > configure: Logger initialized
+[12:52:02.473] [INFO] [file_management_system] > configure: Log directory: logs
+[12:52:02.474] [FINE] [MainApplication] > start: Attempting to load main view FXML file
+[12:52:02.484] [FINEST] [MainApplication] > start: FXMLLoader created
+[12:52:02.667] [INFO] [MainController] > initialize: Initiating main application interface
+[12:52:02.667] [FINEST] [MainController] > initialize: Creating ScanImport instance
+[12:52:02.668] [FINEST] [MainController] > initialize: Attempting to configure buttons
+[12:52:02.985] [INFO] [Database] > withConnection: Attempting DB operation, but DB has not yet been initialized
+[12:52:02.986] [INFO] [Database] > connect: DB connection requested, but DB has not yet been initialized
+[12:52:02.987] [INFO] [DatabaseInitializer] > initiateDB: Attempting to initialize DB
+[12:52:02.997] [INFO] [DatabaseInitializer] > initiateDB: All tables either created or skipped
+[12:52:02.997] [FINE] [DatabaseInitializer] > initiateDB: Attempting to apply constraint(s) to table {node}, column {parent}
+[12:52:02.999] [INFO] [DatabaseCheck] > columnExists: Checking table {node} for column {parent}
+[12:52:03.001] [FINE] [DatabaseCheck] > columnExists: Connection established, statement created, result obtained
+[12:52:03.004] [INFO] [DatabaseCheck] > columnExists: Column found
+[12:52:03.015] [INFO] [MainApplication] > dbinitializationTask: Received operation result from [DatabaseInitializer > initiateDB]  - Concluded successfully
+[12:52:03.017] [FINE] [MainApplication] > dbinitializationTask: Message: [DatabaseInitializer / initiateDB] Successfully created or skipped all tables
+[12:52:03.017] [INFO] [OverviewController] > buildTree: Attempting to generate tree table view
+[12:52:03.018] [FINE] [OverviewController] > buildTree: Attempting to fetch parent nodes from DB
+[12:52:03.020] [FINE] [DatabaseFetch] > getAllParentItems: Fetching all parent items
+[12:52:03.021] [FINE] [DatabaseFetch] > getAllParentItems: Result set obtained
+[12:52:03.032] [INFO] [OverviewController] > buildBaseTree: Attempting to build base tree
+[12:52:03.034] [FINE] [DatabaseFetch] > getScanLocationOf: Fetching scan location of parent node: 1
+[12:52:03.041] [FINE] [DatabaseFetch] > getScanLocationOf: Result set obtained
+[12:52:03.042] [FINE] [OverviewController] > buildBaseTree: Received scan location
+[12:52:03.043] [FINE] [OverviewController] > configureNode: Configuring node 'Hackers' (ID 1)
+[12:52:03.090] [INFO] [MainController] > enableOverview: Received operation result from [OverviewController > buildTree]  - Concluded successfully
+[12:52:03.090] [FINE] [MainController] > enableOverview: Message: [OverviewController / buildTree] Successfully fetched all entries of the default overview
+[12:52:03.090] [FINE] [MainController] > enableOverview: Message: [OverviewController / buildTree] Successfully built the final tree display
+[12:52:07.436] [INFO] [MainController] > onChooseDirectory: Initiating ScanImport
+[12:52:07.437] [INFO] [ScanImport] > scanImportProcess: Initiating directory scan
+[12:52:07.438] [INFO] [DirectoryHandler] > openDirectoryChooser: Initiating directory chooser
+[12:52:07.438] [FINE] [DirectoryHandler] > openDirectoryChooser: Identified last directory: [ C:\Users\PeterCon]
+[12:52:13.558] [INFO] [ScanImport] > scanImportProcess: Received operation result from [FileExplorerController > openDirectoryChooser]  - Concluded successfully
+[12:52:13.558] [FINE] [ScanImport] > scanImportProcess: Message: [FileExplorerController / openDirectoryChooser] User selected a directory: C:\Users\PeterCon\Documents\Folklore
+[12:52:13.561] [FINE] [DatabaseCheck] > doesParentExist: Checking if 'C:\Users\PeterCon\Documents\Folklore' exists in DB
+[12:52:13.562] [FINE] [DatabaseCheck] > doesParentExist: Path is not a node
+[12:52:13.564] [INFO] [ScanImport] > scanImportProcess: Initiating asynchronous directory reading
+[12:52:13.565] [INFO] [DirectoryHandler] > parseDir: Parsing directory: C:\Users\PeterCon\Documents\Folklore
+[12:52:13.567] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\.obsidian' is a directory
+[12:52:13.568] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Henry.md' is a directory
+[12:52:13.568] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Jack.md' is a directory
+[12:52:13.569] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\John.md' is a directory
+[12:52:13.569] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Luna's Tutor Group.md' is a directory
+[12:52:13.569] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Numinari.md' is a directory
+[12:52:13.569] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Paranormal Investigator.md' is a directory
+[12:52:13.570] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore\Warlock.md' is a directory
+[12:52:13.570] [INFO] [ScanImport] > scanImportProccess: Directory content obtained
+[12:52:13.571] [INFO] [ModalController] > showImportPreview: Attempting to load FXML file
+[12:52:13.598] [FINE] [ModalController] > showImportPreview: Scene preparation complete
+[12:52:15.567] [INFO] [ImportController] > handleImport: Selection accepted, proceeding to DB entries
+[12:52:15.575] [INFO] [ScanImport] > handleScanImport: Received operation result from [ScanImport > showOverview]  - Concluded successfully
+[12:52:15.576] [FINE] [ScanImport] > handleScanImport: Message: [ScanImport / showOverview] Import was accepted - Beginning bulk databank insert
+[12:52:15.576] [INFO] [ScanImport] > handleDbInsert: Initiating bulk Db insert
+[12:52:15.576] [FINE] [ScanImport] > handleDbInsert: Attempting to create new parent item
+[12:52:15.577] [INFO] [DirectoryHandler] > parseParent: Getting ItemRow for path: C:\Users\PeterCon\Documents\Folklore
+[12:52:15.577] [FINE] [DirectoryHandler] > isDir: Checking if path 'C:\Users\PeterCon\Documents\Folklore' is a directory
+[12:52:15.578] [INFO] [ScanImport] > handleDbInsert: Attempting asynchronous bulk DB insert
+[12:52:15.585] [INFO] [DatabaseInsert] > insertNewSet: Beginning insert transaction
+[12:52:15.585] [FINE] [DatabaseInsert] > insertNewSet: Parent node has no ID; inserting new parent
+[12:52:15.604] [FINEST] [DatabaseInsert] > insertParentNode: ItemRow[id=-1, name=Folklore, path=C:\Users\PeterCon\Documents\Folklore, displayName=Folklore, fileType=Folder, lastModified=1788267947497, size=4096.0, status=ACTIVE, parent=null, hasChildren=true]
+[12:52:15.620] [FINE] [DatabaseInsert] > insertNewSet: Parent ID obtained: 6
+[12:52:15.621] [FINE] [DatabaseInsert] > insertNewSet: Inserting scan location for parent node
+[12:52:15.626] [FINEST] [DatabaseInsert] > insertScanLocation: ScanLocation[node=ItemRow[id=-1, name=Folklore, path=C:\Users\PeterCon\Documents\Folklore, displayName=Folklore, fileType=Folder, lastModified=1788267947497, size=4096.0, status=ACTIVE, parent=null, hasChildren=true], scanDepth=0, updateMode=MANUAL, scanSource=USER_SELECTION, generation=0, status=ACTIVE] || Alternative ID: 6
+[12:52:15.626] [FINEST] [DatabaseInsert] > insertScanLocation: ScanLocation[node=ItemRow[id=-1, name=Folklore, path=C:\Users\PeterCon\Documents\Folklore, displayName=Folklore, fileType=Folder, lastModified=1788267947497, size=4096.0, status=ACTIVE, parent=null, hasChildren=true], scanDepth=0, updateMode=MANUAL, scanSource=USER_SELECTION, generation=0, status=ACTIVE]
+[12:52:15.628] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=.obsidian, path=C:\Users\PeterCon\Documents\Folklore\.obsidian, displayName=.obsidian, fileType=Folder, lastModified=1756107429704, size=4096.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.629] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Henry.md, path=C:\Users\PeterCon\Documents\Folklore\Henry.md, displayName=Henry.md, fileType=File, lastModified=1756107588410, size=12577.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.629] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Jack.md, path=C:\Users\PeterCon\Documents\Folklore\Jack.md, displayName=Jack.md, fileType=File, lastModified=1788268679757, size=5688.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.629] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=John.md, path=C:\Users\PeterCon\Documents\Folklore\John.md, displayName=John.md, fileType=File, lastModified=1746636938859, size=50.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.630] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Luna's Tutor Group.md, path=C:\Users\PeterCon\Documents\Folklore\Luna's Tutor Group.md, displayName=Luna's Tutor Group.md, fileType=File, lastModified=1759908096070, size=1375.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.631] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Numinari.md, path=C:\Users\PeterCon\Documents\Folklore\Numinari.md, displayName=Numinari.md, fileType=File, lastModified=1747231828957, size=587.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.631] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Paranormal Investigator.md, path=C:\Users\PeterCon\Documents\Folklore\Paranormal Investigator.md, displayName=Paranormal Investigator.md, fileType=File, lastModified=1754167628284, size=3866.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.631] [FINEST] [DatabaseInsert] > insertChildNode: ItemRow[id=-1, name=Warlock.md, path=C:\Users\PeterCon\Documents\Folklore\Warlock.md, displayName=Warlock.md, fileType=File, lastModified=1761748919233, size=14314.0, status=ACTIVE, parent=null, hasChildren=false] || Alternative ID: 6
+[12:52:15.648] [INFO] [ScanImport] > handleDbInsert: DB insert was successful
+[12:52:15.651] [FINE] [OverviewController] > addNewParent: Attempting to add new parent: Folklore
+[12:52:15.653] [FINE] [DatabaseFetch] > getScanLocationOf: Fetching scan location of parent node: 6
+[12:52:15.654] [FINE] [DatabaseFetch] > getScanLocationOf: Result set obtained
+[12:52:15.654] [FINE] [OverviewController] > addNewParent: Received scan location
+[12:52:15.654] [FINE] [OverviewController] > configureNode: Configuring node 'Folklore' (ID 6)
+[12:52:20.643] [INFO] [OverviewController] > loadChildren: Attempting to load and display children of node: 6
+[12:52:20.645] [FINE] [DatabaseFetch] > getChildrenOf: Fetching children for node with ID: 6
+[12:52:20.646] [FINE] [DatabaseFetch] > getChildrenOf: Result set obtained
+[12:52:25.488] [INFO] [OverviewController] > loadChildren: Attempting to load and display children of node: 1
+[12:52:25.490] [FINE] [DatabaseFetch] > getChildrenOf: Fetching children for node with ID: 1
+[12:52:25.490] [FINE] [DatabaseFetch] > getChildrenOf: Result set obtained
+[12:52:37.582] [INFO] [MainController] > onExit: Application shutting down

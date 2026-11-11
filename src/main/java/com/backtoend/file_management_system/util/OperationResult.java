@@ -34,6 +34,10 @@ public record OperationResult<T>(
     public static <T> OperationResult<T> create(OperationStatus status, T value, ArrayList<FeedbackMsg> msg) {
         return new OperationResult<>(status, value, msg, AppLogger.getCaller());
     }
+    public static <T> OperationResult<T> create(OperationStatus status, T value, ArrayList<FeedbackMsg> msg, String sourceMethod, String sourceClass) {
+        SourceLocation source = new SourceLocation(sourceClass, sourceMethod);
+        return new OperationResult<>(status, value, msg, source);
+    }
 
     @Override
     public ArrayList<FeedbackMsg> getAllMessages() {

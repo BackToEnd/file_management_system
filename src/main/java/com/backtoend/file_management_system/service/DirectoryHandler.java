@@ -52,6 +52,7 @@ public class DirectoryHandler {
         return f.isDirectory();
     }
 
+    // TODO: Make async
     /// Parses the content of the given directory and creates a new `ItemRow` instance for each
     /// child of the path
     /// @param path Directory path to be parsed

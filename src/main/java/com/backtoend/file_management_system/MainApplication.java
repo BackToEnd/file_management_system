@@ -1,7 +1,6 @@
 package com.backtoend.file_management_system;
 
 import com.backtoend.file_management_system.controller.MainController;
-import com.backtoend.file_management_system.controller.ModalController;
 import com.backtoend.file_management_system.controller.ToastController;
 import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.database.DatabaseInitializer;
@@ -32,7 +31,6 @@ public class MainApplication extends Application {
     private static final DirectoryHandler directoryHandler = new DirectoryHandler();
     private static final ToastController toastController = new ToastController();
 
-    // TODO: Eliminate the need for `Context` and instead have components pull directly from static getters
     @Override
     public void start(Stage stage) throws IOException {
         LoggingConfig.configure();
@@ -65,7 +63,7 @@ public class MainApplication extends Application {
         stage.show();
 
         // DB initialization on background thread
-        Task<OperationResult<Void>> initializeDb = getOperationResultTask(fxml);
+        Task<OperationResult<Void>> initializeDb = dbInitializationTask(fxml);
         Thread thread = new Thread(initializeDb);
         thread.setDaemon(true);
         thread.start();
@@ -83,7 +81,7 @@ public class MainApplication extends Application {
      * @param fxml FXMLLoader of MainController
      * @return Task
      */
-    private Task<OperationResult<Void>> getOperationResultTask(FXMLLoader fxml) {
+    private Task<OperationResult<Void>> dbInitializationTask(FXMLLoader fxml) {
         DatabaseInitializer dbInit = new DatabaseInitializer();
         Task<OperationResult<Void>> initializeDb = new Task<>() {
             @Override
@@ -93,19 +91,21 @@ public class MainApplication extends Application {
         };
         initializeDb.setOnSucceeded(event -> {
             OperationResult<Void> result = initializeDb.getValue();
-            logger.result(result);
+            logger.result(result, "dbinitializationTask", this.getClass().getName());
             if (result.isSuccessful()) {
                 MainController ctrl = fxml.getController();
                 ctrl.enableOverview();
-                database.setStatus(DbStatus.READY);
             } else {
-                logger.warning("DB initialization could not be completed");
-                database.setStatus(DbStatus.NOT_INITIALIZED);
+                logger.warning("DB initialization could not be completed", "dbinitializationTask", this.getClass().getName());
             }
         });
         initializeDb.setOnFailed(event -> {
-            logger.error("Database encountered during initialization: ", initializeDb.getException());
-            database.setStatus(DbStatus.FAILED);
+            logger.error(
+                    "Database could not be initialized:",
+                    "dbInitializationTask",
+                    this.getClass().getName(),
+                    initializeDb.getException()
+            );
         });
         return initializeDb;
     }

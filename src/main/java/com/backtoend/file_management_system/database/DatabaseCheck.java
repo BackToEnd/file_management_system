@@ -32,7 +32,6 @@ public class DatabaseCheck {
         return ParentExistence.IS_NODE;
     }
 
-    // TODO: Use `.withConnection` and pass a connection rather than a DB instance as parameter
     /// Checks if the specified table already has a column with the specified name
     /// @param table The name of the table
     /// @param column The name of the column

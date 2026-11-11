@@ -39,11 +39,6 @@ public class CompactFormatter extends Formatter {
                 .append('[').append(level).append("] ")
                 .append('[').append(source).append("] > ").append(method).append(": ")
                 .append(msg).append(System.lineSeparator());
-//                .append('[').append(time).append("] ")
-//                .append('[').append(level).append("] ")
-//                .append('[').append(source).append("] ")
-//                .append(msg)
-//                .append(System.lineSeparator());
 
         // Handling exceptions
         if (record.getThrown() != null) {

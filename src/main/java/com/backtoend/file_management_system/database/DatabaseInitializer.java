@@ -82,7 +82,6 @@ public class DatabaseInitializer {
 
     // === Utility Functions === \\
 
-    // TODO: Should this method be called with `db.withConnection()`?
     /// Begins the DB initialization process by first attempting to create all tables,
     /// skipping any tables that already exist, then attempting to add constraint columns\
     /// Deals with any resulting SQLExceptions itself.\
@@ -108,6 +107,12 @@ public class DatabaseInitializer {
 
         // Establishing a connection to the DB
         try (Statement stmt = conn.createStatement()) {
+            // Setting journal mode for WAL to allow concurrent reading and writing
+            stmt.execute("PRAGMA journal_mode = WAL;");
+            feedback.add(FeedbackMsg.create(
+                    "db.init.pragma.journal",
+                    new Object[] {}
+            ));
 
             // Creating all tables that do not yet exist
             for (String table : this.tables) {
@@ -132,7 +137,12 @@ public class DatabaseInitializer {
                     ));
                 }
             }
+            db.setStatus(DbStatus.READY);
             return OperationResult.create(OperationStatus.SUCCESS, null, feedback);
+        } catch (SQLException e) {
+            logger.error("Critical database error encountered:", e);
+            db.setStatus(DbStatus.FAILED);
+            throw e;
         }
     }
 }

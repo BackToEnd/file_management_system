@@ -22,8 +22,7 @@ import java.util.HashMap;
 public class ToastController {
     private final static I18n i = I18n.getInstance();
     private HashMap<ToastType, String> colorCodes = new HashMap<>();
-    private VBox layer;
-    private Label toast;
+    private final Label toast;
 
     // Constructor
     public ToastController() {
@@ -47,7 +46,6 @@ public class ToastController {
     /// Sets the VBox layer on which toasts are supposed to be displayed
     /// @param layer Display layer
     public void setToastLayer(VBox layer) {
-        this.layer = layer;
         layer.getChildren().add(toast);
     }
 

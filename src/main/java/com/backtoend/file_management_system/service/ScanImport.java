@@ -10,6 +10,7 @@ import com.backtoend.file_management_system.database.DatabaseInsert;
 import com.backtoend.file_management_system.enums.DbStatus;
 import com.backtoend.file_management_system.enums.ItemStatus;
 import com.backtoend.file_management_system.enums.ParentExistence;
+import com.backtoend.file_management_system.exceptions.OperationException;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ScanLocation;
@@ -32,179 +33,225 @@ public class ScanImport {
     /// Locally remembers the ID of a parent directory; easier than
     /// passing it into different methods as an argument
     private int parentNodeId;
+    private ItemRow parentItemRow;
+    private String scannedPath;
 
-    /// Performs the entire scan-import process:\
-    /// 1. Opens a directory chooser to allow the user to pick a directory. Properly accounts for
-    /// the directory chooser being closed instead of choosing a directory.
-    /// 2. Browses the content of the directory, properly accounting for insufficient permission to do so.
-    /// 3. Displays an import overview that allows the user to either proceed with the
-    /// import, or cancel the import and discard all scanned items.
-    /// 4. Bulk-inserts all scanned items and their parent path into the database if
-    /// the user proceeds with the import using a transaction, which is rolled back in case any SQLException
-    /// is thrown in the process.
-    /// @param window The window on which directory chooser and import overview should be displayed
-    /// @param callback An operation to execute after this method has run; this should be a method
-    ///                 updating the overview tree. The callback is executed on the main application thread.
-    public void handleScanImport(Window window, ScanImportCallback callback) {
-        // Checking if there is already a scan in progress
-        if (this.scanInProgress) {
-            logger.warning(
-                    "Unable to begin scan-import; "
-                    + "There is already a scan-import in progress"
-            );
-            // TODO: Implement error-handling
-            return;
-        }
-        this.scanInProgress = true;
-
-        logger.info("Initiating directory scan and import process");
-        ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+    /// Initiates the scan-import process by performing the following steps:\
+    /// 1. Opens a directory chooser and allows the user to select a directory
+    /// 2. Scans the selected directory and displays an import overview
+    /// 3. Imports all scanned items into the DB
+    /// @param window Where directory chooser and import overview are supposed to be displayed
+    /// @param callback What to do with the newly inserted parent item;
+    ///                 is used to allow {@link com.backtoend.file_management_system.controller.MainController}
+    ///                 to update the overview tree after the completion of
+    ///                 asynchronous operations
+    public void scanImportProcess(Window window, ScanImportCallback callback) {
+        // General set-up
         Database db = MainApplication.getDatabaseInstance();
-
-        // Check if the DB is ready
-        if (db.getStatus() != DbStatus.READY) {
-            logger.warning("Unable to begin scan-import; DB is not yet initialized");
-            feedback.add(FeedbackMsg.create(
-                    "import.init.db.uninitialized",
-                    new Object[] {}
-            ));
-            // TODO: Implement error-handling
-            this.scanInProgress = false;
-            return;
-        }
-
-        // Open directory chooser
-        OperationResult<String> dirChooser = this.openDirChooser(window);
-        logger.result(dirChooser);
-        feedback.addAll(dirChooser.msg());
-        if (!dirChooser.isSuccessful() || dirChooser.value() == null) {
-            // TODO: Implement error-handling
-            logger.warning("Directory chooser failed");
-            this.scanInProgress = false;
-            return;
-        }
-        String scanPath = dirChooser.value();
-
-        // Checking if the chosen path already exists as a node
+        ArrayList<FeedbackMsg> feedback = new ArrayList<>();
+        this.parentItemRow = null;
         this.parentNodeId = -1;
+        this.scannedPath = null;
+
         try {
-            ParentExistence doesNodeExist = db.withConnection(
-                    conn -> DatabaseCheck.doesParentExist(scanPath, conn)
-            );
-            if (doesNodeExist == ParentExistence.IS_SCAN_LOCATION) {
+            // Checking if there is already a scan in progress
+            if (this.scanInProgress) {
                 feedback.add(FeedbackMsg.create(
-                        "import.init.path.exists.scan",
+                        "import.init.scan.ongoing",
                         new Object[] {}
                 ));
-                // TODO: Implement error-handling
-                logger.warning("Re-scanning existing directories is not yet supported :<");
-                this.scanInProgress = false;
-                return;
-            } else if (doesNodeExist == ParentExistence.IS_NODE) {
-                this.parentNodeId = db.withConnection(
-                        conn -> DatabaseFetch.getNodeId(scanPath, conn)
+                throw new OperationException(
+                        "Unable to begin scan-import; scan-import is already running!"
                 );
             }
-        } catch (SQLException e) {
-            logger.error("Database error encountered:", e);
-            feedback.add(FeedbackMsg.create(
-                    "import.init.path.exists.sqlexception",
-                    new Object[] {}
-            ));
-            // TODO: Implement error-handling
-            this.scanInProgress = false;
-            return;
-        }
 
-        // Parsing the selected directory
-        Task<ArrayList<ItemRow>> parseDirTask = new Task<>() {
-            @Override
-            protected ArrayList<ItemRow> call() throws IOException {
-                return DirectoryHandler.parseDir(scanPath);
-            }
-        };
-        parseDirTask.setOnFailed(event -> {
-            logger.error("File operation failed:", parseDirTask.getException());
-            feedback.add(FeedbackMsg.create(
-                    "import.init.parse.failure",
-                    new Object[] {}
-            ));
-            // TODO: Implement error-handling
-            this.scanInProgress = false;
-        });
-        parseDirTask.setOnSucceeded(event -> {
-            ArrayList<ItemRow> items = parseDirTask.getValue();
+            this.scanInProgress = true;
+            logger.info("Initiating directory scan");
 
-            // Displaying import overview
-            OperationResult<Void> showOverview = showOverview(window, items);
-            logger.result(showOverview);
-            feedback.addAll(showOverview.msg());
-
-            if (!showOverview.isSuccessful()) {
-                logger.warning("Import overview failed");
-                // TODO: Implement error-handling
-                this.scanInProgress = false;
-                return;
-            }
-
-            // Preparing DB insert
-            ItemRow parentRow;
-            try {
-                parentRow = getParentRow(scanPath);
-            } catch (IOException e) {
-                logger.error("File operation failed:", e);
+            // Checking if the DB is available
+            if (db.getStatus() != DbStatus.READY) {
                 feedback.add(FeedbackMsg.create(
-                        "import.init.parse.parent.failed",
+                        "import.init.db.uninitialized",
                         new Object[] {}
                 ));
-                // TODO: Implement error-handling
-                this.scanInProgress = false;
-                return;
+                throw new OperationException(
+                        "Unable to proceed with scan-import; database is unavailable"
+                );
             }
-            ScanLocation scanLocation = getScanLocation(parentRow);
 
-            // Yes, I am creating a task inside a task. I'm sorry.
-            Task<OperationResult<Integer>> bulkDbInsert = new Task<>() {
+            // Open directory chooser
+            OperationResult<String> dirChooser = this.openDirChooser(window);
+            logger.result(dirChooser);
+            feedback.addAll(dirChooser.msg());
+
+            if (!dirChooser.isSuccessful() || dirChooser.value() == null) {
+                throw new OperationException(
+                        "Directory chooser returned unsuccessfully"
+                );
+            }
+
+            this.scannedPath = dirChooser.value();
+
+            // Checking if the chosen path already exists in the DB
+            this.parentNodeId = -1;
+            try {
+                ParentExistence doesNodeExist = db.withConnection(
+                        conn -> DatabaseCheck.doesParentExist(this.scannedPath, conn)
+                );
+                if (doesNodeExist == ParentExistence.IS_SCAN_LOCATION) {
+                    feedback.add(FeedbackMsg.create(
+                            "import.init.path.exists.scan",
+                            new Object[] {}
+                    ));
+                    throw new OperationException(
+                            "Unable to proceed with scan-import; selected path is already a known scan location"
+                    );
+                } else if (doesNodeExist == ParentExistence.IS_NODE) {
+                    this.parentNodeId = db.withConnection(
+                            conn -> DatabaseFetch.getNodeId(this.scannedPath, conn)
+                    );
+                    parentItemRow = db.withConnection(
+                            conn -> DatabaseFetch.getInfo(this.parentNodeId, conn)
+                    );
+                }
+            } catch (SQLException e) {
+                feedback.add(FeedbackMsg.create(
+                        "import.init.path.exists.sqlexception",
+                        new Object[] {}
+                ));
+                throw new OperationException(
+                        "Encountered SQLException while checking status of selected directory",
+                        e
+                );
+            }
+
+            // Parsing the selected directory
+            Task<ArrayList<ItemRow>> parseDirTask = new Task<>() {
                 @Override
-                protected OperationResult<Integer> call() throws SQLException {
-                    return db.withTransaction(conn ->
-                            DatabaseInsert.insertNewSet(
-                                    scanLocation, items, conn
-                            ));
+                protected ArrayList<ItemRow> call() throws IOException {
+                    return DirectoryHandler.parseDir(scannedPath);
                 }
             };
-            bulkDbInsert.setOnFailed(newEvent -> {
-                logger.error("Database operation failed:", bulkDbInsert.getException());
-                feedback.addAll(bulkDbInsert.getValue().msg());
-                // TODO: Implement error-handling
+            parseDirTask.setOnFailed(event -> {
+                logger.error(
+                        "File operation failed:",
+                        "handleScanImport",
+                        this.getClass().getName(),
+                        parseDirTask.getException()
+                );
+                feedback.add(FeedbackMsg.create(
+                        "import.init.parse.failure",
+                        new Object[] {}
+                ));
                 this.scanInProgress = false;
+                // TODO: Error-handling
             });
-            bulkDbInsert.setOnSucceeded(newEvent -> {
-                feedback.addAll(bulkDbInsert.getValue().msg());
-                callback.onSuccess(bulkDbInsert.getValue().value());
-                this.scanInProgress = false;
+            parseDirTask.setOnSucceeded(event -> {
+                logger.info(
+                        "Directory content obtained",
+                        "scanImportProccess",
+                        this.getClass().getName()
+                );
+                ArrayList<ItemRow> items = parseDirTask.getValue();
+
+                // Displaying import overview
+                OperationResult<Void> showOverview = showOverview(window, items);
+                logger.result(showOverview, "handleScanImport", this.getClass().getName());
+                feedback.addAll(showOverview.msg());
+
+                if (!showOverview.isSuccessful()) {
+                    logger.warning(
+                            "Import overview failed",
+                            "handleScanImport",
+                            this.getClass().getName()
+                    );
+                    this.scanInProgress = false;
+                    // TODO: Error-handling
+                } else {
+                    handleDbInsert(feedback, items, callback);
+                }
             });
-            Thread insertThread = new Thread(bulkDbInsert);
-            insertThread.setDaemon(true);
-            insertThread.start();
-        });
-        Thread scanDirectory = new Thread(parseDirTask);
-        scanDirectory.setDaemon(true);
-        scanDirectory.start();
+
+            logger.info("Initiating asynchronous directory reading");
+            Thread thread = new Thread(parseDirTask);
+            thread.setDaemon(true);
+            thread.start();
+
+        } catch (OperationException e) {
+            // TODO: Proper error handling
+            logger.error(
+                    "Scan-Import process could not complete:", e
+            );
+            this.scanInProgress = false;
+        }
     }
 
     // === Utility Methods === \\
 
+    /// Final step in the scan-import process that deals with the bulk DB insert
+    /// of all scanned items
+    /// @param feedback List of all feedback messages accumulated until now
+    /// @param items List of scanned items from the selected directory
+    /// @param callback What to do after the insert is completed successfully
+    private void handleDbInsert(ArrayList<FeedbackMsg> feedback, ArrayList<ItemRow> items, ScanImportCallback callback) {
+        logger.info("Initiating bulk Db insert");
+        Database db = MainApplication.getDatabaseInstance();
+        if (this.parentItemRow == null) {
+            logger.debug("Attempting to create new parent item");
+            try {
+                this.parentItemRow = getParentRow();
+            } catch (IOException e) {
+                logger.error("File operation failed:", e);
+                feedback.add(FeedbackMsg.create(
+                        "import.init.parse.parent.failed",
+                        new Object[]{}
+                ));
+                this.scanInProgress = false;
+                // TODO: Error-handling
+                return;
+            }
+        }
+        ScanLocation scanLocation = getScanLocation(this.parentItemRow);
+        Task<OperationResult<ScanLocation>> bulkDbInsert = new Task<>() {
+            @Override
+            protected OperationResult<ScanLocation> call() throws SQLException {
+                return db.withTransaction(conn ->
+                        DatabaseInsert.insertOrUpdateSet(
+                                scanLocation, items, conn
+                        ));
+            }
+        };
+        bulkDbInsert.setOnFailed(event -> {
+            logger.error(
+                    "Database bulk-insert failed:",
+                    "handleDbInsert",
+                    this.getClass().getName(),
+                    bulkDbInsert.getException()
+                    );
+            this.scanInProgress = false;
+            // TODO: Error-handling
+        });
+        bulkDbInsert.setOnSucceeded(event -> {
+            logger.info(
+                    "DB insert was successful",
+                    "handleDbInsert",
+                    this.getClass().getName()
+            );
+            feedback.addAll(bulkDbInsert.getValue().msg());
+            callback.onSuccess(bulkDbInsert.getValue().value());
+            this.scanInProgress = false;
+        });
+        logger.info("Attempting asynchronous bulk DB insert");
+        Thread thread = new Thread(bulkDbInsert);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     /// Fetches information about the chosen path
-    /// @param path User-selected path
     /// @return An `ItemRow` of the selected path
     /// @throws IOException If the path cannot be accessed
-    private ItemRow getParentRow(String path) throws IOException {
-        ItemRow parent = DirectoryHandler.parseParent(path);
-        if (this.parentNodeId != -1) {
-            parent = parent.setNewId(this.parentNodeId);
-        }
-        return parent;
+    private ItemRow getParentRow() throws IOException {
+        return DirectoryHandler.parseParent(this.scannedPath);
     }
 
     // TODO: Allow the user to define these values

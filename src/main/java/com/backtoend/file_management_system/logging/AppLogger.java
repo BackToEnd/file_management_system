@@ -3,6 +3,8 @@ package com.backtoend.file_management_system.logging;
 import com.backtoend.file_management_system.util.ErrorResult;
 import com.backtoend.file_management_system.util.FeedbackMsg;
 import com.backtoend.file_management_system.util.OperationResult;
+import com.backtoend.file_management_system.util.TriConsumer;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -306,108 +308,69 @@ public class AppLogger {
     // endregion
 
     // region Logging operation results
+    /// Logs the content of an operation result
+    /// @param result Operation result to be logged
+    /// @param sourceMethod Name of the method that called this one; relevant for callback-
+    ///                     and lambda-safe logging
+    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
     public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
         // Gathering result source information
         String resultProviderClass = result.source().getEffectiveClassName();
         String resultProviderMethod = result.source().sourceMethod();
-        info(
-                MessageFormat.format("Received operation result from [{0} > {1}]", new Object[] {resultProviderClass, resultProviderMethod}),
-                sourceMethod,
-                sourceClass
-        );
 
         // Preparing log levels and announcement message
-
-    }
-
-    /// Logs an operation result. Logging level depends on operation status:
-    /// - A `SUCCESSFUL` operation is logged at second-lowest level (`FINE`)
-    /// - A `CANCELED` operation is logged at info level
-    /// - Any other operation status (`FAILED`, `WARNING`) is logged at warning level
-    /// @param res The received operation result
-    public void result(OperationResult<?> res) {
-        // Preparing details about the caller
-        StackWalker.StackFrame caller = getCallerFrame();
-        String className;
-        String methodName = caller.getMethodName();
-        if (caller.getClassName().contains(".")) {
-            className = caller.getClassName()
-                    .substring(caller.getClassName()
-                            .lastIndexOf('.') + 1
-                    );
-        } else {
-            className = caller.getClassName();
-        }
-        logger.info("Received operation result from [" + res.source().getEffectiveClassName() + " > " + res.source().sourceMethod() + "]");
-
-        // Preparing log level and announcement message
-        Level resultLevel;
-        Level msgLevel;
         String announceResult;
-        String resultProviderClass = res.source().getEffectiveClassName();
-        String resultProviderMethod = res.source().sourceMethod();
-        switch (res.status()) {
+        TriConsumer<String, String, String> logResult;
+        TriConsumer<String, String, String> logMsg;
+        switch (result.status()) {
             case SUCCESS:
-                resultLevel = Level.INFO;
-                msgLevel = Level.FINE;
+                logResult = this::info;
+                logMsg = this::debug;
                 announceResult = " - Concluded successfully";
                 break;
             case CANCELED:
-                resultLevel = Level.INFO;
-                msgLevel = Level.FINE;
+                logResult = this::info;
+                logMsg = this::debug;
                 announceResult = " - Canceled by user";
                 break;
             case WARNING:
-                resultLevel = Level.WARNING;
-                msgLevel = Level.INFO;
+                logResult = this::warning;
+                logMsg = this::info;
                 announceResult = " - Unable to perform operation";
                 break;
             case FAILED:
-                resultLevel = Level.SEVERE;
-                msgLevel = Level.SEVERE;
+                logResult = this::error;
+                logMsg = this::error;
                 announceResult = " - Critical error encountered; unable to proceed";
                 break;
             default:
-                resultLevel = Level.WARNING;
-                msgLevel = Level.INFO;
-                announceResult = " - Unknown operation status";
+                logResult = this::warning;
+                logMsg = this::info;
+                announceResult = " - Unknown operation status: {" + result.status().toString() + "}";
         }
 
-        // Logging announcement
-        logger.logp(
-                resultLevel,
-                className,
-                methodName,
+        // Logging messages
+        logResult.accept(
                 MessageFormat.format(
-                        "Result: [{0} / {1}]", new Object[] {
-                                resultProviderClass, resultProviderMethod
-                        }
-                ) + announceResult
+                        "Received operation result from [{0} > {1}] {2}",
+                        new Object[] { resultProviderClass, resultProviderMethod, announceResult}
+                ),
+                sourceMethod, sourceClass
         );
-
-        // Logging contained messages
-        ArrayList<String> msg = res.getLoggableMessages();
-        msg.forEach(m -> {
-            logger.logp(
-                    msgLevel,
-                    className,
-                    methodName,
-                    m
+        ArrayList<String> feedback = result.getLoggableMessages();
+        feedback.forEach(msg -> {
+            logMsg.accept(
+                    msg,
+                    sourceMethod,
+                    sourceClass
             );
         });
     }
-
-    /// Allows safe logging from inside callback lambda expression
-    /// @param msg
-    /// @param source
-    /// @param level
-    public void thread(String msg, String source, Level level) {
-        StackWalker.StackFrame caller = getCallerFrame();
-        logger.logp(
-                level,
-                caller.getClassName(),
-                source,
-                msg
-        );
+    /// Logs the content of an operation result
+    /// @param result Operation result to be logged
+    public void result(OperationResult<?> result) {
+        SourceLocation caller = getCaller();
+        result(result, caller.sourceMethod(), caller.getEffectiveClassName());
     }
+    // endregion
 }

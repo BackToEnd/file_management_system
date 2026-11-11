@@ -64,7 +64,7 @@ public class ImportController {
         ObservableList<ItemRow> data = FXCollections.observableArrayList(list);
 
         // Using lamba-based cell value factories because record classes do not use standard getters like .getName() and .getFileType()
-        // but uses .name() and .fileType() instead
+        // but use .name() and .fileType() instead
         nameCol.setCellValueFactory(
                 cellData -> new ReadOnlyStringWrapper(
                         cellData.getValue().name()

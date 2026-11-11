@@ -29,9 +29,10 @@ public class MainController {
     private final ScanImport scanImport;
 
     // Constructor
-        public MainController() {
+    public MainController() {
             scanImport = new ScanImport();
         }
+
     @FXML
     private void initialize() {
         logger.info("Initiating main application interface");
@@ -47,8 +48,8 @@ public class MainController {
     @FXML
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating ScanImport");
-        Window window = (Window) ((Button) event.getSource()).getScene().getWindow();
-        this.scanImport.handleScanImport(window,itemId -> overviewController.addNewParent(itemId)
+        Window window = ((Button) event.getSource()).getScene().getWindow();
+        this.scanImport.scanImportProcess(window,itemId -> overviewController.addNewParent(itemId)
         );
     }
 
@@ -63,10 +64,6 @@ public class MainController {
     /// Generates the overview tree; is called by `MainApplication` after DB initialization finishes
     ///  successfully and should **not** be called before the initialization finishes
     public void enableOverview() {
-        OperationResult<Void> result = this.overviewController.buildTree();
-        logger.result(result);
-        MainApplication.getToastControllerInstance().showGeneric(
-                result.status(), "toast.main.overview.build"
-        );
+        overviewController.initiateBaseTree();
     }
 }
