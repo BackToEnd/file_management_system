@@ -1,5 +1,7 @@
 package com.backtoend.file_management_system;
 
+import com.backtoend.file_management_system.controller.ErrorHandler;
+import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.logging.LoggingConfig;
 import javafx.application.Application;
@@ -19,6 +21,8 @@ import java.io.IOException;
  */
 public class MainApplication extends Application {
     private final static AppLogger logger = AppLogger.getLogger(MainApplication.class);
+    private static final Database db = new Database("filesystem.db");
+    private static final ErrorHandler errorHandler = new ErrorHandler();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -49,6 +53,15 @@ public class MainApplication extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
+    // Getters, Setters
+    public static Database getDbInstance() {
+        return db;
+    }
+    public static ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
+    
     public static void main(String[] args) {
         launch();
     }

@@ -56,12 +56,16 @@ public class MainController {
     @FXML
     private void onExit() {
         logger.info("Application shutting down");
-        Platform.exit();
+        MainController.terminate();
     }
 
     /// Begins generating the overview tree after the DB initialization
     /// completes. Should **not** be called before the initialization finishes.
     public void enableOverview() {
         // TODO: Call a method that begins building the overview tree
+    }
+
+    public static void terminate() {
+        Platform.exit();
     }
 }

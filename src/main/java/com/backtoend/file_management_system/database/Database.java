@@ -1,6 +1,7 @@
 package com.backtoend.file_management_system.database;
 
 import com.backtoend.file_management_system.logging.AppLogger;
+import javafx.scene.chart.PieChart;
 
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -43,8 +44,12 @@ public class Database {
         logger.debug("Database is located at: " + this.dbLocation);
         // Testing the connection
         try (Connection conn = this.connect()) {
-            logger.info("Database connection established");
+            logger.info("Database connection established; attempting initialization");
             this.status = DbStatus.NOT_INITIALIZED;
+            DatabaseInitialization init = new DatabaseInitialization(this);
+            init.initiateDb(conn);
+            logger.info("Successfully initialized database");
+            this.status = DbStatus.READY;
         } catch (SQLException e) {
             logger.error("Unable to connect to database", e);
             this.status = DbStatus.FAILED;
