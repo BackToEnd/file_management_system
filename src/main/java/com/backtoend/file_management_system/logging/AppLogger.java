@@ -1,5 +1,9 @@
 package com.backtoend.file_management_system.logging;
 
+import com.backtoend.file_management_system.error_handling.OperationResult;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.logging.Level;
 
 /// App-specific logger system, based on `java.util.logging.Logger`\
@@ -301,69 +305,81 @@ public class AppLogger {
     // endregion
 
     // region Logging operation results
-    /// Logs the content of an operation result
-    /// @param result Operation result to be logged
-    /// @param sourceMethod Name of the method that called this one; relevant for callback-
-    ///                     and lambda-safe logging
-    /// @param sourceClass Name of the class of the method that called this one; relevant for thread-safe logging
-//    public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
-//        // Gathering result source information
-//        String resultProviderClass = result.source().getEffectiveClassName();
-//        String resultProviderMethod = result.source().sourceMethod();
-//
-//        // Preparing log levels and announcement message
-//        String announceResult;
-//        TriConsumer<String, String, String> logResult;
-//        TriConsumer<String, String, String> logMsg;
-//        switch (result.status()) {
-//            case SUCCESS:
-//                logResult = this::info;
-//                logMsg = this::debug;
-//                announceResult = " - Concluded successfully";
-//                break;
-//            case CANCELED:
-//                logResult = this::info;
-//                logMsg = this::debug;
-//                announceResult = " - Canceled by user";
-//                break;
-//            case WARNING:
-//                logResult = this::warning;
-//                logMsg = this::info;
-//                announceResult = " - Unable to perform operation";
-//                break;
-//            case FAILED:
-//                logResult = this::error;
-//                logMsg = this::error;
-//                announceResult = " - Critical error encountered; unable to proceed";
-//                break;
-//            default:
-//                logResult = this::warning;
-//                logMsg = this::info;
-//                announceResult = " - Unknown operation status: {" + result.status().toString() + "}";
-//        }
-//
-//        // Logging messages
-//        logResult.accept(
-//                MessageFormat.format(
-//                        "Received operation result from [{0} > {1}] {2}",
-//                        new Object[] { resultProviderClass, resultProviderMethod, announceResult}
-//                ),
-//                sourceMethod, sourceClass
-//        );
-//        ArrayList<String> feedback = result.getLoggableMessages();
-//        feedback.forEach(msg -> {
-//            logMsg.accept(
-//                    msg,
-//                    sourceMethod,
-//                    sourceClass
-//            );
-//        });
-//    }
-//    /// Logs the content of an operation result
-//    /// @param result Operation result to be logged
-//    public void result(OperationResult<?> result) {
-//        SourceLocation caller = getCaller();
-//        result(result, caller.sourceMethod(), caller.getEffectiveClassName());
-//    }
+    public void result(OperationResult<?> result, String sourceMethod, String sourceClass) {
+        // Gathering result source information
+        String resultProviderClass = result.source().getEffectiveClassName();
+        String resultProviderMethod = result.source().sourceMethod();
+
+        // Preparing log levels and announcement message
+        String announceResultSuffix;
+        IResultLogger<String, String, String> logAnnouncement;
+        IResultLogger<String, String, String> logMsg;
+
+        // Identifying logging levels and announcement message
+        switch (result.status()) {
+            case SUCCESS:
+                logAnnouncement = this::info;
+                logMsg = this::debug;
+                announceResultSuffix = " - Concluded successfully";
+                break;
+            case CANCELED:
+                logAnnouncement = this::info;
+                logMsg = this::debug;
+                announceResultSuffix = " - Canceled by user";
+                break;
+            case WARNING:
+                logAnnouncement = this::warning;
+                logMsg = this::info;
+                announceResultSuffix = " - Unable to perform operation";
+                break;
+            case FAILED:
+                logAnnouncement = this::error;
+                logMsg = this::error;
+                announceResultSuffix = " - Failed due to critical error";
+                break;
+            default:
+                logAnnouncement = this::warning;
+                logMsg = this::info;
+                announceResultSuffix = " - Unknown operation status: {" + result.status().toString() + "}";
+        }
+
+        // Logging announcement and messages
+        logAnnouncement.accept(MessageFormat.format(
+                "Received operation result from [{0} > {1}]",
+                new Object[] { resultProviderClass, resultProviderMethod }
+                ), sourceMethod, sourceClass
+        );
+        ArrayList<String> feedback = result.getLoggableMsgs();
+        feedback.forEach(msg -> {
+            logMsg.accept(
+                    msg, sourceMethod, sourceClass
+            );
+        });
+
+        // Logging an exception if one was encountered:
+        if (result.error() != null) {
+            String errorMsg = "Operation result contained the following error:";
+            if (result.isFailed()) {
+                this.error(
+                        errorMsg,
+                        sourceMethod,
+                        sourceClass,
+                        result.error()
+                );
+            } else {
+                this.debug(
+                        errorMsg,
+                        sourceMethod,
+                        sourceClass,
+                        result.error()
+                );
+            }
+        }
+    }
+
+    public void result(OperationResult<?> result) {
+        SourceLocation caller = getCaller();
+        result(result, caller.sourceMethod(), caller.getEffectiveClassName());
+    }
     // endregion
 }

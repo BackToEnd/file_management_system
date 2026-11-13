@@ -1,5 +1,7 @@
 package com.backtoend.file_management_system.database;
 
+import com.backtoend.file_management_system.error_handling.FeedbackMsg;
+import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
 
 import java.sql.Connection;
@@ -7,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DatabaseInitialization {
@@ -74,28 +77,47 @@ public class DatabaseInitialization {
         );
     }
 
-    public void initiateDb(Connection conn) throws SQLException {
+    public OperationResult<Void> initiateDb(Connection conn) {
+        ArrayList<FeedbackMsg> feedback = new ArrayList<>();
         if (this.db.getStatus() != Database.DbStatus.NOT_INITIALIZED) {
-            throw new IllegalStateException(
-                    MessageFormat.format(
-                            "Invalid database status. Expected: {0}. Got: {1}",
-                            new Object[] { Database.DbStatus.NOT_INITIALIZED.toString(), this.db.getStatus().toString() }
+            feedback.add(FeedbackMsg.create(
+                "database.initialization.status.illegal",
+                    new Object[] { this.db.getStatus() }
+            ));
+            return OperationResult.failed(
+                    null, feedback, new IllegalStateException(
+                            MessageFormat.format(
+                                    "Invalid database status. Expected: {0}. Got: {1}",
+                                    new Object[] { Database.DbStatus.NOT_INITIALIZED.toString(), this.db.getStatus().toString() }
+                            )
                     )
             );
         }
 
         // Beginning initialization
+        feedback.add(FeedbackMsg.create(
+                "database.initialization.status.valid",
+                new Object[] {}
+        ));
         try (Statement stmt = conn.createStatement()) {
             // Setting journal mode to 'WAL' to allow simultaneous reading and writing
             stmt.execute(
                     "PRAGMA journal_mode = WAL"
             );
+            feedback.add(FeedbackMsg.create(
+                    "database.initialization.journey.success",
+                    new Object[] {}
+            ));
 
             // Creating all tables
             for (String table : this.tables) {
                 stmt.execute(table);
             }
             logger.info("All tables created or skipped");
+            feedback.add(FeedbackMsg.create(
+                    "database.initialization.tables.success",
+                    new Object[] {}
+            ));
 
             // Applying constraints and other table modifications
             for (HashMap.Entry<String, String> set : this.constraints.entrySet()) {
@@ -109,6 +131,21 @@ public class DatabaseInitialization {
                     stmt.execute(set.getValue());
                 }
             }
+            feedback.add(FeedbackMsg.create(
+                    "database.initialization.constraints.success",
+                    new Object[] {}
+            ));
+            return OperationResult.success(
+                    null, feedback
+            );
+        } catch (SQLException e) {
+            feedback.add(FeedbackMsg.create(
+                    "database.initialization.exception.sql",
+                    new Object[] {}
+            ));
+            return OperationResult.failed(
+                    null, feedback, e
+            );
         }
     }
 

@@ -18,4 +18,6 @@ module com.backtoend.file_management_system {
 
     opens com.backtoend.file_management_system to javafx.fxml;
     opens com.backtoend.file_management_system.controller to javafx.fxml;
+    exports com.backtoend.file_management_system.error_handling;
+    opens com.backtoend.file_management_system.error_handling to javafx.fxml;
 }

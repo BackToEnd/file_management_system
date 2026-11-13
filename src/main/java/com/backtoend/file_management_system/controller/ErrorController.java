@@ -1,11 +1,17 @@
 package com.backtoend.file_management_system.controller;
 
+import com.backtoend.file_management_system.helpers.ExceptionToString;
 import com.backtoend.file_management_system.util.I18n;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.Window;
+
+import java.util.ArrayList;
 
 public class ErrorController {
     @FXML
@@ -14,14 +20,18 @@ public class ErrorController {
     private Label errorDesc;
     @FXML
     private Button buttonConfirm;
+    @FXML
+    private VBox listContainer;
+
+    private ListView<String> msgList;
 
     private final I18n i = I18n.getInstance();
 
     @FXML
     private void initialize() {
-        errorHeader.textProperty().bind(i.bind("modal.error.header.generic"));
-        errorDesc.textProperty().bind(i.bind("modal.error.body.generic"));
-        buttonConfirm.textProperty().bind(i.bind("modal.error.button"));
+        errorHeader.setText(i.get("modal.error.header.generic"));
+        errorDesc.setText(i.get("modal.error.body.generic"));
+        buttonConfirm.setText(i.get("modal.error.button"));
     }
 
     @FXML
@@ -31,14 +41,21 @@ public class ErrorController {
     }
 
     // Getters, setters
-    public void bindHeader(String header) {
-        errorHeader.textProperty().unbind();
-        errorHeader.textProperty().bind(i.bind(header));
+    public void setHeaderKey(String headerKey) {
+        this.errorHeader.setText(i.get(headerKey));
     }
-    public void setBody(String text) {
+    public void setHeaderString(String header) {
+        this.errorHeader.setText(header);
+    }
+    public void setBodyKey(String bodyKey) {
+        this.errorDesc.setText(i.get(bodyKey));
+    }
+    public void setBodyString(String text) {
         this.errorDesc.setText(text);
     }
-    public Window getWindow() {
-        return this.errorHeader.getScene().getWindow();
+    public void setMsgList(ArrayList<String> messages) {
+        ObservableList<String> observable = FXCollections.observableArrayList(messages);
+        msgList = new ListView<>(observable);
+        listContainer.getChildren().add(msgList);
     }
 }

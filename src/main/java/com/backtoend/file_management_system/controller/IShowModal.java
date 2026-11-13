@@ -15,7 +15,6 @@ public interface IShowModal {
     Window getOwner();
     Modality getModality();
     String getFxmlFile();
-    FXMLLoader getFxmlLoader();
 
     default FXMLLoader loadFxml() throws IOException {
         return new FXMLLoader(
@@ -23,13 +22,12 @@ public interface IShowModal {
         );
     }
 
-    default Parent getRoot() throws IOException {
-        return getFxmlLoader().load();
+    default Parent getRoot(FXMLLoader fxml) throws IOException {
+        return fxml.load();
     }
 
 
-    default Stage setStage() throws IOException {
-        Parent root = getRoot();
+    default Stage setStage(FXMLLoader fxml, Parent root) throws IOException {
         Stage stage = new Stage();
         stage.setTitle(getTitle());
         stage.initOwner(getOwner());

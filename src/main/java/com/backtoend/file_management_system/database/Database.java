@@ -1,12 +1,19 @@
 package com.backtoend.file_management_system.database;
 
+import com.backtoend.file_management_system.MainApplication;
+import com.backtoend.file_management_system.error_handling.IErrorCallback;
+import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.logging.SourceLocation;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.chart.PieChart;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.*;
 
 /// Primary database helper class. Manages connections and transactions,
 /// keeps track of database status and initialization, does not perform
@@ -18,6 +25,8 @@ public class Database {
     private final String dbLocation;
     /// Current database status
     private DbStatus status;
+    private final ExecutorService readExecutor;
+    private final ExecutorService writeExecutor;
 
     /// Enum for all possible states the DB can have;
     /// - `NOT_INITIALIZED`: database initialization has not yet been requested
@@ -31,6 +40,7 @@ public class Database {
         FAILED
     }
 
+    // TODO: readExecutor *can* be multi-threaded if that is properly accounted for
     /// Constructor. Creates a new `Database` instance, defines the path to
     /// the .db file, and attempts to connect. If a connection can be established,
     /// its status will be set to `NOT_INITIALIZED`, and an initialization process
@@ -42,18 +52,37 @@ public class Database {
         Path dbPath = Path.of("data", path);
         this.dbLocation = "jdbc:sqlite:" + dbPath;
         logger.debug("Database is located at: " + this.dbLocation);
+        this.readExecutor = Executors.newSingleThreadExecutor();
+        this.writeExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    public void initialize(IErrorCallback handle) throws SQLException {
         // Testing the connection
-        try (Connection conn = this.connect()) {
-            logger.info("Database connection established; attempting initialization");
-            this.status = DbStatus.NOT_INITIALIZED;
-            DatabaseInitialization init = new DatabaseInitialization(this);
-            init.initiateDb(conn);
-            logger.info("Successfully initialized database");
-            this.status = DbStatus.READY;
-        } catch (SQLException e) {
-            logger.error("Unable to connect to database", e);
-            this.status = DbStatus.FAILED;
-        }
+        logger.info("Database connection established; attempting initialization");
+        this.status = DbStatus.NOT_INITIALIZED;
+        DatabaseInitialization init = new DatabaseInitialization(this);
+        CompletableFuture<OperationResult<Void>> result =
+                CompletableFuture.supplyAsync(() -> {
+                    try (Connection conn = connect()) {
+                        return init.initiateDb(conn);
+                    } catch (SQLException e) {
+                        throw new CompletionException(e);
+                    }
+                }, writeExecutor);
+        result.exceptionally(e -> {
+            return OperationResult.failed(
+                    null, null, new SourceLocation(
+                            this.getClass().getName(),
+                            "initialize"
+                    ),
+                    e
+            );
+        });
+        result.thenAccept(operationResult -> {
+            Platform.runLater(() -> {
+                processInitResult(handle, operationResult);
+            });
+        });
     }
 
     public DbStatus getStatus() {
@@ -105,6 +134,19 @@ public class Database {
         }
     }
 
+    // region Interacting with executable services
+    public void executeWrite(Runnable task) {
+        writeExecutor.execute(task);
+    }
+    public void executeRead(Runnable task) {
+        readExecutor.execute(task);
+    }
+    public void shutdown() {
+        readExecutor.shutdown();
+        writeExecutor.shutdown();
+    }
+    // endregion
+
     // === Private Helper Methods === \\
 
     /// Shortcut to create a database connection. This method should not
@@ -121,5 +163,14 @@ public class Database {
             logger.info("A connection to the database was requested before the database had been initialized");
         }
         return DriverManager.getConnection(this.dbLocation);
+    }
+
+    private void processInitResult(IErrorCallback callback, OperationResult<Void> result) {
+        if (result.isSuccess()) {
+            this.status = DbStatus.READY;
+        } else {
+            this.status = DbStatus.FAILED;
+        }
+        callback.handle(result);
     }
 }

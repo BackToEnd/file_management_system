@@ -14,5 +14,6 @@
     <HBox spacing="10" alignment="BOTTOM_RIGHT">
         <Button fx:id="browseBtn" onAction="#onChooseDirectory"/>
         <Button fx:id="killBtn" onAction="#onExit"/>
+        <Button fx:id="errorBtn" onAction="#showTestError"/>
     </HBox>
 </VBox>

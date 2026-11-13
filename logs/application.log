@@ -1,5 +1,15 @@
-[18:05:56.615] [INFO] [file_management_system] > configure: Logger initialized
-[18:05:56.616] [INFO] [file_management_system] > configure: Log directory: logs
-[18:05:56.616] [FINE] [MainApplication] > start: Attempting to load main view FXML file
-[18:05:56.793] [INFO] [MainController] > initialize: Initiating main application interface
-[18:08:50.726] [INFO] [MainController] > onExit: Application shutting down
+[12:14:31.630] [INFO] [file_management_system] > configure: Logger initialized
+[12:14:31.635] [INFO] [file_management_system] > configure: Log directory: logs
+[12:14:31.636] [FINE] [MainApplication] > start: Attempting to load main view FXML file
+[12:14:31.902] [INFO] [Database] > initialize: Database connection established; attempting initialization
+[12:14:31.907] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
+[12:14:32.178] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
+[12:14:32.186] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column node to table parent
+[12:14:32.295] [INFO] [MainController] > initialize: Initiating main application interface
+[12:14:32.658] [INFO] [MainApplication] > start: Database status: NOT_INITIALIZED
+[12:14:32.662] [INFO] [MainController] > handleOperationResult: Received operation result from [OperationResult > success]
+[12:14:32.663] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Database initialization pending - Beginning initialization
+[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Changed journey mode from default to WAL
+[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Created all required tables
+[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Added all missing columns and constraints
+[12:15:02.167] [INFO] [MainController] > onExit: Application shutting down

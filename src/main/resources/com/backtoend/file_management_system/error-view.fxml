@@ -10,13 +10,27 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.backtoend.file_management_system.controller.ErrorController"
+      spacing="20"
       prefHeight="400.0" prefWidth="600.0">
     <padding>
-        <Insets top="15" right="15" left="15" bottom="15"/>
+        <Insets top="15" right="30" left="30" bottom="15"/>
     </padding>
-    <Label fx:id="errorHeader"/>
-    <Label fx:id="errorDesc"/>
-    <HBox spacing="10">
+    <VBox spacing="10">
+        <Label fx:id="errorHeader"
+               style="-fx-font-size: 18px;"
+        />
+    </VBox>
+    <VBox spacing="10" alignment="CENTER" prefWidth="340">
+        <padding>
+            <Insets top="25" bottom="30"/>
+        </padding>
+        <Label fx:id="errorDesc"
+               wrapText="true"
+        />
+    </VBox>
+    <VBox spacing="10" alignment="CENTER" fx:id="listContainer">
+    </VBox>
+    <HBox spacing="10" alignment="BOTTOM_CENTER">
         <Button fx:id="buttonConfirm" onAction="#onConfirm"/>
     </HBox>
 </VBox>
