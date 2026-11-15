@@ -1,15 +1,14 @@
-[12:14:31.630] [INFO] [file_management_system] > configure: Logger initialized
-[12:14:31.635] [INFO] [file_management_system] > configure: Log directory: logs
-[12:14:31.636] [FINE] [MainApplication] > start: Attempting to load main view FXML file
-[12:14:31.902] [INFO] [Database] > initialize: Database connection established; attempting initialization
-[12:14:31.907] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
-[12:14:32.178] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
-[12:14:32.186] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column node to table parent
-[12:14:32.295] [INFO] [MainController] > initialize: Initiating main application interface
-[12:14:32.658] [INFO] [MainApplication] > start: Database status: NOT_INITIALIZED
-[12:14:32.662] [INFO] [MainController] > handleOperationResult: Received operation result from [OperationResult > success]
-[12:14:32.663] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Database initialization pending - Beginning initialization
-[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Changed journey mode from default to WAL
-[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Created all required tables
-[12:14:32.664] [FINE] [MainController] > handleOperationResult: Message: [FeedbackMsg / create] Added all missing columns and constraints
-[12:15:02.167] [INFO] [MainController] > onExit: Application shutting down
+[21:09:22.525] [INFO] [file_management_system] > configure: Logger initialized
+[21:09:22.527] [INFO] [file_management_system] > configure: Log directory: logs
+[21:09:22.527] [FINE] [MainApplication] > start: Attempting to load main view FXML file
+[21:09:22.599] [INFO] [Database] > initialize: Database connection established; attempting initialization
+[21:09:22.602] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
+[21:09:22.683] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
+[21:09:22.684] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column node to table parent
+[21:09:22.703] [INFO] [MainController] > initialize: Initiating main application interface
+[21:09:22.851] [INFO] [MainController] > handleOperationResult: Received operation result from [DatabaseInitialization > initiateDb]: SUCCESS
+[21:09:22.852] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Database initialization pending - Beginning initialization
+[21:09:22.852] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Changed journey mode from default to WAL
+[21:09:22.852] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Created all required tables
+[21:09:22.852] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Added all missing columns and constraints
+[21:09:26.662] [INFO] [MainController] > onExit: Application shutting down

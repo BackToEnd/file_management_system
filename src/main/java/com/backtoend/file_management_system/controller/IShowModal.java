@@ -27,7 +27,7 @@ public interface IShowModal {
     }
 
 
-    default Stage setStage(FXMLLoader fxml, Parent root) throws IOException {
+    default Stage setStage(Parent root) throws IOException {
         Stage stage = new Stage();
         stage.setTitle(getTitle());
         stage.initOwner(getOwner());

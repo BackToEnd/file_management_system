@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Objects;
 
+// TODO: Fix duplicate code
 public class ErrorHandler implements IShowModal {
     private final static AppLogger logger = AppLogger.getLogger(ErrorHandler.class);
     private final String modalTitle = "modal.error.title";
@@ -75,7 +76,7 @@ public class ErrorHandler implements IShowModal {
             if (list != null) {
                 controller.setMsgList(list);
             }
-            Stage stage = setStage(fxml, root);
+            Stage stage = setStage(root);
             stage.showAndWait();
             logger.warning("Error displayed and acknowledged. Terminating application.");
         } catch (IOException e) {
@@ -122,7 +123,7 @@ public class ErrorHandler implements IShowModal {
                 );
             }
 
-            Stage stage = setStage(fxml, root);
+            Stage stage = setStage(root);
             stage.showAndWait();
             logger.warning("Error displayed and acknowledged. Terminating application.");
         } catch (IOException e) {

@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.Window;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /// Main controller class. Handles user interactions with main application elements,
@@ -43,6 +44,8 @@ public class MainController {
                     .initialize(this::handleOperationResult);
         } catch (SQLException e) {
             logger.error("Encountered a problem during initialization:", e);
+        } catch (IOException e) {
+            logger.error("Unable to create or access DB directory:", e);
         }
     }
 
@@ -99,7 +102,9 @@ public class MainController {
         // TODO: Call a method that begins building the overview tree
     }
 
+    // FIXME: Shut down executor services
     public static void terminate() {
+        MainApplication.getDbInstance().shutdown();
         Platform.exit();
     }
 

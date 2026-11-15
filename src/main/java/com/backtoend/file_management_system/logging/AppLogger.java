@@ -1,5 +1,6 @@
 package com.backtoend.file_management_system.logging;
 
+import com.backtoend.file_management_system.error_handling.FeedbackMsg;
 import com.backtoend.file_management_system.error_handling.OperationResult;
 
 import java.text.MessageFormat;
@@ -63,11 +64,9 @@ public class AppLogger {
         String className = frame.getClassName();
         String methodName = frame.getMethodName();
 
-        return className.equals(AppLogger.class.getName()
-//                || className.equals(FeedbackMsg.class.getName())
-//                || className.equals(OperationResult.class.getName())
-//                || className.equals(ErrorResult.class.getName()
-                );
+        return className.equals(AppLogger.class.getName())
+                || className.equals(FeedbackMsg.class.getName())
+                || className.equals(OperationResult.class.getName());
     }
 
 
@@ -345,8 +344,8 @@ public class AppLogger {
 
         // Logging announcement and messages
         logAnnouncement.accept(MessageFormat.format(
-                "Received operation result from [{0} > {1}]",
-                new Object[] { resultProviderClass, resultProviderMethod }
+                "Received operation result from [{0} > {1}]: {2}",
+                new Object[] { resultProviderClass, resultProviderMethod, result.status().toString() }
                 ), sourceMethod, sourceClass
         );
         ArrayList<String> feedback = result.getLoggableMsgs();

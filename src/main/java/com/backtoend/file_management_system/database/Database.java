@@ -1,6 +1,7 @@
 package com.backtoend.file_management_system.database;
 
 import com.backtoend.file_management_system.MainApplication;
+import com.backtoend.file_management_system.error_handling.ErrorHandler;
 import com.backtoend.file_management_system.error_handling.IErrorCallback;
 import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
@@ -9,6 +10,8 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.chart.PieChart;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -49,6 +52,7 @@ public class Database {
     /// if the initialization process is successful.
     /// @param path name of the database file
     public Database(String path) {
+        // Creating data folder if none exists
         Path dbPath = Path.of("data", path);
         this.dbLocation = "jdbc:sqlite:" + dbPath;
         logger.debug("Database is located at: " + this.dbLocation);
@@ -56,10 +60,13 @@ public class Database {
         this.writeExecutor = Executors.newSingleThreadExecutor();
     }
 
-    public void initialize(IErrorCallback handle) throws SQLException {
+    public void initialize(IErrorCallback handle) throws SQLException, IOException {
+        // Creating DB directory if it does not yet exist
+        Path dbFolder = Path.of("data");
+        Files.createDirectories(dbFolder);
         // Testing the connection
         logger.info("Database connection established; attempting initialization");
-        this.status = DbStatus.NOT_INITIALIZED;
+        this.status = DbStatus.INITIALIZING;
         DatabaseInitialization init = new DatabaseInitialization(this);
         CompletableFuture<OperationResult<Void>> result =
                 CompletableFuture.supplyAsync(() -> {
@@ -69,20 +76,14 @@ public class Database {
                         throw new CompletionException(e);
                     }
                 }, writeExecutor);
-        result.exceptionally(e -> {
-            return OperationResult.failed(
-                    null, null, new SourceLocation(
-                            this.getClass().getName(),
-                            "initialize"
-                    ),
-                    e
-            );
-        });
-        result.thenAccept(operationResult -> {
-            Platform.runLater(() -> {
-                processInitResult(handle, operationResult);
-            });
-        });
+        result.exceptionally(e -> OperationResult.failed(
+                null, null, new SourceLocation(
+                        this.getClass().getName(),
+                        "initialize"
+                ),
+                e
+        ));
+        result.thenAccept(operationResult -> Platform.runLater(() -> processInitResult(handle, operationResult)));
     }
 
     public DbStatus getStatus() {

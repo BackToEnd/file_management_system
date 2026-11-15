@@ -53,7 +53,6 @@ public class MainApplication extends Application {
         stage.setTitle("File Management System");
         stage.setScene(scene);
         stage.show();
-        logger.info("Database status: " + MainApplication.db.getStatus());
     }
 
     // Getters, Setters

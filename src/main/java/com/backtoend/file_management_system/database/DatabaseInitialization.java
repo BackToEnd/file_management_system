@@ -79,7 +79,7 @@ public class DatabaseInitialization {
 
     public OperationResult<Void> initiateDb(Connection conn) {
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
-        if (this.db.getStatus() != Database.DbStatus.NOT_INITIALIZED) {
+        if (this.db.getStatus() != Database.DbStatus.INITIALIZING) {
             feedback.add(FeedbackMsg.create(
                 "database.initialization.status.illegal",
                     new Object[] { this.db.getStatus() }
@@ -88,7 +88,7 @@ public class DatabaseInitialization {
                     null, feedback, new IllegalStateException(
                             MessageFormat.format(
                                     "Invalid database status. Expected: {0}. Got: {1}",
-                                    new Object[] { Database.DbStatus.NOT_INITIALIZED.toString(), this.db.getStatus().toString() }
+                                    new Object[] { Database.DbStatus.INITIALIZING.toString(), this.db.getStatus().toString() }
                             )
                     )
             );

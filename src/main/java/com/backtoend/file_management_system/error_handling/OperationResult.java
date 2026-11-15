@@ -85,20 +85,20 @@ public record OperationResult<T>(
             T value, ArrayList<FeedbackMsg> msgs,
             SourceLocation source
     ) {
-        return success(value, msgs, source, null);
+        return canceled(value, msgs, source, null);
     }
     public static <T> OperationResult<T> canceled(
             T value, ArrayList<FeedbackMsg> msgs,
             Throwable error
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, error);
+        return canceled(value, msgs, source, error);
     }
     public static <T> OperationResult<T> canceled(
             T value, ArrayList<FeedbackMsg> msgs
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, null);
+        return canceled(value, msgs, source, null);
     }
     // endregion
     // region Operations that resulted in warnings
@@ -112,20 +112,20 @@ public record OperationResult<T>(
             T value, ArrayList<FeedbackMsg> msgs,
             SourceLocation source
     ) {
-        return success(value, msgs, source, null);
+        return warning(value, msgs, source, null);
     }
     public static <T> OperationResult<T> warning(
             T value, ArrayList<FeedbackMsg> msgs,
             Throwable error
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, error);
+        return warning(value, msgs, source, error);
     }
     public static <T> OperationResult<T> warning(
             T value, ArrayList<FeedbackMsg> msgs
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, null);
+        return warning(value, msgs, source, null);
     }
     // endregion
     // region Failed operations
@@ -139,20 +139,20 @@ public record OperationResult<T>(
             T value, ArrayList<FeedbackMsg> msgs,
             SourceLocation source
     ) {
-        return success(value, msgs, source, null);
+        return failed(value, msgs, source, null);
     }
     public static <T> OperationResult<T> failed(
             T value, ArrayList<FeedbackMsg> msgs,
             Throwable error
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, error);
+        return failed(value, msgs, source, error);
     }
     public static <T> OperationResult<T> failed(
             T value, ArrayList<FeedbackMsg> msgs
     ) {
         SourceLocation source = AppLogger.getCaller();
-        return success(value, msgs, source, null);
+        return failed(value, msgs, source, null);
     }
     // endregion
 
