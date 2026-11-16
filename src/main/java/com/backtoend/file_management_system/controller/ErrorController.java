@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
-public class ErrorController {
+public class ErrorController implements IModalController {
     @FXML
     private Label errorHeader;
     @FXML

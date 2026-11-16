@@ -4,6 +4,7 @@ import com.backtoend.file_management_system.error_handling.ErrorHandler;
 import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.logging.LoggingConfig;
+import com.backtoend.file_management_system.service.DirectoryHandler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -23,7 +24,7 @@ public class MainApplication extends Application {
     private final static AppLogger logger = AppLogger.getLogger(MainApplication.class);
     private static final Database db = new Database("filesystem.db");
     private static final ErrorHandler errorHandler = new ErrorHandler();
-    
+    private static final DirectoryHandler dirHandler = new DirectoryHandler();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -62,6 +63,7 @@ public class MainApplication extends Application {
     public static ErrorHandler getErrorHandler() {
         return errorHandler;
     }
+    public static DirectoryHandler getDirHandler() { return dirHandler; }
     
     public static void main(String[] args) {
         launch();

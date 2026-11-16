@@ -15,6 +15,8 @@ module com.backtoend.file_management_system {
     exports com.backtoend.file_management_system.database;
     exports com.backtoend.file_management_system.logging;
     exports com.backtoend.file_management_system.util;
+    exports com.backtoend.file_management_system.service;
+    exports com.backtoend.file_management_system.model;
 
     opens com.backtoend.file_management_system to javafx.fxml;
     opens com.backtoend.file_management_system.controller to javafx.fxml;

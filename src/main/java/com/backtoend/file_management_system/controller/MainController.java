@@ -6,6 +6,7 @@ import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.util.I18n;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,12 +14,14 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 
 /// Main controller class. Handles user interactions with main application elements,
 /// initiates relevant processes, maintains all other base UI controllers.
 /// @author Rogue049
 public class MainController {
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
+    private static final int PREVENT_SOFTLOCK = 20;
     private final ErrorHandler errors = MainApplication.getErrorHandler();
     private final I18n i = I18n.getInstance();
 
@@ -73,7 +76,6 @@ public class MainController {
     /// Shut down the application
     @FXML
     private void onExit() {
-        logger.info("Application shutting down");
         MainController.terminate();
     }
 
@@ -105,7 +107,10 @@ public class MainController {
     // FIXME: Shut down executor services
     public static void terminate() {
         MainApplication.getDbInstance().shutdown();
-        Platform.exit();
+        Task<Boolean> shutDown = MainController.getShutDownTask();
+        Thread thread = new Thread(shutDown);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void handleOperationResult(OperationResult<?> result) {
@@ -115,9 +120,70 @@ public class MainController {
                 this.getClass().getName()
         );
         if (result.isFailed()) {
-            errors.displayOperationResult(
+            errors.showOperationResult(
                     killBtn.getScene().getWindow(), result
             );
         }
+    }
+
+    private static Task<Boolean> getShutDownTask() {
+        logger.info("Shut-down initiated; shutting down executor services");
+        Task<Boolean> shutDown = new Task<>() {
+            @Override
+            protected Boolean call() {
+                logger.debug(
+                        "Awaiting all executor service shutdowns on background thread"
+                );
+                boolean canShutDown = false;
+                int preventSoftlock = 0;
+                while (!canShutDown && preventSoftlock < PREVENT_SOFTLOCK) {
+                    logger.trace(
+                            "Shut-down attempt: " + preventSoftlock
+                    );
+                    canShutDown = MainApplication.getDbInstance().awaitTermination();
+                    if (preventSoftlock == (PREVENT_SOFTLOCK / 2)) {
+                        logger.warning(MessageFormat.format(
+                                "Shut-down has been attempted {0} times; half as many times as is allowed",
+                                new Object[] { preventSoftlock }
+                                )
+                        );
+                    }
+                    preventSoftlock++;
+                }
+                return canShutDown;
+            }
+        };
+        // TODO: What amount of error-handling can be done here?
+        shutDown.setOnCancelled(event -> {
+            logger.warning(
+                    "Shut-down has been canceled",
+                    "getShutDownTask (canceled)",
+                    MainController.class.getName()
+            );
+        });
+        shutDown.setOnFailed(event -> {
+            logger.warning(
+                    "Shut-down has failed",
+                    "getShutDownTask (failed)",
+                    MainController.class.getName()
+            );
+        });
+        shutDown.setOnSucceeded(event -> {
+            if (shutDown.getValue()) {
+                logger.info(
+                        "Successfully shut down all executor services; application shutting down",
+                        "getShutDownTask (success)",
+                        MainController.class.getName()
+                );
+                Platform.exit();
+            } else {
+                logger.warning(
+                        "Unable to shut down executor services; something might be stuck",
+                        "getShutDownTask (success)",
+                        MainController.class.getName()
+                );
+            }
+        });
+        return shutDown;
     }
 }

@@ -6,6 +6,7 @@ import com.backtoend.file_management_system.error_handling.IErrorCallback;
 import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.logging.SourceLocation;
+import com.backtoend.file_management_system.util.IExecutorService;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.chart.PieChart;
@@ -22,7 +23,7 @@ import java.util.concurrent.*;
 /// keeps track of database status and initialization, does not perform
 /// SQL queries.
 /// @author Rogue049
-public class Database {
+public class Database implements IExecutorService {
     private static final AppLogger logger = AppLogger.getLogger(Database.class);
     /// JDBC path of the database file
     private final String dbLocation;
@@ -43,7 +44,6 @@ public class Database {
         FAILED
     }
 
-    // TODO: readExecutor *can* be multi-threaded if that is properly accounted for
     /// Constructor. Creates a new `Database` instance, defines the path to
     /// the .db file, and attempts to connect. If a connection can be established,
     /// its status will be set to `NOT_INITIALIZED`, and an initialization process
@@ -56,7 +56,7 @@ public class Database {
         Path dbPath = Path.of("data", path);
         this.dbLocation = "jdbc:sqlite:" + dbPath;
         logger.debug("Database is located at: " + this.dbLocation);
-        this.readExecutor = Executors.newSingleThreadExecutor();
+        this.readExecutor = Executors.newFixedThreadPool(2);
         this.writeExecutor = Executors.newSingleThreadExecutor();
     }
 
@@ -89,6 +89,7 @@ public class Database {
     public DbStatus getStatus() {
         return this.status;
     }
+    public boolean ready() { return this.status == DbStatus.READY; }
 
     /// Perform the given DB operation.\
     /// For multi-step insert queries, use {@link Database#withTransaction}
@@ -97,7 +98,7 @@ public class Database {
     /// @return the result of the database operation
     /// @param <T> the datatype returned by the database operation
     /// @throws SQLException if the given operation throws
-    public <T> T withConnection(ISqlQuery<T> query) throws SQLException {
+    private <T> T withConnection(ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             return query.execute(conn);
         }
@@ -116,7 +117,7 @@ public class Database {
     /// @return the result of the database operation
     /// @param <T> the datatype returned by the database operation
     /// @throws SQLException if the given operation throws
-    public <T> T withTransaction(ISqlQuery<T> query) throws SQLException {
+    private <T> T withTransaction(ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             conn.setAutoCommit(false);
 
@@ -142,12 +143,69 @@ public class Database {
     public void executeRead(Runnable task) {
         readExecutor.execute(task);
     }
+
+    public <T> CompletableFuture<T> read(ISqlQuery<T> query) {
+        logger.debug("Queueing read operation");
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.withConnection(query);
+            } catch (SQLException e) {
+                throw new CompletionException(e);
+            }
+        }, readExecutor);
+    }
+
+    public <T> CompletableFuture<T> writeWithConnection(ISqlQuery<T> query) {
+        logger.debug("Queueing write-with-connection operation");
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.withConnection(query);
+            } catch (SQLException e) {
+                throw new CompletionException(e);
+            }
+        }, writeExecutor);
+    }
+
+    public <T> CompletableFuture<T> writeWithTransaction(ISqlQuery<T> query) {
+        logger.debug("Queueing write-with-transaction operation");
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return this.withTransaction(query);
+            } catch (SQLException e) {
+                throw new CompletionException(e);
+            }
+        }, writeExecutor);
+    }
     public void shutdown() {
         readExecutor.shutdown();
         writeExecutor.shutdown();
     }
     // endregion
 
+    public boolean awaitTermination() {
+        try {
+            boolean readTerminated = readExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            boolean writeTerminated = writeExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            logger.debug(
+                    "Read executor status: "
+                    + ((readTerminated) ? "Terminated" : "Busy")
+            );
+            logger.debug(
+                    "Write executor status: "
+                            + ((writeTerminated) ? "Terminated" : "Busy")
+            );
+            return readTerminated && writeTerminated;
+        } catch (InterruptedException e) {
+            logger.error(
+                    "Unable to shut down database executor services:",
+                    "awaitTermination",
+                    this.getClass().getName(),
+                    e
+            );
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
     // === Private Helper Methods === \\
 
     /// Shortcut to create a database connection. This method should not

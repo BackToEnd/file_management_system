@@ -25,6 +25,9 @@ public class ErrorHandler implements IShowModal {
     private final I18n i = I18n.getInstance();
     private Window owner;
     private boolean isAvailable;
+    private FXMLLoader fxml;
+    private Parent root;
+    private ErrorController controller;
 
     public ErrorHandler() {
         this.isAvailable = true;
@@ -47,92 +50,84 @@ public class ErrorHandler implements IShowModal {
     public String getFxmlFile() {
         return this.fxmlFile;
     }
+    @Override
+    public FXMLLoader getFxmlLoader() { return this.fxml; }
     // endregion
 
     // Displaying an error
-    public void showError(String header, String body, Window owner, ArrayList<String> list) {
+    public void showError(String header, String body, Window owner, ArrayList<String> list, boolean isFatal) {
         logger.warning("Critical error received, attempting to load error view FXML file");
         if (!this.isAvailable) {
             logger.warning("Unable to display two errors at the same time");
             return;
         }
         try {
-            this.owner = owner;
-            this.isAvailable = false;
-            FXMLLoader fxml = loadFxml();
-            logger.debug("FXML file loaded");
-            Parent root = getRoot(fxml);
-            ErrorController controller = fxml.getController();
-            if (controller == null) {
-                logger.error("Unable to fetch controller for some reason");
-                return;
-            }
-            if (header != null) {
-                controller.setHeaderKey(header);
-            }
-            if (body != null) {
-                controller.setBodyString(body);
-            }
-            if (list != null) {
-                controller.setMsgList(list);
-            }
-            Stage stage = setStage(root);
-            stage.showAndWait();
+            configureAll(owner, header, body, list);
             logger.warning("Error displayed and acknowledged. Terminating application.");
         } catch (IOException e) {
             logger.error("Unable to display error modal. Terminating application.", e);
         } finally {
-            MainController.terminate();
+            if (isFatal) {
+                MainController.terminate();
+            }
         }
     }
-
+    public void showError(String header, String body, Window owner, ArrayList<String> list) {
+        showError(header, body, owner, list, true);
+    }
+    public void showError(String header, String body, Window owner, boolean isFatal) {
+        showError(header,body, owner, null, isFatal);
+    }
     public void showError(String header, String body, Window owner) {
-        showError(header, body, owner, null);
+        showError(header, body, owner, null, true);
     }
 
     // Displaying a problematic operation result
-    public void displayOperationResult(String header, String body, Window owner, OperationResult<?> result) {
+    public void showOperationResult(String header, String body, Window owner, OperationResult<?> result, boolean isFatal) {
         if (!this.isAvailable) {
             logger.warning("Unable to display two errors at the same time");
             return;
         }
-
         try {
-            this.owner = owner;
-            this.isAvailable = false;
-            FXMLLoader fxml = loadFxml();
-            logger.debug("FXML file loaded");
-            Parent root = getRoot(fxml);
-            ErrorController controller = fxml.getController();
-            if (controller == null) {
-                logger.error("Unable to fetch controller for some reason");
-                return;
-            }
-            controller.setHeaderKey(Objects.requireNonNullElse(
-                    header, "modal.error.header.failed"
-            ));
-            controller.setBodyString(Objects.requireNonNullElse(
-                    body, MessageFormat.format(
-                            i.get("modal.error.body.failed"),
-                            new Object[] { result.status().toString() }
-                    )
-            ));
-            if (result.msgs() != null) {
-                controller.setMsgList(
-                        result.getPrintableMsgs()
-                );
-            }
-
-            Stage stage = setStage(root);
-            stage.showAndWait();
+            configureAll(
+                    owner,
+                    Objects.requireNonNullElse(header, i.get("modal.error.header.failed")),
+                    Objects.requireNonNullElse(body, MessageFormat.format(
+                            i.get("modal.error.body.failed"), new Object[] { result.status().toString() }
+                    )),
+                    result.getPrintableMsgs()
+            );
             logger.warning("Error displayed and acknowledged. Terminating application.");
         } catch (IOException e) {
             logger.error("Unable to display error modal. Terminating application.", e);
         } finally {
-            MainController.terminate();
+            if (isFatal) {
+                MainController.terminate();
+            }
         }
     }
-    public void displayOperationResult(Window owner, OperationResult<?> result) {
-        displayOperationResult(null, null, owner, result);
+    public void showOperationResult(String header, String body, Window owner, OperationResult<?> result) {
+        showOperationResult(header, body, owner, result, true);
+    }
+    public void showOperationResult(Window owner, OperationResult<?> result, boolean isFatal) {
+        showOperationResult(null, null, owner, result, isFatal);
+    }
+    public void showOperationResult(Window owner, OperationResult<?> result) {
+        showOperationResult(null, null, owner, result, true);
+    }
+
+    // === Private Helper Methods === \\
+    private void configureAll(Window owner, String header, String body, ArrayList<String> msgs)
+            throws IOException {
+        this.owner = owner;
+        this.isAvailable = false;
+        this.fxml = loadFxml();
+        this.root = getRoot();
+        this.controller = (ErrorController) getController();
+        if (header != null) { this.controller.setHeaderString(header); }
+        if (body != null) { this.controller.setBodyString(body); }
+        if (msgs != null) { this.controller.setMsgList(msgs); }
+        Stage stage = setStage(this.root);
+        stage.showAndWait();
     }
 }

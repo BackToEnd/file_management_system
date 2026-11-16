@@ -169,7 +169,9 @@ public record OperationResult<T>(
     public boolean isFailed() {
         return this.status == OperationStatus.FAILED;
     }
+
     public ArrayList<String> getPrintableMsgs() {
+        if (msgs == null) { return null; }
         ArrayList<String> result = new ArrayList<>();
         msgs.forEach(m -> {
             result.add(m.getMsg());
@@ -178,6 +180,7 @@ public record OperationResult<T>(
     }
 
     public ArrayList<String> getLoggableMsgs() {
+        if (msgs == null) { return null; }
         ArrayList<String> result = new ArrayList<>();
         msgs.forEach(m -> {
             result.add(m.logMsg());

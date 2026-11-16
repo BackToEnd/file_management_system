@@ -19,7 +19,7 @@ public class DatabaseInitialization {
 
     // region Preparing all queries for table creation
     private final String[] tables = {"""
-            CREATE TABLE IF NOT EXISTS node (
+            CREATE TABLE IF NOT EXISTS item (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             path TEXT NOT NULL,
@@ -31,7 +31,7 @@ public class DatabaseInitialization {
             );
             """, """
             CREATE TABLE IF NOT EXISTS scan_location (
-            node_id INTEGER PRIMARY KEY REFERENCES node(id),
+            item_id INTEGER PRIMARY KEY REFERENCES item(id),
             scan_depth INTEGER,
             update_mode TEXT,
             scan_source TEXT,
@@ -58,10 +58,10 @@ public class DatabaseInitialization {
             UNIQUE (type, value)
             );
             """, """
-            CREATE TABLE IF NOT EXISTS node_metadata (
-            node_id INTEGER REFERENCES node (id),
+            CREATE TABLE IF NOT EXISTS item_metadata (
+            item_id INTEGER REFERENCES item (id),
             metadata INTEGER REFERENCES metadata_value (id),
-            PRIMARY KEY (node_id, metadata)
+            PRIMARY KEY (item_id, metadata)
             );
             """
     };
@@ -70,9 +70,9 @@ public class DatabaseInitialization {
     public DatabaseInitialization(Database db) {
         this.db = db;
         this.constraints = new HashMap<>();
-        this.constraints.put("node/parent", """
-               ALTER TABLE node
-               ADD COLUMN parent INTEGER REFERENCES node (id);
+        this.constraints.put("item/parent", """
+               ALTER TABLE item
+               ADD COLUMN parent INTEGER REFERENCES item (id);
                """
         );
     }

@@ -568,7 +568,7 @@
     </routine>
     <schema id="214" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2026-11-02.12:38:47</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-11-16.09:31:24</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="215" parent="14">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1807,10 +1807,10 @@
       <Position>1</Position>
     </argument>
     <table id="627" parent="214" name="category"/>
-    <table id="628" parent="214" name="metadata_type"/>
-    <table id="629" parent="214" name="metadata_value"/>
-    <table id="630" parent="214" name="node"/>
-    <table id="631" parent="214" name="node_metadata"/>
+    <table id="628" parent="214" name="item"/>
+    <table id="629" parent="214" name="item_metadata"/>
+    <table id="630" parent="214" name="metadata_type"/>
+    <table id="631" parent="214" name="metadata_value"/>
     <table id="632" parent="214" name="scan_location"/>
     <table id="633" parent="214" name="sqlite_master">
       <System>1</System>
@@ -1837,138 +1837,138 @@
       <StoredType>INTEGER|0s</StoredType>
     </column>
     <column id="639" parent="628" name="name">
-      <Position>2</Position>
-      <StoredType>TEXT|0s</StoredType>
-    </column>
-    <column id="640" parent="628" name="allow_multiple">
-      <Position>3</Position>
-      <StoredType>INTEGER|0s</StoredType>
-    </column>
-    <column id="641" parent="628" name="category">
-      <Position>4</Position>
-      <StoredType>INTEGER|0s</StoredType>
-    </column>
-    <foreign-key id="642" parent="628">
-      <ColNames>category</ColNames>
-      <RefColNames>id</RefColNames>
-      <RefTableName>category</RefTableName>
-    </foreign-key>
-    <key id="643" parent="628">
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <column id="644" parent="629" name="id">
-      <AutoIncrement>1</AutoIncrement>
-      <Position>1</Position>
-      <StoredType>INTEGER|0s</StoredType>
-    </column>
-    <column id="645" parent="629" name="type">
-      <Position>2</Position>
-      <StoredType>INTEGER|0s</StoredType>
-    </column>
-    <column id="646" parent="629" name="value">
-      <Position>3</Position>
-      <StoredType>TEXT|0s</StoredType>
-    </column>
-    <foreign-key id="647" parent="629">
-      <ColNames>type</ColNames>
-      <RefColNames>id</RefColNames>
-      <RefTableName>metadata_type</RefTableName>
-    </foreign-key>
-    <index id="648" parent="629" name="sqlite_autoindex_metadata_value_1">
-      <ColNames>type
-value</ColNames>
-      <NameSurrogate>1</NameSurrogate>
-      <Unique>1</Unique>
-    </index>
-    <key id="649" parent="629">
-      <ColNames>id</ColNames>
-      <Primary>1</Primary>
-    </key>
-    <key id="650" parent="629">
-      <ColNames>type
-value</ColNames>
-      <UnderlyingIndexName>sqlite_autoindex_metadata_value_1</UnderlyingIndexName>
-    </key>
-    <column id="651" parent="630" name="id">
-      <AutoIncrement>1</AutoIncrement>
-      <Position>1</Position>
-      <StoredType>INTEGER|0s</StoredType>
-    </column>
-    <column id="652" parent="630" name="name">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="653" parent="630" name="path">
+    <column id="640" parent="628" name="path">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="654" parent="630" name="display_name">
+    <column id="641" parent="628" name="display_name">
       <Position>4</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="655" parent="630" name="file_type">
+    <column id="642" parent="628" name="file_type">
       <Position>5</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="656" parent="630" name="last_modified">
+    <column id="643" parent="628" name="last_modified">
       <Position>6</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="657" parent="630" name="size">
+    <column id="644" parent="628" name="size">
       <Position>7</Position>
       <StoredType>REAL|0s</StoredType>
     </column>
-    <column id="658" parent="630" name="status">
+    <column id="645" parent="628" name="status">
       <Position>8</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="659" parent="630" name="parent">
+    <column id="646" parent="628" name="parent">
       <Position>9</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <foreign-key id="660" parent="630">
+    <foreign-key id="647" parent="628">
       <ColNames>parent</ColNames>
       <RefColNames>id</RefColNames>
-      <RefTableName>node</RefTableName>
+      <RefTableName>item</RefTableName>
     </foreign-key>
-    <key id="661" parent="630">
+    <key id="648" parent="628">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="662" parent="631" name="node_id">
+    <column id="649" parent="629" name="item_id">
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="663" parent="631" name="metadata">
+    <column id="650" parent="629" name="metadata">
       <Position>2</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <foreign-key id="664" parent="631">
-      <ColNames>node_id</ColNames>
+    <foreign-key id="651" parent="629">
+      <ColNames>item_id</ColNames>
       <RefColNames>id</RefColNames>
-      <RefTableName>node</RefTableName>
+      <RefTableName>item</RefTableName>
     </foreign-key>
-    <foreign-key id="665" parent="631">
+    <foreign-key id="652" parent="629">
       <ColNames>metadata</ColNames>
       <RefColNames>id</RefColNames>
       <RefTableName>metadata_value</RefTableName>
     </foreign-key>
-    <index id="666" parent="631" name="sqlite_autoindex_node_metadata_1">
-      <ColNames>node_id
+    <index id="653" parent="629" name="sqlite_autoindex_item_metadata_1">
+      <ColNames>item_id
 metadata</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="667" parent="631">
-      <ColNames>node_id
+    <key id="654" parent="629">
+      <ColNames>item_id
 metadata</ColNames>
       <Primary>1</Primary>
-      <UnderlyingIndexName>sqlite_autoindex_node_metadata_1</UnderlyingIndexName>
+      <UnderlyingIndexName>sqlite_autoindex_item_metadata_1</UnderlyingIndexName>
     </key>
-    <column id="668" parent="632" name="node_id">
+    <column id="655" parent="630" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="656" parent="630" name="name">
+      <Position>2</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <column id="657" parent="630" name="allow_multiple">
+      <Position>3</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="658" parent="630" name="category">
+      <Position>4</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <foreign-key id="659" parent="630">
+      <ColNames>category</ColNames>
+      <RefColNames>id</RefColNames>
+      <RefTableName>category</RefTableName>
+    </foreign-key>
+    <key id="660" parent="630">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="661" parent="631" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="662" parent="631" name="type">
+      <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="663" parent="631" name="value">
+      <Position>3</Position>
+      <StoredType>TEXT|0s</StoredType>
+    </column>
+    <foreign-key id="664" parent="631">
+      <ColNames>type</ColNames>
+      <RefColNames>id</RefColNames>
+      <RefTableName>metadata_type</RefTableName>
+    </foreign-key>
+    <index id="665" parent="631" name="sqlite_autoindex_metadata_value_1">
+      <ColNames>type
+value</ColNames>
+      <NameSurrogate>1</NameSurrogate>
+      <Unique>1</Unique>
+    </index>
+    <key id="666" parent="631">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <key id="667" parent="631">
+      <ColNames>type
+value</ColNames>
+      <UnderlyingIndexName>sqlite_autoindex_metadata_value_1</UnderlyingIndexName>
+    </key>
+    <column id="668" parent="632" name="item_id">
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
@@ -1993,12 +1993,12 @@ metadata</ColNames>
       <StoredType>TEXT|0s</StoredType>
     </column>
     <foreign-key id="674" parent="632">
-      <ColNames>node_id</ColNames>
+      <ColNames>item_id</ColNames>
       <RefColNames>id</RefColNames>
-      <RefTableName>node</RefTableName>
+      <RefTableName>item</RefTableName>
     </foreign-key>
     <key id="675" parent="632">
-      <ColNames>node_id</ColNames>
+      <ColNames>item_id</ColNames>
       <Primary>1</Primary>
     </key>
     <column id="676" parent="633" name="type">
