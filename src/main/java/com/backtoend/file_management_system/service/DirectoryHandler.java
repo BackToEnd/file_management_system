@@ -39,7 +39,7 @@ public class DirectoryHandler {
                 long lastModified = f.lastModified();
                 long size = f.length();
                 items.add(new ScannedItem(
-                        f.getAbsoluteFile().getName(), filePath, fileType, lastModified, size
+                        f.getAbsoluteFile().getName(), filePath, fileType, lastModified, size, false
                 ));
             }
         }
@@ -53,8 +53,10 @@ public class DirectoryHandler {
         String fileType = (isDir(path)) ? "Folder" : "File";
         long lastModified = f.lastModified();
         long size = f.length();
+        String[] content = f.list();
+        boolean isParent = (content != null && content.length > 0);
         return new ScannedItem(
-                name, path, fileType, lastModified, size
+                name, path, fileType, lastModified, size, isParent
         );
     }
 

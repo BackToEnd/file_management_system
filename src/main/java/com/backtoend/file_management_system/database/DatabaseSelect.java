@@ -4,6 +4,7 @@ import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.IItemInformation;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ScanLocation;
+import com.backtoend.file_management_system.model.ScannedItem;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -108,42 +109,27 @@ public class DatabaseSelect {
             if (result.next()) {
                 return getScanLocation(item, result);
             }
-            throw new SQLException(
-                    "A requested scan location was not returned by the database"
-            );
+            return null;
         }
     }
 
-    public static IItemInformation getInfo(int id, Connection conn) throws SQLException {
-        String itemQuery = """
-                SELECT *, CASE
-                WHEN id IN (
-                    SELECT DISTINCT parent
-                    FROM item
-                ) THEN 1
-                ELSE 0
-                END AS has_children
-                FROM item
-                WHERE id = ?;
+    public static ItemRow getInfo(ScannedItem item, Connection conn) throws SQLException {
+        String query = """
+                SELECT id, parent FROM item
+                WHERE path = ?;
                 """;
-        String scanLocationQuery = """
-                SELECT * FROM scan_location
-                WHERE item_id = ?;
-                """;
-        try (PreparedStatement itemStmt = conn.prepareStatement(itemQuery);
-        PreparedStatement scanLocationStmt = conn.prepareStatement(scanLocationQuery)) {
-            ResultSet itemResult = itemStmt.executeQuery();
-            ResultSet scanLocationResult = scanLocationStmt.executeQuery();
-            if (itemResult.next()) {
-                ItemRow item = getItemRow(itemResult);
-                if (scanLocationResult.next()) {
-                    return getScanLocation(item, scanLocationResult);
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, item.path());
+            ResultSet result = stmt.executeQuery();
+            if (result.next()) {
+                int id = result.getInt("id");
+                Integer parent = result.getInt("parent");
+                if (result.wasNull()) {
+                    parent = null;
                 }
-                return item;
+                return ItemRow.create(item, id, parent);
             }
-            throw new SQLException(
-                    "Database returned no item with ID '" + id + "'"
-            );
+            return null;
         }
     }
 

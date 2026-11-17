@@ -7,10 +7,10 @@ public record ItemRow(
         double size, IItemInformation.ItemStatus status, Integer parentId, boolean hasChildren
 ) implements IItemInformation {
     // Constructor from ScannedItem
-    public static ItemRow create(ScannedItem item, int id, Integer parentId) {
+    public static ItemRow create(ScannedItem item, int id, Integer parent) {
         return new ItemRow(
                 id, item.name(), item.path(), item.name(), item.fileType(), item.lastModified(),
-                item.size(), IItemInformation.ItemStatus.ACTIVE, parentId, false
+                item.size(), ItemStatus.ACTIVE, parent, item.hasChildren()
         );
     }
 

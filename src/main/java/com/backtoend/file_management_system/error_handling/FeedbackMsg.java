@@ -10,8 +10,12 @@ public record FeedbackMsg(
         String key, Object[] args, SourceLocation source
 ) {
     // "Constructor"
-    public static FeedbackMsg create(String key, Object[] args) {
-        return new FeedbackMsg(key, args, AppLogger.getCaller());
+    public static FeedbackMsg create(String key, String sourceMethod, String sourceClass, Object... args) {
+        return new FeedbackMsg(key, args, new SourceLocation(sourceClass, sourceMethod));
+    }
+    public static FeedbackMsg create(String key, Object... args) {
+        SourceLocation source = AppLogger.getCaller();
+        return FeedbackMsg.create(key, source.sourceMethod(), source.sourceClass(), args);
     }
 
     public String getMsg() {

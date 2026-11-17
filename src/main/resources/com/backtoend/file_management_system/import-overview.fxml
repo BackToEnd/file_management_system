@@ -13,12 +13,12 @@
     </padding>
 
     <Label fx:id="tableLabel"/>
-    <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="nameCol"/>
-            <TableColumn fx:id="typeCol"/>
-        </columns>
-    </TableView>
+    <VBox fx:id="previewContainer">
+        <TabPane fx:id="tabPane">
+            <Tab fx:id="previewTab"/>
+            <Tab fx:id="settingsTab"/>
+        </TabPane>
+    </VBox>
 
     <HBox spacing="10">
         <Button fx:id="buttonImport" onAction="#handleImport"/>

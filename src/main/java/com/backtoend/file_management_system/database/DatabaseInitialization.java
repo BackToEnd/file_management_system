@@ -96,8 +96,7 @@ public class DatabaseInitialization {
 
         // Beginning initialization
         feedback.add(FeedbackMsg.create(
-                "database.initialization.status.valid",
-                new Object[] {}
+                "database.initialization.status.valid"
         ));
         try (Statement stmt = conn.createStatement()) {
             // Setting journal mode to 'WAL' to allow simultaneous reading and writing
@@ -105,8 +104,7 @@ public class DatabaseInitialization {
                     "PRAGMA journal_mode = WAL"
             );
             feedback.add(FeedbackMsg.create(
-                    "database.initialization.journey.success",
-                    new Object[] {}
+                    "database.initialization.journey.success"
             ));
 
             // Creating all tables
@@ -115,8 +113,7 @@ public class DatabaseInitialization {
             }
             logger.info("All tables created or skipped");
             feedback.add(FeedbackMsg.create(
-                    "database.initialization.tables.success",
-                    new Object[] {}
+                    "database.initialization.tables.success"
             ));
 
             // Applying constraints and other table modifications
@@ -132,16 +129,14 @@ public class DatabaseInitialization {
                 }
             }
             feedback.add(FeedbackMsg.create(
-                    "database.initialization.constraints.success",
-                    new Object[] {}
+                    "database.initialization.constraints.success"
             ));
             return OperationResult.success(
                     null, feedback
             );
         } catch (SQLException e) {
             feedback.add(FeedbackMsg.create(
-                    "database.initialization.exception.sql",
-                    new Object[] {}
+                    "database.initialization.exception.sql"
             ));
             return OperationResult.failed(
                     null, feedback, e

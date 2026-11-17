@@ -348,12 +348,7 @@ public class AppLogger {
                 new Object[] { resultProviderClass, resultProviderMethod, result.status().toString() }
                 ), sourceMethod, sourceClass
         );
-        ArrayList<String> feedback = result.getLoggableMsgs();
-        feedback.forEach(msg -> {
-            logMsg.accept(
-                    msg, sourceMethod, sourceClass
-            );
-        });
+        feedback(result.msgs(), sourceMethod, sourceClass, logMsg);
 
         // Logging an exception if one was encountered:
         if (result.error() != null) {
@@ -381,4 +376,25 @@ public class AppLogger {
         result(result, caller.sourceMethod(), caller.getEffectiveClassName());
     }
     // endregion
+    // region Logging an array of FeedbackMsgs
+    public void feedback(ArrayList<FeedbackMsg> list, String sourceMethod, String sourceClass, IResultLogger<String, String, String> loggingLevel) {
+        info(
+                "Logging independent list of feedback messages:",
+                sourceMethod, sourceClass
+        );
+        list.forEach(msg -> {
+            loggingLevel.accept(
+                    msg.logMsg(), sourceMethod, sourceClass
+            );
+        });
+    }
+    public void feedback(ArrayList<FeedbackMsg> list, IResultLogger<String, String, String> loggingLevel) {
+        SourceLocation source = getCaller();
+        feedback(
+                list,
+                source.sourceMethod(),
+                source.getEffectiveClassName(),
+                loggingLevel
+        );
+    }
 }
