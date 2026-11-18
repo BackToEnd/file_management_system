@@ -1,15 +1,129 @@
-[15:48:35.115] [INFO] [file_management_system] > configure: Logger initialized
-[15:48:35.119] [INFO] [file_management_system] > configure: Log directory: logs
-[15:48:35.120] [FINE] [MainApplication] > start: Attempting to load main view FXML file
-[15:48:35.338] [INFO] [Database] > initialize: Database connection established; attempting initialization
-[15:48:35.343] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
-[15:48:35.520] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
-[15:48:35.522] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column item to table parent
-[15:48:35.666] [INFO] [MainController] > initialize: Initiating main application interface
-[15:48:35.975] [INFO] [MainController] > handleOperationResult: Received operation result from [DatabaseInitialization > initiateDb]: SUCCESS
-[15:48:35.976] [INFO] [MainController] > handleOperationResult: Logging independent list of feedback messages:
-[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Database initialization pending - Beginning initialization
-[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Changed journey mode from default to WAL
-[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Created all required tables
-[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Added all missing columns and constraints
-[15:48:47.556] [INFO] [MainController] > onChooseDirectory: Initiating scan-import sequence
+[20:11:37.374] [INFO] [file_management_system] > configure: Logger initialized
+[20:11:37.376] [INFO] [file_management_system] > configure: Log directory: logs
+[20:11:37.376] [FINE] [MainApplication] > start: Attempting to load main view FXML file
+[20:11:37.463] [INFO] [Database] > initialize: Database connection established; attempting initialization
+[20:11:37.465] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
+[20:11:37.556] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
+[20:11:37.557] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column [item] to table [parent]
+[20:11:37.574] [INFO] [MainController] > initialize: Initiating main application interface
+[20:11:37.732] [INFO] [MainController] > handleOperationResult: Received operation result from [DatabaseInitialization > initiateDb]: SUCCESS
+[20:11:37.733] [INFO] [MainController] > handleOperationResult: Logging independent list of feedback messages:
+[20:11:37.733] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Database initialization pending - Beginning initialization
+[20:11:37.733] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Changed journey mode from default to WAL
+[20:11:37.733] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Created all required tables
+[20:11:37.733] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Added all missing columns and constraints
+[20:11:39.470] [INFO] [MainController] > onChooseDirectory: Initiating scan-import sequence
+[20:11:39.470] [INFO] [ScanImportService] > handleScanImport: Initiating scan-import process
+[20:11:39.471] [INFO] [FileExplorerController] > openDirectoryChooser: Initiating directory chooser
+[20:11:49.898] [INFO] [ScanImportService] > getDirectoryInfo: Starting directory parsing
+[20:11:49.901] [INFO] [DirectoryHandler] > parseParent: Getting info on parent path: F:\Commissions
+[20:11:49.907] [INFO] [ScanImportService] > call: Scanned item [Commissions] >> path: F:\Commissions | file type: Folder | last modified at: 2025-11-15T14:20:46.568Z | size on disk: 0 | has children: no
+[20:11:49.908] [FINE] [Database] > read: Queueing read operation
+[20:11:49.912] [INFO] [DirectoryHandler] > parseDirectory: Parsing directory: F:\Commissions
+[20:11:52.254] [WARNING] [ImportController] > getSettings: Scan location information requested, but scan location settings are not yet implemented!
+[20:11:52.254] [INFO] [ScanImportService] > showOverview: User rejected import
+[20:11:54.580] [INFO] [MainController] > onChooseDirectory: Initiating scan-import sequence
+[20:11:54.580] [INFO] [ScanImportService] > handleScanImport: Initiating scan-import process
+[20:11:54.580] [INFO] [FileExplorerController] > openDirectoryChooser: Initiating directory chooser
+[20:12:03.345] [INFO] [ScanImportService] > getDirectoryInfo: Starting directory parsing
+[20:12:03.346] [INFO] [DirectoryHandler] > parseParent: Getting info on parent path: G:\documents
+[20:12:03.346] [INFO] [ScanImportService] > call: Scanned item [documents] >> path: G:\documents | file type: Folder | last modified at: 2026-08-14T07:34:58.455Z | size on disk: 4.096 | has children: yes
+[20:12:03.346] [FINE] [Database] > read: Queueing read operation
+[20:12:03.349] [INFO] [DirectoryHandler] > parseDirectory: Parsing directory: G:\documents
+[20:12:06.255] [WARNING] [ImportController] > getSettings: Scan location information requested, but scan location settings are not yet implemented!
+[20:12:06.255] [INFO] [ScanImportService] > dbBulkWrite: Creating task for import mode: NEW
+[20:12:06.261] [FINE] [ScanImportService] > getNewInsertTask: Started async task
+[20:12:06.261] [FINE] [Database] > read: Queueing read operation
+[20:12:06.264] [FINE] [Database] > writeWithTransaction: Queueing write-with-transaction operation
+[20:12:06.264] [FINE] [Database] > lambda$writeWithTransaction$0: Processing async write-with-transaction operation
+[20:12:06.264] [FINE] [Database] > withTransaction: Connection with transaction established
+[20:12:06.265] [FINE] [Database] > withTransaction: Attempting to execute query
+[20:12:06.268] [INFO] [DatabaseInsert] > insertChildrenOf: Attempting to format 15 children of parent with ID 25
+[20:12:06.269] [INFO] [DatabaseInsert] > insertChildrenOf: Successfully inserted all children
+[20:12:06.275] [FINE] [Database] > withTransaction: Committed transaction
+[20:12:06.276] [INFO] [MainController] > updateAfterImport: Updating overview tree with ID: 25
+[20:12:06.276] [INFO] [ScanImportService] > lambda$dbBulkWrite$2: Received operation result from [ScanImportService > dbBulkWrite {task.setOnSucceeded}]: SUCCESS
+[20:12:06.276] [INFO] [ScanImportService] > lambda$dbBulkWrite$2: Logging independent list of feedback messages:
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [ScanImportService / handleScanImport] Successfully parsed the content of the selected directory
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [ScanImportService / getDirectoryInfo] Initiated directory parse background task
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [Task {directoryContent} / call] Successfully obtained info on the selected directory
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [Task {directoryContent} / call] Successfully gathered all information on the selected directory from the database
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [Task {directoryContent} / call] Successfully read directory content; found 15 child items
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [Task {directoryContent} / setOnSucceeded] Successfully parsed the content of the selected directory
+[20:12:06.276] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [ScanImportService / showOverview] Attempting to show import preview
+[20:12:06.277] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [DatabaseBulkInsert / insertNewSet] Successfully obtained all descendants (total of 0 items)
+[20:12:06.277] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [DatabaseBulkInsert / insertNewSet {db.writeWithTransaction}] Insert parent item and obtained ID 25
+[20:12:06.277] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [DatabaseBulkInsert / insertNewSet {db.writeWithTransaction}] Added scan location to parent item
+[20:12:06.277] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [DatabaseBulkInsert / insertNewSet {db.writeWithTransaction}] Inserted all child items
+[20:12:06.277] [FINE] [ScanImportService] > lambda$dbBulkWrite$2: Message: [DatabaseBulkInsert / insertNewSet] Successfully inserted all items into the database
+[20:12:29.059] [SEVERE] [MainController] > showTestError: Test exception thrown:
+java.lang.RuntimeException: Caught text exception
+	at com.backtoend.file_management_system/com.backtoend.file_management_system.controller.MainController.showTestError(MainController.java:100)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:583)
+	at com.sun.javafx.reflect.Trampoline.invoke(MethodUtil.java:72)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:583)
+	at javafx.base@22.0.1/com.sun.javafx.reflect.MethodUtil.invoke(MethodUtil.java:270)
+	at javafx.fxml@22.0.1/com.sun.javafx.fxml.MethodHelper.invoke(MethodHelper.java:84)
+	at javafx.fxml@22.0.1/javafx.fxml.FXMLLoader$MethodHandler.invoke(FXMLLoader.java:1860)
+	at javafx.fxml@22.0.1/javafx.fxml.FXMLLoader$ControllerMethodEventHandler.handle(FXMLLoader.java:1731)
+	at javafx.base@22.0.1/com.sun.javafx.event.CompositeEventHandler.dispatchBubblingEvent(CompositeEventHandler.java:86)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:232)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:189)
+	at javafx.base@22.0.1/com.sun.javafx.event.CompositeEventDispatcher.dispatchBubblingEvent(CompositeEventDispatcher.java:59)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:58)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventUtil.fireEventImpl(EventUtil.java:74)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventUtil.fireEvent(EventUtil.java:49)
+	at javafx.base@22.0.1/javafx.event.Event.fireEvent(Event.java:198)
+	at javafx.graphics@22.0.1/javafx.scene.Node.fireEvent(Node.java:8917)
+	at javafx.controls@22.0.1/javafx.scene.control.Button.fire(Button.java:203)
+	at javafx.controls@22.0.1/com.sun.javafx.scene.control.behavior.ButtonBehavior.mouseReleased(ButtonBehavior.java:207)
+	at javafx.controls@22.0.1/com.sun.javafx.scene.control.inputmap.InputMap.handle(InputMap.java:274)
+	at javafx.base@22.0.1/com.sun.javafx.event.CompositeEventHandler$NormalEventHandlerRecord.handleBubblingEvent(CompositeEventHandler.java:247)
+	at javafx.base@22.0.1/com.sun.javafx.event.CompositeEventHandler.dispatchBubblingEvent(CompositeEventHandler.java:80)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:232)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventHandlerManager.dispatchBubblingEvent(EventHandlerManager.java:189)
+	at javafx.base@22.0.1/com.sun.javafx.event.CompositeEventDispatcher.dispatchBubblingEvent(CompositeEventDispatcher.java:59)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:58)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.BasicEventDispatcher.dispatchEvent(BasicEventDispatcher.java:56)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventDispatchChainImpl.dispatchEvent(EventDispatchChainImpl.java:114)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventUtil.fireEventImpl(EventUtil.java:74)
+	at javafx.base@22.0.1/com.sun.javafx.event.EventUtil.fireEvent(EventUtil.java:54)
+	at javafx.base@22.0.1/javafx.event.Event.fireEvent(Event.java:198)
+	at javafx.graphics@22.0.1/javafx.scene.Scene$MouseHandler.process(Scene.java:3985)
+	at javafx.graphics@22.0.1/javafx.scene.Scene.processMouseEvent(Scene.java:1891)
+	at javafx.graphics@22.0.1/javafx.scene.Scene$ScenePeerListener.mouseEvent(Scene.java:2709)
+	at javafx.graphics@22.0.1/com.sun.javafx.tk.quantum.GlassViewEventHandler$MouseEventNotification.run(GlassViewEventHandler.java:411)
+	at javafx.graphics@22.0.1/com.sun.javafx.tk.quantum.GlassViewEventHandler$MouseEventNotification.run(GlassViewEventHandler.java:301)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:138)
+	at javafx.graphics@22.0.1/com.sun.javafx.tk.quantum.GlassViewEventHandler.lambda$handleMouseEvent$2(GlassViewEventHandler.java:450)
+	at javafx.graphics@22.0.1/com.sun.javafx.tk.quantum.QuantumToolkit.runWithoutRenderLock(QuantumToolkit.java:430)
+	at javafx.graphics@22.0.1/com.sun.javafx.tk.quantum.GlassViewEventHandler.handleMouseEvent(GlassViewEventHandler.java:449)
+	at javafx.graphics@22.0.1/com.sun.glass.ui.View.handleMouseEvent(View.java:551)
+	at javafx.graphics@22.0.1/com.sun.glass.ui.View.notifyMouse(View.java:937)
+	at javafx.graphics@22.0.1/com.sun.glass.ui.win.WinApplication._runLoop(Native Method)
+	at javafx.graphics@22.0.1/com.sun.glass.ui.win.WinApplication.lambda$runLoop$3(WinApplication.java:184)
+	at java.base/java.lang.Thread.run(Thread.java:1527)
+	Suppressed: java.lang.RuntimeException: Added suppressed exception
+		at com.backtoend.file_management_system/com.backtoend.file_management_system.controller.MainController.showTestError(MainController.java:103)
+		... 54 more
+Caused by: java.lang.RuntimeException: Test exception thrown
+	at com.backtoend.file_management_system/com.backtoend.file_management_system.controller.MainController.showTestError(MainController.java:97)
+	... 54 more
+[20:12:29.061] [WARNING] [ErrorHandler] > showError: Critical error received, attempting to load error view FXML file
+[20:12:30.971] [WARNING] [ErrorHandler] > showError: Error displayed and acknowledged. Terminating application.
+[20:12:30.971] [INFO] [MainController] > getShutDownTask: Shut-down initiated; shutting down executor services
+[20:12:30.972] [FINE] [MainController] > call: Awaiting all executor service shutdowns on background thread
+[20:12:30.972] [FINEST] [MainController] > call: Shut-down attempt: 0
+[20:12:30.972] [FINE] [Database] > awaitTermination: Read executor status: Terminated
+[20:12:30.972] [FINE] [Database] > awaitTermination: Write executor status: Terminated
+[20:12:30.972] [INFO] [MainController] > getShutDownTask (success): Successfully shut down all executor services; application shutting down

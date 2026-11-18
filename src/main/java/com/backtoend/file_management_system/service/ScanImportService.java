@@ -80,7 +80,7 @@ public class ScanImportService {
         this.window = window;
         this.parentItem = null;
         this.settings = null;
-        this.feedback = null;
+        this.feedback = new ArrayList<>();
         this.feedback.add(FeedbackMsg.create(
                 "import.scan.ongoing.success"
         ));
@@ -251,6 +251,7 @@ public class ScanImportService {
         thread.setDaemon(true);
         thread.start();
     }
+
     private void showOverview(ArrayList<ScannedItem> list) {
         feedback.add(FeedbackMsg.create("import.preview.initiated"));
         String suffix = mode.toString().toLowerCase();
@@ -270,11 +271,13 @@ public class ScanImportService {
             onCompletion();
             return;
         }
+        settings = newSettings;
         // Proceeding with the bulk-import
         dbBulkWrite(list);
     }
 
     private void dbBulkWrite(ArrayList<ScannedItem> list) {
+        logger.info("Creating task for import mode: " + mode);
         DatabaseBulkInsert insert = new DatabaseBulkInsert();
         Task<OperationResult<Integer>> task;
         switch (mode) {
@@ -286,14 +289,35 @@ public class ScanImportService {
             );
         }
         task.setOnCancelled(event -> {
-            // TODO
+            logger.warning(
+                    "Bulk DB insert was canceled",
+                    "dbBulkWrite {task.setOnCancelled}",
+                    this.getClass().getName()
+            );
+            handleError(feedback, "import.insert.canceled", false);
+            onCompletion();
         });
         task.setOnFailed(event -> {
-            // TODO
+            logger.error(
+                    "Caught error while attempting bulk DB insert:",
+                    "dbBulkWrite {task.setOnFailed}",
+                    this.getClass().getName(),
+                    task.getException()
+            );
+            handleError(feedback, "import.insert.failed", false);
+            onCompletion();
         });
         task.setOnSucceeded(event -> {
+            feedback.addAll(task.getValue().msgs());
             callback.accept(task.getValue().value());
+            logger.result(
+                    OperationResult.success(null, feedback, new SourceLocation(this.getClass().getName(), "dbBulkWrite {task.setOnSucceeded}"))
+            );
+            onCompletion();
         });
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private Task<OperationResult<Integer>> getNewInsertTask(
@@ -302,6 +326,11 @@ public class ScanImportService {
         return new Task<>() {
             @Override
             protected OperationResult<Integer> call() {
+                logger.debug(
+                        "Started async task",
+                        "getNewInsertTask",
+                        this.getClass().getName()
+                );
                 return insert.insertNewSet((ScannedItem) parentItem, settings, list);
             }
         };
@@ -311,7 +340,11 @@ public class ScanImportService {
     ) {
         return new Task<>() {
             @Override
-            protected OperationResult<Integer> call() {
+            protected OperationResult<Integer> call() {logger.debug(
+                    "Started async task",
+                    "getTransformTask",
+                    this.getClass().getName()
+            );
                 return insert.transformItem((ItemRow) parentItem, settings, list);
             }
         };
@@ -321,7 +354,11 @@ public class ScanImportService {
     ) {
         return new Task<>() {
             @Override
-            protected OperationResult<Integer> call() {
+            protected OperationResult<Integer> call() {logger.debug(
+                    "Started async task",
+                    "getRescanTask",
+                    this.getClass().getName()
+            );
                 return insert.rescanPath((ScanLocation) parentItem, list);
             }
         };

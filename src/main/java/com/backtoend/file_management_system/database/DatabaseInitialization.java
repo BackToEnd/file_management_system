@@ -130,7 +130,7 @@ public class DatabaseInitialization {
             for (HashMap.Entry<String, String> set : this.constraints.entrySet()) {
                 String[] check = set.getKey().split("/");
                 logger.debug(MessageFormat.format(
-                        "Attempting to apply column {0} to table {1}",
+                        "Attempting to apply column [{0}] to table [{1}]",
                         new Object[] { check[0], check[1] }
                         )
                 );

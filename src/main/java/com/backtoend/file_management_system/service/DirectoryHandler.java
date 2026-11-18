@@ -65,12 +65,12 @@ public class DirectoryHandler {
     public ScannedItem parseParent(String path) {
         logger.info("Getting info on parent path: " + path);
         File f = new File(path);
-        String name = f.getAbsoluteFile().getName();
         String fileType = (isDir(path)) ? "Folder" : "File";
         long lastModified = f.lastModified();
         long size = f.length();
         String[] content = f.list();
         String normalizedPath = normalizePath(f);
+        String name = normalizedPath.substring(normalizedPath.lastIndexOf('\\') + 1);
         boolean isParent = (content != null && content.length > 0);
         return new ScannedItem(
                 name, normalizedPath, fileType, lastModified, size, isParent

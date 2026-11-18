@@ -49,11 +49,11 @@ public class MainController {
 
     /// Constructor. Creates a new `MainController` instance and configures all required attributes.
     public MainController() {
+        this.scanImport = new ScanImportService();
         // Initialization things
         try {
             MainApplication.getDbInstance()
                     .initialize(this::handleOperationResult);
-            this.scanImport = new ScanImportService();
         } catch (SQLException e) {
             logger.error("Encountered a problem during initialization:", e);
         } catch (IOException e) {

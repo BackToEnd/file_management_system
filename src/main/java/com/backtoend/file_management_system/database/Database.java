@@ -132,15 +132,19 @@ public class Database implements IExecutorService {
     /// @throws SQLException if any database operation fails
     private <T> T withTransaction(ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
+            logger.debug("Connection with transaction established");
             conn.setAutoCommit(false);
-
             try {
+                logger.debug("Attempting to execute query");
                 T result = query.execute(conn);
                 conn.commit();
+                logger.debug("Committed transaction");
                 return result;
             } catch (Exception e) {
+                logger.error("Caught exception:", e);
                 try {
                     conn.rollback();
+                    logger.error("Transaction rolled back");
                 } catch (SQLException rollbackError) {
                     e.addSuppressed(rollbackError);
                 }
@@ -197,6 +201,7 @@ public class Database implements IExecutorService {
         logger.debug("Queueing write-with-transaction operation");
         return CompletableFuture.supplyAsync(() -> {
             try {
+                logger.debug("Processing async write-with-transaction operation");
                 return this.withTransaction(query);
             } catch (SQLException e) {
                 throw new CompletionException(e);
