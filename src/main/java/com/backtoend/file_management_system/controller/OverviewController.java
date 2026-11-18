@@ -9,7 +9,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
+/// Controller class contained within {@link MainController}.\
+/// Responsible for generating and maintaining the tree overview, as well as
+/// handling all user interactions with the tree.
 public class OverviewController {
+    /// Logger instance
     private static final AppLogger logger = AppLogger.getLogger(OverviewController.class);
     @FXML
     private TreeTableView<String> treeView;
@@ -21,7 +25,9 @@ public class OverviewController {
     private TreeTableColumn<String, String> typeCol;
     @FXML
     private TreeTableColumn<String, String> pathCol;
+    /// Database singleton instance
     private final Database db = MainApplication.getDbInstance();
+    /// I18n instance
     private final I18n i = I18n.getInstance();
 
     @FXML

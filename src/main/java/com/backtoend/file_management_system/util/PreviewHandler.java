@@ -3,6 +3,7 @@ package com.backtoend.file_management_system.util;
 import com.backtoend.file_management_system.controller.IShowModal;
 import com.backtoend.file_management_system.controller.ImportController;
 import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.model.ScannedItem;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -25,6 +26,8 @@ public class PreviewHandler implements IShowModal {
     private FXMLLoader fxml;
     private Parent root;
     private ImportController controller;
+    private Boolean isAccepted;
+    private ScanLocation settings;
 
     public PreviewHandler() { this.isAvailable = true; }
 
@@ -41,25 +44,44 @@ public class PreviewHandler implements IShowModal {
     public FXMLLoader getFxmlLoader() { return this.fxml; }
     // endregion
 
-    public Boolean showPreview(String title, String label, ArrayList<ScannedItem> list, Window owner) {
+    public void showPreview(String title, String label, ArrayList<ScannedItem> list, ScanLocation settings, Window owner) {
         if (!this.isAvailable) {
             logger.warning("Unable to display two previews at the same time");
-            return null;
+            return;
         }
         try {
+            this.isAccepted = null;
+            this.settings = null;
             this.owner = owner;
             this.isAvailable = false;
             if (title != null) { this.modalTitle = title; }
             this.fxml = loadFxml();
             this.root = getRoot();
             this.controller = (ImportController) getController();
-            if (label != null) { this.controller.bindLabel(label); }
+            if (label != null) { this.controller.setLabel(label); }
+            controller.setAll(list, settings);
             Stage stage = setStage(this.root);
             stage.showAndWait();
-            return this.controller.isAccepted();
+            this.isAccepted = controller.isAccepted();
+            this.settings = controller.getSettings();
         } catch (IOException e) {
             logger.error("Unable to read FXML file:", e);
-            return null;
         }
+    }
+    public void showPreview(String title, String label, ArrayList<ScannedItem> list, Window owner) {
+        showPreview(title, label, list, null, owner);
+    }
+    public void showPreview(String title, ArrayList<ScannedItem> list, ScanLocation settings, Window owner) {
+        showPreview(title, null, list, settings, owner);
+    }
+    public void showPreview(String title, ArrayList<ScannedItem> list, Window owner) {
+        showPreview(title, null, list, null, owner);
+    }
+
+    public Boolean isAccepted() {
+        return this.isAccepted;
+    }
+    public ScanLocation getSettings() {
+        return this.settings;
     }
 }

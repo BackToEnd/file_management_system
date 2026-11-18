@@ -1,6 +1,5 @@
 package com.backtoend.file_management_system.controller;
 
-import com.backtoend.file_management_system.helpers.ExceptionToString;
 import com.backtoend.file_management_system.util.I18n;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +12,9 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
+/// Controller class implementing {@link IModalController}.\
+/// The modal controller associated with {@link com.backtoend.file_management_system.error_handling.ErrorHandler}.
+/// @author Rogue049
 public class ErrorController implements IModalController {
     @FXML
     private Label errorHeader;
@@ -23,8 +25,10 @@ public class ErrorController implements IModalController {
     @FXML
     private VBox listContainer;
 
+    /// A String list of messages displayed on the modal
     private ListView<String> msgList;
 
+    /// {@link I18n} instance
     private final I18n i = I18n.getInstance();
 
     @FXML
@@ -41,18 +45,24 @@ public class ErrorController implements IModalController {
     }
 
     // Getters, setters
-    public void setHeaderKey(String headerKey) {
-        this.errorHeader.setText(i.get(headerKey));
-    }
-    public void setHeaderString(String header) {
+
+    /// Configures the text shown on the header label.
+    /// @param header an ordinary String
+    public void setHeader(String header) {
         this.errorHeader.setText(header);
     }
-    public void setBodyKey(String bodyKey) {
-        this.errorDesc.setText(i.get(bodyKey));
-    }
-    public void setBodyString(String text) {
+
+    /// Configures the text shown in the body label.
+    /// @param text an ordinary String, ideally containing some info as to
+    ///             what caused an error. Should be informative to the user.
+    public void setBody(String text) {
         this.errorDesc.setText(text);
     }
+
+    /// Configures the text shown in the message list. This method should only
+    /// be used if a message list is supposed to be displayed. If no list
+    /// is provided, do not call this method.
+    /// @param messages Non-null String list
     public void setMsgList(ArrayList<String> messages) {
         ObservableList<String> observable = FXCollections.observableArrayList(messages);
         msgList = new ListView<>(observable);

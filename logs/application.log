@@ -1,19 +1,15 @@
-[10:30:43.224] [INFO] [file_management_system] > configure: Logger initialized
-[10:30:43.229] [INFO] [file_management_system] > configure: Log directory: logs
-[10:30:43.230] [FINE] [MainApplication] > start: Attempting to load main view FXML file
-[10:30:43.405] [INFO] [Database] > initialize: Database connection established; attempting initialization
-[10:30:43.409] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
-[10:30:43.643] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
-[10:30:43.644] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column item to table parent
-[10:30:43.703] [INFO] [MainController] > initialize: Initiating main application interface
-[10:30:44.012] [INFO] [MainController] > handleOperationResult: Received operation result from [DatabaseInitialization > initiateDb]: SUCCESS
-[10:30:44.013] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Database initialization pending - Beginning initialization
-[10:30:44.013] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Changed journey mode from default to WAL
-[10:30:44.014] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Created all required tables
-[10:30:44.014] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Added all missing columns and constraints
-[10:30:48.282] [INFO] [MainController] > getShutDownTask: Shut-down initiated; shutting down executor services
-[10:30:48.286] [FINE] [MainController] > call: Awaiting all executor service shutdowns on background thread
-[10:30:48.287] [FINEST] [MainController] > call: Shut-down attempt: 0
-[10:30:48.287] [FINE] [Database] > awaitTermination: Read executor status: Terminated
-[10:30:48.287] [FINE] [Database] > awaitTermination: Write executor status: Terminated
-[10:30:48.288] [INFO] [MainController] > getShutDownTask (success): Successfully shut down all executor services; application shutting down
+[15:48:35.115] [INFO] [file_management_system] > configure: Logger initialized
+[15:48:35.119] [INFO] [file_management_system] > configure: Log directory: logs
+[15:48:35.120] [FINE] [MainApplication] > start: Attempting to load main view FXML file
+[15:48:35.338] [INFO] [Database] > initialize: Database connection established; attempting initialization
+[15:48:35.343] [INFO] [Database] > connect: A connection to the database was requested before the database had been initialized
+[15:48:35.520] [INFO] [DatabaseInitialization] > initiateDb: All tables created or skipped
+[15:48:35.522] [FINE] [DatabaseInitialization] > initiateDb: Attempting to apply column item to table parent
+[15:48:35.666] [INFO] [MainController] > initialize: Initiating main application interface
+[15:48:35.975] [INFO] [MainController] > handleOperationResult: Received operation result from [DatabaseInitialization > initiateDb]: SUCCESS
+[15:48:35.976] [INFO] [MainController] > handleOperationResult: Logging independent list of feedback messages:
+[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Database initialization pending - Beginning initialization
+[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Changed journey mode from default to WAL
+[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Created all required tables
+[15:48:35.977] [FINE] [MainController] > handleOperationResult: Message: [DatabaseInitialization / initiateDb] Added all missing columns and constraints
+[15:48:47.556] [INFO] [MainController] > onChooseDirectory: Initiating scan-import sequence

@@ -3,6 +3,7 @@ package com.backtoend.file_management_system.service;
 import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.controller.FileExplorerController;
 import com.backtoend.file_management_system.database.Database;
+import com.backtoend.file_management_system.database.DatabaseBulkInsert;
 import com.backtoend.file_management_system.database.DatabaseSelect;
 import com.backtoend.file_management_system.error_handling.FeedbackMsg;
 import com.backtoend.file_management_system.error_handling.OperationResult;
@@ -33,6 +34,7 @@ public class ScanImportService {
     private volatile int untilTimeout = 0;
     private boolean acceptingImports = true;
     private IItemInformation parentItem;
+    private ScanLocation settings;
     private ImportMode mode;
     private ArrayList<FeedbackMsg> feedback;
     private Consumer<Integer> callback;
@@ -76,6 +78,9 @@ public class ScanImportService {
         this.activeImport = new CompletableFuture<>();
         this.untilTimeout = 0;
         this.window = window;
+        this.parentItem = null;
+        this.settings = null;
+        this.feedback = null;
         this.feedback.add(FeedbackMsg.create(
                 "import.scan.ongoing.success"
         ));
@@ -113,7 +118,7 @@ public class ScanImportService {
 
     // === Private Helper Methods === \\
     private String openDirectoryChooser() {
-        FileExplorerController fExCon = new FileExplorerController(dirHandler);
+        FileExplorerController fExCon = new FileExplorerController();
         return fExCon.openDirectoryChooser(window);
     }
 
@@ -160,6 +165,7 @@ public class ScanImportService {
                             logger.info(scanLocation.display());
                             mode = ImportMode.RESCAN;
                             parentItem = scanLocation;
+                            settings = scanLocation;
                         }
                     }
                 } catch (InterruptedException e) {
@@ -251,8 +257,10 @@ public class ScanImportService {
         String title = "modal.import.preview.title." + suffix;
         String label = "modal.import.preview.label." + suffix;
         PreviewHandler preview = new PreviewHandler();
-        Boolean importStatus = preview.showPreview(title, label, list, window);
-        if (importStatus == null) {
+        preview.showPreview(title, label, list, settings, window);
+        Boolean importStatus = preview.isAccepted();
+        ScanLocation newSettings = preview.getSettings();
+        if (importStatus == null || newSettings == null) {
             handleError(feedback, "import.preview.error", false);
             onCompletion();
             return;
@@ -267,7 +275,56 @@ public class ScanImportService {
     }
 
     private void dbBulkWrite(ArrayList<ScannedItem> list) {
-        // TODO
+        DatabaseBulkInsert insert = new DatabaseBulkInsert();
+        Task<OperationResult<Integer>> task;
+        switch (mode) {
+            case TRANSFORM -> task = getTransformTask(list, insert);
+            case RESCAN -> task = getRescanTask(list, insert);
+            case NEW -> task = getNewInsertTask(list, insert);
+            case null, default -> throw new IllegalStateException(
+                    "Unknown scan-import mode: " + mode
+            );
+        }
+        task.setOnCancelled(event -> {
+            // TODO
+        });
+        task.setOnFailed(event -> {
+            // TODO
+        });
+        task.setOnSucceeded(event -> {
+            callback.accept(task.getValue().value());
+        });
+    }
+
+    private Task<OperationResult<Integer>> getNewInsertTask(
+            ArrayList<ScannedItem> list, DatabaseBulkInsert insert
+    ) {
+        return new Task<>() {
+            @Override
+            protected OperationResult<Integer> call() {
+                return insert.insertNewSet((ScannedItem) parentItem, settings, list);
+            }
+        };
+    }
+    private Task<OperationResult<Integer>> getTransformTask(
+            ArrayList<ScannedItem> list, DatabaseBulkInsert insert
+    ) {
+        return new Task<>() {
+            @Override
+            protected OperationResult<Integer> call() {
+                return insert.transformItem((ItemRow) parentItem, settings, list);
+            }
+        };
+    }
+    private Task<OperationResult<Integer>> getRescanTask(
+            ArrayList<ScannedItem> list, DatabaseBulkInsert insert
+    ) {
+        return new Task<>() {
+            @Override
+            protected OperationResult<Integer> call() {
+                return insert.rescanPath((ScanLocation) parentItem, list);
+            }
+        };
     }
 
     private void onCompletion() {

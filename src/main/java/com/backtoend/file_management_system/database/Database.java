@@ -24,12 +24,15 @@ import java.util.concurrent.*;
 /// SQL queries.
 /// @author Rogue049
 public class Database implements IExecutorService {
+    /// Logger instance
     private static final AppLogger logger = AppLogger.getLogger(Database.class);
     /// JDBC path of the database file
     private final String dbLocation;
     /// Current database status
-    private DbStatus status;
+    private volatile DbStatus status;
+    /// Read executor service; bi-threaded by default, allowing two read operations at the same time.
     private final ExecutorService readExecutor;
+    /// Write executor service; single-threaded since SQLite can only perform one write at a time
     private final ExecutorService writeExecutor;
 
     /// Enum for all possible states the DB can have;
@@ -60,6 +63,11 @@ public class Database implements IExecutorService {
         this.writeExecutor = Executors.newSingleThreadExecutor();
     }
 
+    /// Asynchronously initializes the database through the write executor; this operation should be performed
+    /// at the start of the application lifecycle.
+    /// @param handle a callback that defines what to do with the result of this operation
+    /// @throws SQLException if any SQL operation fails
+    /// @throws IOException if the `data` folder at the root of this directory cannot be created
     public void initialize(IErrorCallback handle) throws SQLException, IOException {
         // Creating DB directory if it does not yet exist
         Path dbFolder = Path.of("data");
@@ -86,37 +94,42 @@ public class Database implements IExecutorService {
         result.thenAccept(operationResult -> Platform.runLater(() -> processInitResult(handle, operationResult)));
     }
 
+    /// Checks the current status of the DB
+    /// @return database status
     public DbStatus getStatus() {
         return this.status;
     }
+
+    /// Shortcut to check if the DB is ready
+    /// @return `true` if the status is `READY`, otherwise `false`
     public boolean ready() { return this.status == DbStatus.READY; }
 
-    /// Perform the given DB operation.\
-    /// For multi-step insert queries, use {@link Database#withTransaction}
-    /// instead.
-    /// @param query a database operation to be executed
-    /// @return the result of the database operation
-    /// @param <T> the datatype returned by the database operation
-    /// @throws SQLException if the given operation throws
+    /// Shortcut for executing a provided database operation with a database connection;
+    /// this method has been made private because {@link #writeExecutor} and {@link #readExecutor}
+    /// exist now. All database operations are to be performed through the corresponding methods.
+    /// @see #read(ISqlQuery)
+    /// @see #writeWithConnection(ISqlQuery)
+    /// @see #writeWithTransaction(ISqlQuery)
+    /// @param query database operation to be performed
+    /// @return the result of the performed operation
+    /// @param <T> datatype returned by the operation
+    /// @throws SQLException if any database operation fails
     private <T> T withConnection(ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             return query.execute(conn);
         }
     }
 
-    /// Perform the given DB operation through a managed transaction. If
-    /// any exception is encountered, a rollback of the transaction is
-    /// initiated.\
-    /// This method should be preferred over {@link Database#withConnection(ISqlQuery)}
-    /// if any task to be executed either consists of multiple separate
-    /// queries, such as a bulk-insert, and every step has to be un-done
-    /// if any operation throws any exception.\
-    /// It should *not* be used if the operation consists of one single
-    /// query, or if the operation is a longer read.
-    /// @param query a database operation to be executed
-    /// @return the result of the database operation
-    /// @param <T> the datatype returned by the database operation
-    /// @throws SQLException if the given operation throws
+    /// Shortcut for executing a provided database operation with a database transaction;
+    /// this method has been made private because {@link #writeExecutor} and {@link #readExecutor}
+    /// exist now. All database operations are to be performed through the corresponding methods.
+    /// @see #read(ISqlQuery)
+    /// @see #writeWithConnection(ISqlQuery)
+    /// @see #writeWithTransaction(ISqlQuery)
+    /// @param query database operation to be performed
+    /// @return the result of the performed operation
+    /// @param <T> datatype returned by the operation
+    /// @throws SQLException if any database operation fails
     private <T> T withTransaction(ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             conn.setAutoCommit(false);
@@ -137,13 +150,13 @@ public class Database implements IExecutorService {
     }
 
     // region Interacting with executable services
-    public void executeWrite(Runnable task) {
-        writeExecutor.execute(task);
-    }
-    public void executeRead(Runnable task) {
-        readExecutor.execute(task);
-    }
 
+    /// Asynchronously performs a read operation through the corresponding executor service.\
+    /// Read operations are performed without transactions. Do not use this method for anything other than
+    /// read operations.
+    /// @param query a database operation to be performed
+    /// @return a completable future of the result returned by the operation
+    /// @param <T> datatype returned by the operation
     public <T> CompletableFuture<T> read(ISqlQuery<T> query) {
         logger.debug("Queueing read operation");
         return CompletableFuture.supplyAsync(() -> {
@@ -155,6 +168,13 @@ public class Database implements IExecutorService {
         }, readExecutor);
     }
 
+    /// Asynchronously performs a write operation through the corresponding executor service.\
+    /// This method performs the operation through a connection, not transaction. Do not use this method for
+    /// read operations, and do not use it for bulk-inserts where one failure means discarding the rest of the
+    /// write as well.
+    /// @param query a database operation to be performed
+    /// @return a completable future of the result returned by the operation
+    /// @param <T> datatype returned by the operation
     public <T> CompletableFuture<T> writeWithConnection(ISqlQuery<T> query) {
         logger.debug("Queueing write-with-connection operation");
         return CompletableFuture.supplyAsync(() -> {
@@ -166,6 +186,13 @@ public class Database implements IExecutorService {
         }, writeExecutor);
     }
 
+    /// Asynchronously performs a write operation through the corresponding executor service.\
+    /// This method performs the operation through a transaction. Any failure throughout the transaction
+    /// causes all prior operations of the same transaction to be rolled back. Do not use this method for read
+    /// operations, and do not use it for single inserts.
+    /// @param query a database operation to be performed
+    /// @return a completable future of the result returned by the operation
+    /// @param <T> datatype returned by the operation
     public <T> CompletableFuture<T> writeWithTransaction(ISqlQuery<T> query) {
         logger.debug("Queueing write-with-transaction operation");
         return CompletableFuture.supplyAsync(() -> {
@@ -176,12 +203,18 @@ public class Database implements IExecutorService {
             }
         }, writeExecutor);
     }
+
+    /// Shuts down read and write executor services in order to allow the application to exit.
+    /// WARNING: There is currently no safety net in place for application termination during ongoing reads or writes.
     public void shutdown() {
         readExecutor.shutdown();
         writeExecutor.shutdown();
     }
     // endregion
 
+    /// Asynchronously waits for 10s to check if read and write executors have terminated (10s per
+    /// executor).
+    /// @return `true` if both executor services have terminated, otherwise `false`.
     public boolean awaitTermination() {
         try {
             boolean readTerminated = readExecutor.awaitTermination(10, TimeUnit.SECONDS);
@@ -224,6 +257,10 @@ public class Database implements IExecutorService {
         return DriverManager.getConnection(this.dbLocation);
     }
 
+    /// Final step in the initialization process. Sets the status to `READY` if the operation was
+    /// successful, otherwise sets the status to `FAILED`.
+    /// @param callback callback to process the result of the initialization
+    /// @param result result of the initialization process
     private void processInitResult(IErrorCallback callback, OperationResult<Void> result) {
         if (result.isSuccess()) {
             this.status = DbStatus.READY;

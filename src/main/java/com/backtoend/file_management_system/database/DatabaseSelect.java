@@ -5,9 +5,11 @@ import com.backtoend.file_management_system.model.IItemInformation;
 import com.backtoend.file_management_system.model.ItemRow;
 import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.model.ScannedItem;
+import com.backtoend.file_management_system.service.DirectoryHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DatabaseSelect {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseSelect.class);
@@ -133,6 +135,39 @@ public class DatabaseSelect {
         }
     }
 
+    public static HashMap<String, Integer> reverseEngineerParents(String parentPath, Connection conn) throws SQLException {
+        String query = """
+                SELECT id, path
+                FROM item
+                WHERE path LIKE ? ESCAPE '\\';
+                """;
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            HashMap<String, Integer> pathToId = new HashMap<>();
+            stmt.setString(1, DirectoryHandler.escapePath(parentPath));
+            ResultSet result = stmt.executeQuery();
+            while(result.next()) {
+                pathToId.put(result.getString("path"), result.getInt("id"));
+            }
+            return pathToId;
+        }
+    }
+
+    public static HashMap<String, Integer> getDescendantInfo(int parentId, Connection conn) throws  SQLException {
+        String query = """
+                SELECT id, path
+                FROM item
+                WHERE parent = ?;
+                """;
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            HashMap<String, Integer> pathToId = new HashMap<>();
+            stmt.setInt(1, parentId);
+            ResultSet result = stmt.executeQuery();
+            while (result.next()) {
+                pathToId.put(result.getString("path"), result.getInt("id"));
+            }
+            return pathToId;
+        }
+    }
     // === Helper Methods === \\
     private static ItemRow getItemRow(ResultSet result) throws SQLException {
         int id = result.getInt("id");

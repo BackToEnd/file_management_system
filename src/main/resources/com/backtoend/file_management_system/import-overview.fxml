@@ -13,7 +13,7 @@
     </padding>
 
     <Label fx:id="tableLabel"/>
-    <VBox fx:id="previewContainer">
+    <VBox>
         <TabPane fx:id="tabPane">
             <Tab fx:id="previewTab"/>
             <Tab fx:id="settingsTab"/>

@@ -9,20 +9,29 @@ import com.backtoend.file_management_system.model.ScannedItem;
 import java.sql.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class DatabaseInsert {
     private static final AppLogger logger = AppLogger.getLogger(DatabaseInsert.class);
 
-    public void insertChildrenOf(Integer parentId, ArrayList<ScannedItem> children, Connection conn) throws SQLException {
+    public static void insertChildrenOf(Integer parentId, ArrayList<ScannedItem> children, HashMap<String, Integer> descendants, Connection conn)
+            throws SQLException {
         logger.info(MessageFormat.format(
                 "Attempting to format {0} children of parent with ID {1}", children.size(), parentId
         ));
         for (ScannedItem child : children) {
-           insertChildOf(parentId, child, conn);
+            Integer existingId = descendants.get(child.path());
+            if (existingId != null) {
+                ItemRow childItem = ItemRow.create(child, existingId, parentId);
+                updateItem(existingId, childItem, conn);
+            } else {
+                insertChildOf(parentId, child, conn);
+            }
         }
         logger.info("Successfully inserted all children");
     }
-    public int insertChildOf(Integer parentId, ScannedItem child, Connection conn) throws SQLException {
+    public static int insertChildOf(Integer parentId, ScannedItem child, Connection conn) throws SQLException {
         String query = """
         INSERT INTO item(
                          name, path, display_name, file_type, last_modified, size, status, parent
@@ -61,7 +70,31 @@ public class DatabaseInsert {
         }
     }
 
-    public void updateItem(ItemRow item, Connection conn) throws SQLException {
+    public static void updateItems(
+            int parentId, ArrayList<ScannedItem> children, HashMap<String, Integer> potentialDescendants, HashMap<String, Integer> dbDescendants,
+            Connection conn
+            ) throws SQLException {
+        HashSet<String> seen = new HashSet<>();
+        for (ScannedItem item : children) {
+            String path = item.path();
+            seen.add(path);
+            Integer dbId = dbDescendants.get(path);
+            Integer potentialId = potentialDescendants.get(path);
+            if (dbId != null) {
+                updateItem(ItemRow.create(item, dbId, parentId), conn);
+            } else if (potentialId != null) {
+                updateItem(ItemRow.create(item, potentialId, parentId), conn);
+            } else {
+                insertChildOf(parentId, item, conn);
+            }
+        }
+        for (var entry : dbDescendants.entrySet()) {
+            if (!seen.contains(entry.getKey())) {
+                markDisabled(entry.getValue(), conn);
+            }
+        }
+    }
+    public static void updateItem(int id, ItemRow item, Connection conn) throws SQLException {
         String query = """
                 UPDATE item
                 SET name = ?,
@@ -73,7 +106,7 @@ public class DatabaseInsert {
                     status = ?,
                     parent = ?
                 WHERE id = ?;
-                    """;
+                """;
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, item.name());
             stmt.setString(2, item.path());
@@ -83,7 +116,7 @@ public class DatabaseInsert {
             stmt.setDouble(6, item.size());
             stmt.setString(7, item.status().toString());
             stmt.setObject(8, item.parentId(), Types.INTEGER);
-            stmt.setInt(9, item.id());
+            stmt.setInt(9, id);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected != 1) {
                 throw new SQLException(
@@ -92,10 +125,31 @@ public class DatabaseInsert {
             }
         }
     }
+    public static void updateItem(ItemRow item, Connection conn) throws SQLException {
+        updateItem(item.id(), item, conn);
+    }
+
+    public static void markDisabled(int id, Connection conn) throws SQLException {
+        String query = """
+                UPDATE item
+                SET status = ?
+                WHERE id = ?;
+                """;
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, IItemInformation.ItemStatus.DISABLED.toString());
+            stmt.setInt(2, id);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected != 1) {
+                throw new SQLException(
+                        "Updated status of one item, expected one affected row, got " + rowsAffected
+                );
+            }
+        }
+    }
 
     // TODO: This method does not update scan locations if their item has changed ID;
     //  items changing DB IDs should never be possible anyways
-    public void updateScanLocation(ScanLocation item, Connection conn) throws SQLException {
+    public static void updateScanLocation(ScanLocation item, Connection conn) throws SQLException {
         String query = """
                 UPDATE scan_location
                 SET scan_depth = ?,
@@ -122,7 +176,7 @@ public class DatabaseInsert {
         }
     }
 
-    public void createScanLocation(int itemId, ScanLocation scanLocation, Connection conn) throws SQLException {
+    public static void createScanLocation(int itemId, ScanLocation scanLocation, Connection conn) throws SQLException {
         String query = """
                 INSERT INTO scan_location (
                                            item_id, scan_depth, update_mode, scan_source, generation,status

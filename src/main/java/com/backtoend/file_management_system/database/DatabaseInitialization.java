@@ -13,11 +13,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class DatabaseInitialization {
+    /// Logger instance
     private static final AppLogger logger = AppLogger.getLogger(DatabaseInitialization.class);
+    /// `Database` singleton instance
     private final Database db;
+    /// A `HashMap` of constraints, mapping table/column to query
     private final HashMap<String, String> constraints;
 
     // region Preparing all queries for table creation
+    /// All table creation queries
     private final String[] tables = {"""
             CREATE TABLE IF NOT EXISTS item (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,6 +71,8 @@ public class DatabaseInitialization {
     };
     // endregion
 
+    /// Constructor. Defines {@link #constraints}.
+    /// @param db `Database` singleton instance
     public DatabaseInitialization(Database db) {
         this.db = db;
         this.constraints = new HashMap<>();
@@ -77,6 +83,10 @@ public class DatabaseInitialization {
         );
     }
 
+    /// Attempts to initialize the database by setting journal mode, creating tables, and
+    /// applying constraints/other table alter operations
+    /// @param conn Database connection
+    /// @return an operation result with status, feedback messages, and an exception if one was thrown
     public OperationResult<Void> initiateDb(Connection conn) {
         ArrayList<FeedbackMsg> feedback = new ArrayList<>();
         if (this.db.getStatus() != Database.DbStatus.INITIALIZING) {
@@ -145,6 +155,13 @@ public class DatabaseInitialization {
     }
 
     // === Private helper methods === \\
+
+    /// Checks if the given table already contains the given column
+    /// @param table name of the table
+    /// @param column name of the column
+    /// @param conn Database connection
+    /// @return `true` if the table already contains the column, otherwise `false`
+    /// @throws SQLException if the database operation fails
     private boolean doesColumnExist(String table, String column, Connection conn) throws SQLException {
         String query = "PRAGMA table_info(\"" + table.replace("\"", "\"\"") + "\");";
         try (Statement stmt = conn.createStatement();

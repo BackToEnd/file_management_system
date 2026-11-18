@@ -4,6 +4,7 @@ import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.error_handling.ErrorHandler;
 import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
+import com.backtoend.file_management_system.service.ScanImportService;
 import com.backtoend.file_management_system.util.I18n;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -20,10 +21,17 @@ import java.text.MessageFormat;
 /// initiates relevant processes, maintains all other base UI controllers.
 /// @author Rogue049
 public class MainController {
+    /// Logger instance
     private static final AppLogger logger = AppLogger.getLogger(MainController.class);
+    /// How many times the shutdown may be re-attempted before considering the shutdown
+    /// failed
     private static final int PREVENT_SOFTLOCK = 20;
+    /// `ErrorHandler` singleton instance
     private final ErrorHandler errors = MainApplication.getErrorHandler();
+    /// `I18n` instance
     private final I18n i = I18n.getInstance();
+    /// `ScanImportService` instance
+    private final ScanImportService scanImport;
 
     // region FXML elements
     /// {@link OverviewController} instance
@@ -45,6 +53,7 @@ public class MainController {
         try {
             MainApplication.getDbInstance()
                     .initialize(this::handleOperationResult);
+            this.scanImport = new ScanImportService();
         } catch (SQLException e) {
             logger.error("Encountered a problem during initialization:", e);
         } catch (IOException e) {
@@ -69,9 +78,12 @@ public class MainController {
     private void onChooseDirectory(ActionEvent event) {
         logger.info("Initiating scan-import sequence");
         Window window = ((Button) event.getSource()).getScene().getWindow();
-        // TODO: Hook up scan-import workflow
+        scanImport.handleScanImport(window, this::updateAfterImport);
     }
 
+    private void updateAfterImport(Integer id) {
+        logger.info("Updating overview tree with ID: " + id);
+    }
     // TODO: Make sure this method works with any ongoing background processes
     /// Shut down the application
     @FXML
@@ -113,6 +125,9 @@ public class MainController {
         thread.start();
     }
 
+    /// Deals with an `OperationResult` obtained from a process.\
+    /// If the operation status is `FAILED`, the error is treated as fatal and the application is terminated.
+    /// @param result `OperationResult` to be handled
     private void handleOperationResult(OperationResult<?> result) {
         logger.result(
                 result,
@@ -126,6 +141,11 @@ public class MainController {
         }
     }
 
+    /// Creates a `Task` to asynchronously shut down executor services. This process will be repeated until
+    /// the application can either shut down successfully (all executor services have terminated), or
+    /// {@value #PREVENT_SOFTLOCK} attempts have been made.
+    /// @return the created task; the task returns `true` if all executor services have shut down, and `false`
+    /// if the shut-down was not possible.
     private static Task<Boolean> getShutDownTask() {
         logger.info("Shut-down initiated; shutting down executor services");
         Task<Boolean> shutDown = new Task<>() {
