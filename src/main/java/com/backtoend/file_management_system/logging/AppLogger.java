@@ -341,7 +341,6 @@ public class AppLogger {
                 logMsg = this::info;
                 announceResultSuffix = " - Unknown operation status: {" + result.status().toString() + "}";
         }
-
         // Logging announcement and messages
         logAnnouncement.accept(MessageFormat.format(
                 "Received operation result from [{0} > {1}]: {2}",
@@ -377,16 +376,10 @@ public class AppLogger {
     }
     // endregion
     // region Logging an array of FeedbackMsgs
-    public void feedback(ArrayList<FeedbackMsg> list, String sourceMethod, String sourceClass, IResultLogger<String, String, String> loggingLevel) {
-        info(
-                "Logging independent list of feedback messages:",
-                sourceMethod, sourceClass
-        );
-        list.forEach(msg -> {
-            loggingLevel.accept(
-                    msg.logMsg(), sourceMethod, sourceClass
-            );
-        });
+    public void feedback(ArrayList<FeedbackMsg> list, String sourceMethod, String sourceClass, IResultLogger<String, String, String> logMsgs) {
+        for (FeedbackMsg msg : list) {
+            logMsgs.accept(msg.logMsg(), sourceMethod, sourceClass);
+        }
     }
     public void feedback(ArrayList<FeedbackMsg> list, IResultLogger<String, String, String> loggingLevel) {
         SourceLocation source = getCaller();

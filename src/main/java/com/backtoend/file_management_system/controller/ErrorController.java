@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -35,6 +36,7 @@ public class ErrorController implements IModalController {
     private void initialize() {
         errorHeader.setText(i.get("modal.error.header.generic"));
         errorDesc.setText(i.get("modal.error.body.generic"));
+        errorDesc.setMinHeight(Region.USE_PREF_SIZE);
         buttonConfirm.setText(i.get("modal.error.button"));
     }
 

@@ -141,14 +141,15 @@ public class Database implements IExecutorService {
                 logger.debug("Committed transaction");
                 return result;
             } catch (Exception e) {
-                logger.error("Caught exception:", e);
                 try {
                     conn.rollback();
                     logger.error("Transaction rolled back");
+                    throw e;
                 } catch (SQLException rollbackError) {
+                    logger.info("Rollback threw");
                     e.addSuppressed(rollbackError);
+                    throw e;
                 }
-                throw e;
             }
         }
     }
@@ -204,6 +205,12 @@ public class Database implements IExecutorService {
                 logger.debug("Processing async write-with-transaction operation");
                 return this.withTransaction(query);
             } catch (SQLException e) {
+                logger.error(
+                        "Caught SQLException:",
+                        "read {supplyAsync}",
+                        this.getClass().getName(),
+                        e
+                );
                 throw new CompletionException(e);
             }
         }, writeExecutor);

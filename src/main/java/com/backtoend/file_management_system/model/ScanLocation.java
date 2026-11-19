@@ -7,6 +7,12 @@ public record ScanLocation(
         ItemRow item, int scanDepth, IItemInformation.UpdateMode updateMode, IItemInformation.ScanSource scanSource,
         int generation, IItemInformation.ItemStatus status
 ) implements IItemInformation {
+
+    @Override
+    public ItemRow getItem() {
+        return item;
+    }
+
     public String display() {
         return MessageFormat.format(
                 "",

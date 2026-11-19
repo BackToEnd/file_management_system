@@ -308,11 +308,26 @@ public class ScanImportService {
             onCompletion();
         });
         task.setOnSucceeded(event -> {
-            feedback.addAll(task.getValue().msgs());
-            callback.accept(task.getValue().value());
-            logger.result(
-                    OperationResult.success(null, feedback, new SourceLocation(this.getClass().getName(), "dbBulkWrite {task.setOnSucceeded}"))
-            );
+            OperationResult<Integer> result = task.getValue();
+            feedback.addAll(result.msgs());
+            if (result.isSuccess()) {
+                callback.accept(task.getValue().value());
+                logger.result(
+                        OperationResult.success(null, feedback, new SourceLocation(this.getClass().getName(), "dbBulkWrite {task.setOnSucceeded}")),
+                        "dbBulkWrite {task.setOnSuccess}",
+                        this.getClass().getName()
+                );
+            } else {
+                logger.result(
+                        OperationResult.create(
+                                result.status(), result.value(), feedback,
+                                result.source(), result.error()
+                        ),
+                        "dbBulkWrite {task.setOnSuccess}",
+                        this.getClass().getName()
+                );
+                handleError(feedback, null, null, false);
+            }
             onCompletion();
         });
         Thread thread = new Thread(task);
@@ -380,8 +395,8 @@ public class ScanImportService {
         logger.warning("An error was encountered and is now being handled. Printing all collected messages:");
         logger.feedback(msgs, logger::error);
         OperationResult<Void> result = OperationResult.failed(null, msgs);
-        String headerText = i.get(header);
-        String bodyText = i.get(body);
+        String headerText = (header != null) ? i.get(header) : null;
+        String bodyText = (body != null) ? i.get(body) : null;
         MainApplication.getErrorHandler().showOperationResult(headerText, bodyText, window, result, isFatal);
     }
     private void handleError(ArrayList<FeedbackMsg> msgs, String key, boolean isFatal) {

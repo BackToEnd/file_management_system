@@ -20,9 +20,9 @@
                style="-fx-font-size: 18px;"
         />
     </VBox>
-    <VBox spacing="10" alignment="CENTER" prefWidth="340">
+    <VBox spacing="10" alignment="CENTER" prefWidth="340" minHeight="100">
         <padding>
-            <Insets top="25" bottom="30"/>
+            <Insets top="25" bottom="20"/>
         </padding>
         <Label fx:id="errorDesc"
                wrapText="true"

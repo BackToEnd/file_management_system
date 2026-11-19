@@ -5,6 +5,7 @@ import java.time.Instant;
 public interface IItemInformation {
     String display();
     long lastModified();
+    ItemRow getItem();
     default Instant formatLastModified() {
         return Instant.ofEpochMilli(lastModified());
     }

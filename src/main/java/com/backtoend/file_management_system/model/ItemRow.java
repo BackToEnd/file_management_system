@@ -14,6 +14,12 @@ public record ItemRow(
         );
     }
 
+    @Override
+    public ItemRow getItem() {
+        return this;
+    }
+
+    @Override
     public String display() {
         return MessageFormat.format(
                 "Item with ID '{0}' >> name: {0} | path: {1} | display name: {2} | file type: {3} | " +

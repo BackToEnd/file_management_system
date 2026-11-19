@@ -30,15 +30,18 @@ public class DatabaseBulkInsert {
     public OperationResult<Integer> insertNewSet(
             ScannedItem parent, ScanLocation settings, ArrayList<ScannedItem> list
     ) {
+        logger.info("Beginning asynchronously inserting new set");
         HashMap<String, Integer> descendants;
         try {
             descendants = db.read(conn -> DatabaseSelect.reverseEngineerParents(parent.path(), conn)).get();
 
         } catch (InterruptedException e) {
+            logger.error("Read task was interrupted:", e);
             feedback.add(FeedbackMsg.create("database.insert.bulk.descendants.interrupted"));
             Thread.currentThread().interrupt();
             return OperationResult.canceled(null, feedback, e);
         } catch (ExecutionException e) {
+            logger.error("Read task threw:", e.getCause());
             feedback.add(FeedbackMsg.create("database.insert.bulk.descendants.exception"));
             return OperationResult.failed(null, feedback, e.getCause());
         }
@@ -47,6 +50,11 @@ public class DatabaseBulkInsert {
         try {
             int obtainedId = db.writeWithTransaction(conn -> {
                 int parentId = DatabaseInsert.insertChildOf(null, parent, conn);
+                logger.info(
+                        "Obtained parent ID: " + parentId,
+                        "insertNewSet {db.writeWithTransaction}",
+                        this.getClass().getName()
+                );
                 feedback.add(FeedbackMsg.create(
                         "database.insert.bulk.parent.id.success",
                         "insertNewSet {db.writeWithTransaction}",
@@ -54,6 +62,11 @@ public class DatabaseBulkInsert {
                         parentId
                 ));
                 DatabaseInsert.createScanLocation(parentId, settings, conn);
+                logger.info(
+                        "Inserted scan location",
+                        "insertNewSet {db.writeWithTransaction}",
+                        this.getClass().getName()
+                );
                 feedback.add(FeedbackMsg.create(
                         "database.insert.bulk.parent.scan.success",
                         "insertNewSet {db.writeWithTransaction}",
@@ -65,6 +78,11 @@ public class DatabaseBulkInsert {
                         "insertNewSet {db.writeWithTransaction}",
                         this.getClass().getName()
                 ));
+                logger.info(
+                        "Inserted child items",
+                        "insertNewSet {db.writeWithTransaction}",
+                        this.getClass().getName()
+                );
                 return parentId;
             }).get();
             feedback.add(FeedbackMsg.create(
@@ -72,10 +90,12 @@ public class DatabaseBulkInsert {
             ));
             return OperationResult.success(obtainedId, feedback);
         } catch (InterruptedException e) {
+            logger.error("Write task was interrupted:", e);
             feedback.add(FeedbackMsg.create("database.insert.bulk.children.interrupted"));
             Thread.currentThread().interrupt();
             return OperationResult.canceled(null, feedback, e);
         } catch (ExecutionException e) {
+            logger.error("Write task threw:", e.getCause());
             feedback.add(FeedbackMsg.create("database.insert.bulk.children.exception"));
             return OperationResult.failed(null, feedback, e.getCause());
         }
