@@ -58,8 +58,27 @@ public class OverviewController {
         this.treeItems = new HashMap<>();
     }
 
-    public boolean isAffectedBy(int beingProcessed, int potentialChild) {
-        
+    public boolean isDescendantOf(int beingProcessed, int potentialChild) {
+        CustomTreeItem cursor = treeItems.get(potentialChild);
+        assert cursor != null : "Child ID not registered in item tree map";
+        Integer parentId = cursor.getValue().parentId();
+        while (
+                parentId != null
+                && parentId != beingProcessed
+        ) {
+            cursor = treeItems.get(parentId);
+            assert cursor != null : "Parent of a child item not registered in item tree map";
+            parentId = cursor.getValue().parentId();
+        }
+        return parentId != null;
+    }
+    public boolean isDirectChildOf(int beingProcessed, int potentialChild) {
+        CustomTreeItem cursor = treeItems.get(potentialChild);
+        assert cursor != null : "Child ID not registered in item tree map";
+        return cursor.getValue().parentId() == beingProcessed;
+    }
+    public boolean exists(int beingProcessed) {
+        return treeItems.get(beingProcessed) != null;
     }
 
     public void rebuild() {
