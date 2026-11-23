@@ -9,6 +9,7 @@ public record TreeData(
         ItemRow item,
         ScanLocation scanLocation,
         ArrayList<TreeData> children,
-        boolean childrenLoaded
+        CustomTreeItem.TreeItemStatus itemStatus,
+        CustomTreeItem.TreeChildrenStatus childrenStatus
 ) {
 }

@@ -4,7 +4,9 @@ import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.database.Database;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.model.ItemRow;
+import com.backtoend.file_management_system.model.ScanLocation;
 import com.backtoend.file_management_system.tree.CustomTreeItem;
+import com.backtoend.file_management_system.tree.TreeData;
 import com.backtoend.file_management_system.util.I18n;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -12,7 +14,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.UUID;
 
 /// Controller class contained within {@link MainController}.\
 /// Responsible for generating and maintaining the tree overview, as well as
@@ -35,6 +39,7 @@ public class OverviewController {
     /// I18n instance
     private final I18n i = I18n.getInstance();
     private final HashMap<Integer, CustomTreeItem> treeItems;
+    private final HashMap<Integer, UUID> affectedByOperation;
 
     @FXML
     private void initialize() {
@@ -56,6 +61,7 @@ public class OverviewController {
     public OverviewController() {
         this.db = MainApplication.getDbInstance();
         this.treeItems = new HashMap<>();
+        this.affectedByOperation = new HashMap<>();
     }
 
     public boolean isDescendantOf(int beingProcessed, int potentialChild) {
@@ -79,6 +85,34 @@ public class OverviewController {
     }
     public boolean exists(int beingProcessed) {
         return treeItems.get(beingProcessed) != null;
+    }
+    public boolean matchTreeItemStatus(CustomTreeItem.TreeItemStatus status, int id) {
+        return treeItems.get(id).getItemStatus() == status;
+    }
+    public CustomTreeItem.TreeItemStatus getItemStatusOf(int id) {
+        return treeItems.get(id).getItemStatus();
+    }
+    public boolean reloadIncludesChildren(int id) {
+        return treeItems.get(id).reloadIncludesChildren();
+    }
+    public void queuedOperationOn(
+            int id, UUID operation,
+            CustomTreeItem.TreeItemStatus itemStatus,
+            CustomTreeItem.TreeChildrenStatus childrenStatus
+    ) {
+        logger.info(MessageFormat.format(
+                "Applying effects of operation UUID {0} to item with ID {1}",
+                operation, id
+        ));
+        affectedByOperation.put(id, operation);
+        CustomTreeItem treeItem = treeItems.get(id);
+        treeItem.setItemStatus(itemStatus);
+        if (childrenStatus != null) {
+            treeItem.setChildrenStatus(childrenStatus);
+        }
+    }
+    public void updateStateOwner(int id, UUID newStateOwner) {
+        affectedByOperation.put(id, newStateOwner);
     }
 
     public void rebuild() {
