@@ -15,7 +15,8 @@ public record TreeOperation(
 ) {
     public record OperationRequest(
             IItemInformation affectedItem,
-            Operations operation
+            Operations operation,
+            CustomTreeItem.TreeItemStatus status
     ) {}
     public enum Priority {
         REBUILD (0),
@@ -40,14 +41,55 @@ public record TreeOperation(
         public int getPriority() { return this.priority; }
     }
     public enum Operations {
-        NUKE,
-        REBUILD_TREE,
-        REBUILD_BRANCH,
-        RECURSIVE_REBUILD,
-        TRANSFORM_SELF,
-        LOAD_CHILDREN
+        NUKE (0),
+        REBUILD_TREE (1),
+        REBUILD_BRANCH (2),
+        RECURSIVE_REBUILD (3),
+        TRANSFORM_SELF (4),
+        LOAD_CHILDREN (5);
+        private final int priority;
+        Operations(int priority) { this.priority = priority; }
+        public int getPriority() { return this.priority; }
     }
     public interface ITreeOperationCallback<T> {
         T update(OperationResult<T> result);
+    }
+
+    // === Methods === \\
+    public static TreeOperation create(
+            OperationRequest request,
+            ITreeOperationCallback<?> callback
+    ) {
+        Priority priority;
+        Scope scope = switch (request.operation()) {
+            case NUKE, REBUILD_TREE -> {
+                priority = Priority.REBUILD;
+                yield Scope.TREE;
+            }
+            case REBUILD_BRANCH -> {
+                priority = Priority.RESCAN;
+                yield Scope.DIRECT_CHILDREN;
+            }
+            case RECURSIVE_REBUILD -> {
+                priority = Priority.RESCAN;
+                yield Scope.ALL_DESCENDANTS;
+            }
+            case TRANSFORM_SELF -> {
+                priority = Priority.TRANSFORM;
+                yield Scope.SELF;
+            }
+            case LOAD_CHILDREN -> {
+                priority = Priority.LOAD;
+                yield Scope.DIRECT_CHILDREN;
+            }
+            case null, default -> throw new IllegalStateException(
+                    "Unknown operation type: " + request.operation()
+            );
+        };
+        UUID uuid = UUID.randomUUID();
+        return new TreeOperation(
+                request.affectedItem, priority, scope,
+                request.operation(), uuid, callback
+        );
     }
 }

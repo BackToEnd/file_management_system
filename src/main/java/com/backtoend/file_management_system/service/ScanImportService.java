@@ -109,7 +109,7 @@ public class ScanImportService {
             return;
         }
         this.feedback.add(FeedbackMsg.create(
-                "import.directory.success", directory
+                "import.directory.picked.success", directory
         ));
 
         // Fetching directory content and info
