@@ -5,9 +5,7 @@ import com.backtoend.file_management_system.logging.AppLogger;
 
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 // TODO: I am moving away from an "active task" mechanic. OverviewController itself should track what items can currently
 //  be updated and only allow updates on items that are not currently scheduled or updating
@@ -29,74 +27,106 @@ public class TreeOperationScheduler {
 
     public void requestOperation(TreeOperation.OperationRequest request, TreeOperation.ITreeOperationCallback<?> callback) {
         logger.info("Received new operation request on item with ID " + request.affectedItem().getItem().id());
-        TreeOperation operationRequest = TreeOperation.create(request, callback);
-        if (request.status() == CustomTreeItem.TreeItemStatus.PENDING) {
-            logger.debug("Requested operation affects item with status 'PENDING'");
-            UUID pendingReason = pendingOperationReason(operationRequest);
-            if (pendingReason == null) {
-                logger.warning(
-                        "Failed to fetch UUID of operation pending for item with ID "
-                        + operationRequest.affectedItem().getItem().id()
-                );
-                return;
-            }
+        TreeOperation candidate = TreeOperation.create(request, callback);
+        boolean resolvedDirectly = resolveDirectAscendants(candidate);
+        boolean resolvedRecursively = resolvedDirectly || resolveRecursiveAscendants(candidate);
+        if (resolvedDirectly || resolvedRecursively) {
+            logger.info("Successfully merged candidate with existing operation; ignoring request");
+            return;
         }
+        logger.info("Unable to merge candidate with existing operation; queuing new operation");
+        resolveAllDescendants(candidate);
+        queue(candidate);
     }
 
     // === Private Helper Methods === \\
-    // TODO: Make this thing work with UUID sets rather than single UUIDs
-    private UUID pendingOperationReason(TreeOperation operation) {
-        if (operation.scope() == TreeOperation.Scope.TREE) {
-            TreeOperation affector = this.queue.stream()
-                    .filter((TreeOperation op) -> op.scope() == TreeOperation.Scope.TREE)
-                    .findFirst()
-                    .orElse(null);
-            return (affector == null) ? null : affector.uuid();
+    private boolean resolveDirectAscendants(TreeOperation candidate) {
+        int effectiveId = (candidate.affectedItem() == null) ? -1 : candidate.itemId();
+        logger.info("Attempting to resolve direct ascendants of operation affecting item: " + effectiveId);
+        Set<UUID> directAscendants = this.currentlyQueued.get(effectiveId);
+        if (directAscendants.isEmpty()) {
+            logger.info("Found no directly affecting operations in queue map");
+            return false;
         }
-        return null;
+        Set<TreeOperation> ascendantOperations = this.queue.stream()
+                .filter(op ->
+                        directAscendants.contains(op.uuid())
+                                && candidate.maxScopeToConsume() <= op.scope().getPriority())
+                .collect(Collectors.toSet());
+        boolean isConsumed = false;
+        for (TreeOperation op : ascendantOperations) {
+            if (consumeDescendant(op, candidate)) {
+                isConsumed = true;
+                break;
+            }
+        }
+        return isConsumed;
     }
-
-    /// This method processes operation stacking by having the broader-scoped operation consume the narrower one.\
-    /// The order of passed operations when calling this method is **very important**, do not reverse it!\
-    /// Operation A (`superior`) can only affect operation B (`affectedCandidate`)
-    /// if the item targeted by B is some form of descendant of A,
-    /// in which case A can, in some cases, consume B. Here are all potential situations determined and solved by
-    /// this method:
-    /// - Both A and B are `TREE`-wide operations; in this case, `NUKE` operations will consume `REBUILD_TREE` operations.
-    /// If A and B perform the same operation, A consumes B.
-    /// - Both A and B affect the same item; in this case, the wider-scoped operation will consume the other. Yes, this
-    /// means that an operation of priority `LOAD` will consume operations of priority `TRANSFORM`.
-    /// - If A's scope is wider than B's, A will consume B.
-    /// - If B's scope is wider than A's, B will be queued as independent action. This is because A cannot consume B
-    /// if A's scope is `DIRECT_CHILDREN` while B's scope is `ALL_DESCENDANTS` - B is recursive while A is not.
-    /// @param affectedCandidate operation determined to *be affected by* the other
-    /// @param superior operation determined to be *affecting* the other.
-    /// @return `true` if the superior operation consumed the affected one, otherwise `false`
-    private boolean consume(TreeOperation affectedCandidate, TreeOperation superior) {
-        UUID consumer;
-        if (superior.scope() == TreeOperation.Scope.TREE) {
-            // Superior is a tree-wide operation, meaning it automatically consumes candidate UNLESS candidate
-            // has a higher operation priority
-            logger.info("Superior operation affects the whole tree");
-            consumer = (superior.operation().getPriority() >= affectedCandidate.operation().getPriority()) ?
-                    superior.uuid() : affectedCandidate.uuid();
-        } else if (superior.scope().getPriority() > affectedCandidate.scope().getPriority()) {
-            // Superior has a wider operation scope than candidate, meaning it automatically absorbs candidate
-            logger.info("Superior's scope is wider than candidate's");
-            consumer = superior.uuid();
-        } else {
-            // Candidate has a wider or equal scope than/to superior; superior cannot consume it,
-            // but candidate, being a descendant of superior, cannot consume superior either
-            logger.info("Scope of candidate is wider than or equal to superior's");
-            consumer = null;
+    private boolean resolveRecursiveAscendants(TreeOperation candidate) {
+        // TODO: Deal with all operations recursively affecting this one's affected item
+        assert candidate.affectedItem() != null : "Operation with invalid affected item passed into recursive search";
+        logger.info("Attempting to resolve indirect/undiscovered connections of existing operations to item: " + candidate.itemId());
+        Set<TreeOperation> recursiveAscendants = this.queue.stream()
+                .filter(op -> op.scope().getPriority() <3)
+                .collect(Collectors.toSet());
+        if (recursiveAscendants.isEmpty()) {
+            logger.info("Found no operations with wide enough scope in queue");
+            return false;
         }
-        if (consumer == superior.uuid()) {
-            logger.debug("Determined that superior consumes candidate");
+        boolean isConsumed = false;
+    }
+    private void resolveAllDescendants(TreeOperation candidate) {
+        // TODO: Deal with all operations affected by this one
+    }
+    private boolean consumeDescendant(TreeOperation parent, TreeOperation descendant) {
+        UUID consumer = parent.uuid();
+        boolean consumes = true;
+        // Eliminating edge case first: parent and descendant apply to the same item
+        if (
+                parent.affectedItem() != null && descendant.affectedItem() != null
+                && parent.itemId() == descendant.itemId()
+        ) {
+            logger.info("Parent and descendant both target the same item");
+            // Descendant actually consumes parent in this situation; no need to override 'consumes'
+            if (descendant.scope().getPriority() < parent.scope().getPriority()) {
+                consumer = descendant.uuid();
+            }
+        } else if (descendant.scope().getPriority() >= parent.minConsumableScope()) {
+            // Then ruling out that parent's scope does not suffice to contain descendant's
+            logger.info("Parent scope can contain descendant scope");
+
+            // Dealing with tree-wide operations
+            if (descendant.scope().getPriority() == 0 && descendant.operation().getPriority() > parent.operation().getPriority()) {
+                consumer = descendant.uuid();
+            }
+        }
+        if (consumer == parent.uuid()) {
+            logger.info("Determined that parent consumes descendant");
+            this.unQueueAndConsume(consumer, descendant.uuid());
             return true;
         }
-        if (consumer == affectedCandidate.uuid()) {
-            logger.debug("Determined that candidate consumes superior");
-        }
+        logger.info("Determined that descendant is not consumed");
         return false;
+    }
+    private void queue(TreeOperation candidate) {
+        this.queue.add(candidate);
+        this.currentlyQueued.computeIfAbsent(candidate.itemId(), k -> new HashSet<>());
+        this.currentlyQueued.get(candidate.itemId()).add(candidate.uuid());
+    }
+    private void unQueue(UUID uuid) {
+        this.currentlyQueued.entrySet().removeIf(entry -> {
+            Set<UUID> queued = entry.getValue();
+            queued.remove(uuid);
+            return queued.isEmpty();
+        });
+        this.queue.removeIf(op -> op.uuid() == uuid);
+    }
+    private void unQueueAndConsume(UUID consumer, UUID replace) {
+        this.currentlyQueued.forEach((key, queued) -> {
+            if (queued.remove(replace)) {
+                queued.add(consumer);
+            }
+        });
+        this.queue.removeIf(op -> op.uuid() == replace);
     }
 }

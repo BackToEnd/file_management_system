@@ -89,27 +89,8 @@ public class OverviewController {
     public boolean matchTreeItemStatus(CustomTreeItem.TreeItemStatus status, int id) {
         return treeItems.get(id).getItemStatus() == status;
     }
-    public CustomTreeItem.TreeItemStatus getItemStatusOf(int id) {
-        return treeItems.get(id).getItemStatus();
-    }
     public boolean reloadIncludesChildren(int id) {
         return treeItems.get(id).reloadIncludesChildren();
-    }
-    public void queuedOperationOn(
-            int id, UUID operation,
-            CustomTreeItem.TreeItemStatus itemStatus,
-            CustomTreeItem.TreeChildrenStatus childrenStatus
-    ) {
-        logger.info(MessageFormat.format(
-                "Applying effects of operation UUID {0} to item with ID {1}",
-                operation, id
-        ));
-        affectedByOperation.put(id, operation);
-        CustomTreeItem treeItem = treeItems.get(id);
-        treeItem.setItemStatus(itemStatus);
-        if (childrenStatus != null) {
-            treeItem.setChildrenStatus(childrenStatus);
-        }
     }
     public void updateStateOwner(int id, UUID newStateOwner) {
         affectedByOperation.put(id, newStateOwner);

@@ -15,8 +15,7 @@ public record TreeOperation(
 ) {
     public record OperationRequest(
             IItemInformation affectedItem,
-            Operations operation,
-            CustomTreeItem.TreeItemStatus status
+            Operations operation
     ) {}
     public enum Priority {
         REBUILD (0),
@@ -43,10 +42,10 @@ public record TreeOperation(
     public enum Operations {
         NUKE (0),
         REBUILD_TREE (1),
-        REBUILD_BRANCH (2),
-        RECURSIVE_REBUILD (3),
-        TRANSFORM_SELF (4),
-        LOAD_CHILDREN (5);
+        RECURSIVE_REBUILD (2),
+        REBUILD_BRANCH (3),
+        LOAD_CHILDREN (4),
+        TRANSFORM_SELF (5);
         private final int priority;
         Operations(int priority) { this.priority = priority; }
         public int getPriority() { return this.priority; }
@@ -91,5 +90,37 @@ public record TreeOperation(
                 request.affectedItem, priority, scope,
                 request.operation(), uuid, callback
         );
+    }
+    public int itemId() {
+        return this.affectedItem.getItem().id();
+    }
+    public int maxScopeToConsume() {
+        return switch (this.scope) {
+            case TREE -> {
+                yield 0;
+            }
+            case ALL_DESCENDANTS, DIRECT_CHILDREN -> {
+                yield 1;
+            }
+            case SELF -> {
+                yield 2;
+            }
+        };
+    }
+    public int minConsumableScope() {
+        return switch (this.scope) {
+            case TREE -> {
+                yield 0;
+            }
+            case ALL_DESCENDANTS -> {
+                yield 1;
+            }
+            case DIRECT_CHILDREN -> {
+                yield 2;
+            }
+            case SELF -> {
+                yield 4;    // Yes, 4 isn't a valid value. That's because SELF can only consume operations on itself, but never other operations
+            }
+        };
     }
 }
