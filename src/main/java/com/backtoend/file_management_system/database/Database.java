@@ -2,11 +2,11 @@ package com.backtoend.file_management_system.database;
 
 import com.backtoend.file_management_system.MainApplication;
 import com.backtoend.file_management_system.error_handling.ErrorHandler;
-import com.backtoend.file_management_system.error_handling.IErrorCallback;
 import com.backtoend.file_management_system.error_handling.OperationResult;
 import com.backtoend.file_management_system.logging.AppLogger;
 import com.backtoend.file_management_system.logging.SourceLocation;
 import com.backtoend.file_management_system.util.IExecutorService;
+import com.backtoend.file_management_system.util.VariousCallbackInterfaces;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.chart.PieChart;
@@ -68,7 +68,7 @@ public class Database implements IExecutorService {
     /// @param handle a callback that defines what to do with the result of this operation
     /// @throws SQLException if any SQL operation fails
     /// @throws IOException if the `data` folder at the root of this directory cannot be created
-    public void initialize(IErrorCallback handle) throws SQLException, IOException {
+    public void initialize(VariousCallbackInterfaces.IErrorCallback handle) throws SQLException, IOException {
         // Creating DB directory if it does not yet exist
         Path dbFolder = Path.of("data");
         Files.createDirectories(dbFolder);
@@ -107,14 +107,14 @@ public class Database implements IExecutorService {
     /// Shortcut for executing a provided database operation with a database connection;
     /// this method has been made private because {@link #writeExecutor} and {@link #readExecutor}
     /// exist now. All database operations are to be performed through the corresponding methods.
-    /// @see #read(ISqlQuery)
-    /// @see #writeWithConnection(ISqlQuery)
-    /// @see #writeWithTransaction(ISqlQuery)
+    /// @see #read(VariousCallbackInterfaces.ISqlQuery)
+    /// @see #writeWithConnection(VariousCallbackInterfaces.ISqlQuery)
+    /// @see #writeWithTransaction
     /// @param query database operation to be performed
     /// @return the result of the performed operation
     /// @param <T> datatype returned by the operation
     /// @throws SQLException if any database operation fails
-    private <T> T withConnection(ISqlQuery<T> query) throws SQLException {
+    private <T> T withConnection(VariousCallbackInterfaces.ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             return query.execute(conn);
         }
@@ -123,14 +123,14 @@ public class Database implements IExecutorService {
     /// Shortcut for executing a provided database operation with a database transaction;
     /// this method has been made private because {@link #writeExecutor} and {@link #readExecutor}
     /// exist now. All database operations are to be performed through the corresponding methods.
-    /// @see #read(ISqlQuery)
-    /// @see #writeWithConnection(ISqlQuery)
-    /// @see #writeWithTransaction(ISqlQuery)
+    /// @see #read(VariousCallbackInterfaces.ISqlQuery)
+    /// @see #writeWithConnection(VariousCallbackInterfaces.ISqlQuery)
+    /// @see #writeWithTransaction(VariousCallbackInterfaces.ISqlQuery)
     /// @param query database operation to be performed
     /// @return the result of the performed operation
     /// @param <T> datatype returned by the operation
     /// @throws SQLException if any database operation fails
-    private <T> T withTransaction(ISqlQuery<T> query) throws SQLException {
+    private <T> T withTransaction(VariousCallbackInterfaces.ISqlQuery<T> query) throws SQLException {
         try (Connection conn = this.connect()) {
             logger.debug("Connection with transaction established");
             conn.setAutoCommit(false);
@@ -162,7 +162,7 @@ public class Database implements IExecutorService {
     /// @param query a database operation to be performed
     /// @return a completable future of the result returned by the operation
     /// @param <T> datatype returned by the operation
-    public <T> CompletableFuture<T> read(ISqlQuery<T> query) {
+    public <T> CompletableFuture<T> read(VariousCallbackInterfaces.ISqlQuery<T> query) {
         logger.debug("Queueing read operation");
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -180,7 +180,7 @@ public class Database implements IExecutorService {
     /// @param query a database operation to be performed
     /// @return a completable future of the result returned by the operation
     /// @param <T> datatype returned by the operation
-    public <T> CompletableFuture<T> writeWithConnection(ISqlQuery<T> query) {
+    public <T> CompletableFuture<T> writeWithConnection(VariousCallbackInterfaces.ISqlQuery<T> query) {
         logger.debug("Queueing write-with-connection operation");
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -198,7 +198,7 @@ public class Database implements IExecutorService {
     /// @param query a database operation to be performed
     /// @return a completable future of the result returned by the operation
     /// @param <T> datatype returned by the operation
-    public <T> CompletableFuture<T> writeWithTransaction(ISqlQuery<T> query) {
+    public <T> CompletableFuture<T> writeWithTransaction(VariousCallbackInterfaces.ISqlQuery<T> query) {
         logger.debug("Queueing write-with-transaction operation");
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -273,7 +273,7 @@ public class Database implements IExecutorService {
     /// successful, otherwise sets the status to `FAILED`.
     /// @param callback callback to process the result of the initialization
     /// @param result result of the initialization process
-    private void processInitResult(IErrorCallback callback, OperationResult<Void> result) {
+    private void processInitResult(VariousCallbackInterfaces.IErrorCallback callback, OperationResult<Void> result) {
         if (result.isSuccess()) {
             this.status = DbStatus.READY;
         } else {

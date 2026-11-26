@@ -2,6 +2,7 @@ package com.backtoend.file_management_system.logging;
 
 import com.backtoend.file_management_system.error_handling.FeedbackMsg;
 import com.backtoend.file_management_system.error_handling.OperationResult;
+import com.backtoend.file_management_system.util.VariousCallbackInterfaces;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -311,8 +312,8 @@ public class AppLogger {
 
         // Preparing log levels and announcement message
         String announceResultSuffix;
-        IResultLogger<String, String, String> logAnnouncement;
-        IResultLogger<String, String, String> logMsg;
+        VariousCallbackInterfaces.IResultLogger<String, String, String> logAnnouncement;
+        VariousCallbackInterfaces.IResultLogger<String, String, String> logMsg;
 
         // Identifying logging levels and announcement message
         switch (result.status()) {
@@ -376,12 +377,12 @@ public class AppLogger {
     }
     // endregion
     // region Logging an array of FeedbackMsgs
-    public void feedback(ArrayList<FeedbackMsg> list, String sourceMethod, String sourceClass, IResultLogger<String, String, String> logMsgs) {
+    public void feedback(ArrayList<FeedbackMsg> list, String sourceMethod, String sourceClass, VariousCallbackInterfaces.IResultLogger<String, String, String> logMsgs) {
         for (FeedbackMsg msg : list) {
             logMsgs.accept(msg.logMsg(), sourceMethod, sourceClass);
         }
     }
-    public void feedback(ArrayList<FeedbackMsg> list, IResultLogger<String, String, String> loggingLevel) {
+    public void feedback(ArrayList<FeedbackMsg> list, VariousCallbackInterfaces.IResultLogger<String, String, String> loggingLevel) {
         SourceLocation source = getCaller();
         feedback(
                 list,

@@ -11,10 +11,12 @@ import com.backtoend.file_management_system.util.I18n;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -56,6 +58,7 @@ public class OverviewController {
         pathCol.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(
                 cellData.getValue().getValue().path()
         ));
+        treeView.setRoot(new CustomTreeItem());
     }
 
     public OverviewController() {
@@ -98,5 +101,50 @@ public class OverviewController {
 
     public void rebuild() {
         logger.info("Rebuilding the entire tree");
+    }
+
+    public TreeData getSingleInfo(int id) {
+        CustomTreeItem item = this.treeItems.get(id);
+        assert item != null : "getSingleInfo was given an unknown ID";
+        if (item.isBeingProcessed()) {
+            return null;
+        }
+        return new TreeData(
+                item.getValue(), item.getScanLocation(), new ArrayList<TreeData>(), item.getItemStatus(), item.getChildrenStatus()
+        );
+    }
+
+    public TreeData getBranchInfo(int id, boolean recursive) {
+        TreeData result;
+        CustomTreeItem root;
+        if (id == -1) {
+            result = new TreeData(null, null, new ArrayList<TreeData>(), null, null);
+            root = (CustomTreeItem) this.treeView.getRoot();
+        } else {
+            result = getSingleInfo(id);
+            root = (CustomTreeItem) this.treeItems.get(id);
+        }
+        if (result == null) {
+            return null;
+        }
+        assert root != null : "Unable to fetch root item";
+        for (TreeItem<ItemRow> child : root.getChildren()) {
+            int childId = child.getValue().id();
+            TreeData childData = (recursive) ? getBranchInfo(childId, true) : getSingleInfo(childId);
+            if (childData == null) {
+                return null;
+            }
+            result.children().add(childData);
+        }
+        return result;
+    }
+
+    public void markSingleProcessing(int id, UUID responsible) {
+        assert this.treeItems.get(id) != null : "Tried updating status of item with invalid ID";
+        this.treeItems.get(id).process();
+    }
+
+    public void markAllProcessing(int id, UUID responsible, boolean recursive) {
+        // TODO
     }
 }

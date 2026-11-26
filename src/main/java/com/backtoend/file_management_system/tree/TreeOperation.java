@@ -34,7 +34,7 @@ public record TreeOperation(
         TREE (0),
         ALL_DESCENDANTS (1),
         DIRECT_CHILDREN (2),
-        SELF (3);
+        NONEXISTING_CHILDREN (3);
         private final int priority;
         Scope(int priority) { this.priority = priority; }
         public int getPriority() { return this.priority; }
@@ -75,7 +75,7 @@ public record TreeOperation(
             }
             case TRANSFORM_SELF -> {
                 priority = Priority.TRANSFORM;
-                yield Scope.SELF;
+                yield Scope.DIRECT_CHILDREN;
             }
             case LOAD_CHILDREN -> {
                 priority = Priority.LOAD;
@@ -102,7 +102,7 @@ public record TreeOperation(
             case ALL_DESCENDANTS, DIRECT_CHILDREN -> {
                 yield 1;
             }
-            case SELF -> {
+            case NONEXISTING_CHILDREN -> {
                 yield 2;
             }
         };
@@ -116,10 +116,10 @@ public record TreeOperation(
                 yield 1;
             }
             case DIRECT_CHILDREN -> {
-                yield 2;
+                yield 3;
             }
-            case SELF -> {
-                yield 4;    // Yes, 4 isn't a valid value. That's because SELF can only consume operations on itself, but never other operations
+            case NONEXISTING_CHILDREN -> {
+                yield 4;    // Yup, this is an invalid number, but new NONEXISTENT_CHILDREN operations cannot consume anything
             }
         };
     }
