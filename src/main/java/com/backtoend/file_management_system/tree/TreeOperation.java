@@ -91,8 +91,45 @@ public record TreeOperation(
                 request.operation(), uuid, callback
         );
     }
+
     public int itemId() {
-        return this.affectedItem.getItem().id();
+        return (this.affectedItem != null) ? this.affectedItem.getItem().id() : -1;
+    }
+
+    /// Shortcut to check whether this operation processes items recursively.\
+    /// This is not the same thing as {@link #affectsRecursively()}, this method
+    /// only checks which items are *processed* by this operation, based on scope
+    /// and operation type.
+    /// @return `true` if the operation processes children of children (has a {@link Scope} of `ALL_DESCENDANTS`,
+    /// or is a tree-wide rebuild), otherwise `false`
+    public boolean processesRecursively() {
+        return switch(this.scope) {
+            case TREE -> {
+                yield this.operation == Operations.REBUILD_TREE;
+            }
+            case ALL_DESCENDANTS -> {
+                yield true;
+            }
+            case null, default -> {
+                yield false;
+            }
+        };
+    }
+
+    /// Shortcut to check whether this operation affects items recursively.\
+    /// This is not the same thing as {@link #processesRecursively()}, this method
+    /// only checks which items are *affected* by this operation, based on scope, and scope alone.
+    /// @return `true` if the operation has an effect on children of children (has a {@link Scope} of `ALL_DESCENDANTS`
+    /// or `TREE`), otherwise `false`
+    public boolean affectsRecursively() {
+        return switch(this.scope) {
+            case TREE, ALL_DESCENDANTS -> {
+                yield true;
+            }
+            case null, default -> {
+                yield false;
+            }
+        };
     }
     public int maxScopeToConsume() {
         return switch (this.scope) {

@@ -6,7 +6,8 @@ import com.backtoend.file_management_system.util.VariousCallbackInterfaces;
 
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 // TODO: I am moving away from an "active task" mechanic. OverviewController itself should track what items can currently
@@ -18,13 +19,17 @@ public class TreeOperationScheduler {
     private final HashMap<Integer, Set<UUID>> currentlyQueued;
     private final Set<UUID> currentlyProcessing;
     private final OverviewController overview;
+    private final ExecutorService pool;
 
-    public TreeOperationScheduler(OverviewController overview) {
+    private record OperationCandidate(TreeOperation operation, TreeData data) { }
+
+    public TreeOperationScheduler(OverviewController overview, int threadCount) {
         this.queue = new ArrayList<>();
         this.currentlyProcessing = new HashSet<>();
         this.currentlyQueued = new HashMap<>();
         this.overview = overview;
-        this.MAX_OPERATION_COUNT = 1;
+        this.MAX_OPERATION_COUNT = threadCount;
+        this.pool = Executors.newFixedThreadPool(threadCount);
     }
 
     public void requestOperation(TreeOperation.OperationRequest request, TreeOperation.ITreeOperationCallback<?> callback) {
@@ -47,27 +52,39 @@ public class TreeOperationScheduler {
             logger.info("Attempted to perform next operation, but queue was empty or all workers were busy");
             return;
         }
-        this.queue.stream()
+        // Attempting to fetch the next operation candidate
+        OperationCandidate next = this.queue.stream()
+                // Sorting the queue by priority, from lowest to highest
                 .sorted(Comparator.comparingInt((TreeOperation op) -> op.priority().getPriority()))
-                .forEach((TreeOperation op) -> {
-                    // Iterating through all queued operations, sorted by priority, from lowest to highest
-                    int id = (op.affectedItem() != null) ? op.itemId() : -1;
-                    boolean recursive = switch(op.scope()) {
-                        case TREE ->{
-                            yield op.operation() == TreeOperation.Operations.REBUILD_TREE;
-                        }
-                        case null, default -> {
-                            yield false;
-                        }
-                    };
+                // Retrieve TreeData object for each operation to determine whether it can be executed
+                .map((TreeOperation op) -> {
+                    int id = op.itemId();
+                    boolean recursive = op.processesRecursively();
                     TreeData info = this.overview.getBranchInfo(id, recursive);
                     if (info != null) {
-                        logger.info("Operation affects no items with status PROCESSING; initiating operation execution");
+                        return new OperationCandidate(op, info);
                     }
-                });
+                    return null;
+                })
+                .filter(Objects::nonNull)   // Filtering out any null objects
+                .findFirst()    // Grab the first non-null object; that's the operation to execute
+                .orElse(null);  // If none was found, grab null instead
+        if (next != null) {
+            logger.debug("Found operation to execute");
+            TreeOperation process = next.operation;
+            this.overview.markAllProcessing(process.itemId(), process.uuid(), process.affectsRecursively());
+            this.pool.submit(
+                    new TreeOperationExecutor(process, next.data)
+            );
+            // This fills up the worker in case multiple operations could not be initiated due to
+            // processing state, causing worker threads to remain free
+            processNext();
+            return;
+        }
+        logger.debug("Unable to find executable operation in queue");
     }
     private boolean resolveDirectAscendants(TreeOperation candidate) {
-        int effectiveId = (candidate.affectedItem() == null) ? -1 : candidate.itemId();
+        int effectiveId = candidate.itemId();
         logger.info("Attempting to resolve direct ascendants of operation affecting item: " + effectiveId);
         Set<UUID> directAscendants = this.currentlyQueued.get(effectiveId);
         if (directAscendants.isEmpty()) {

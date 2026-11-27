@@ -146,5 +146,21 @@ public class OverviewController {
 
     public void markAllProcessing(int id, UUID responsible, boolean recursive) {
         // TODO
+        CustomTreeItem root;
+        if (id == -1) {
+            recursive = true;
+            root = (CustomTreeItem) this.treeView.getRoot();
+        } else {
+            root = this.treeItems.get(id);
+        }
+        assert root != null : "Unable to fetch root item";
+        for (TreeItem<ItemRow> child : root.getChildren()) {
+            assert child instanceof CustomTreeItem : "Child somehow is not an instance of CustomTreeItem";
+            CustomTreeItem custom = (CustomTreeItem) child;
+            this.affectedByOperation.put(custom.getValue().id(), responsible);
+            if (recursive) {
+                markAllProcessing(custom.getValue().id(), responsible, true);
+            }
+        }
     }
 }
